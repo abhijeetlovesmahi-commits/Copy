@@ -1,15 +1,11 @@
-/* PREMIUM 200-CURRENCY CLEAN THEME (MERGED VERSION)
-   Designed for: The Lalit International School
-   Main Features: Royal Header, 12px Body, Currency Texture, Logo Watermark
-*/
-
+/* PREMIUM 200-CURRENCY DASHBOARD (FIXED MENU & SIDEBAR) */
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Poppins:wght@400;600&display=swap');
 
 :root { 
     --note-accent: #ff9800; /* ₹200 Orange */
-    --note-bg: #fffbf2;     /* Light Clean Cream */
+    --note-bg: #fffbf2;     /* Light Cream */
+    --sidebar-bg: #fff3e0;  /* Sidebar Note Texture Color */
     --text-dark: #2d2d2d;   
-    --sidebar-dark: #1e1e1e;
 }
 
 body { 
@@ -17,90 +13,111 @@ body {
     font-family: 'Poppins', sans-serif; 
     font-size: 12px; 
     color: var(--text-dark); 
-    display: flex; 
-    min-height: 100vh; 
     margin: 0; 
+    overflow-x: hidden;
 }
 
-/* --- 1. SHORTCUT MENU (3 LINES) --- */
+/* --- 1. FIXED HAMBURGER MENU (3 LINES) --- */
+#menu-checkbox { display: none; } /* Hide the actual checkbox */
+
 .menu-toggle {
     position: fixed;
-    top: 15px;
-    left: 15px;
+    top: 20px;
+    left: 20px;
     width: 30px;
-    height: 22px;
+    height: 20px;
+    cursor: pointer;
+    z-index: 3000;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    cursor: pointer;
-    z-index: 3000;
-    background: var(--note-accent);
-    padding: 8px;
-    border-radius: 4px;
 }
 
+/* Creating 3 clean lines */
 .menu-toggle span {
     display: block;
     height: 3px;
     width: 100%;
-    background: white;
-    border-radius: 2px;
+    background: var(--note-accent);
+    border-radius: 10px;
+    transition: 0.3s;
 }
 
-/* --- 2. SIDEBAR (AUTO-HIDE VERSION) --- */
+/* --- 2. CURRENCY STYLE SIDEBAR --- */
 .sidebar { 
-    width: 250px; 
-    background: var(--sidebar-dark); 
+    width: 260px; 
+    background-color: var(--sidebar-bg);
+    /* Sidebar mein bhi note wala pattern */
+    background-image: 
+        radial-gradient(circle at 1px 1px, rgba(255, 152, 0, 0.1) 1px, transparent 0),
+        url('https://www.transparenttextures.com/patterns/cream-paper.png');
+    background-size: 10px 10px, auto;
+    
     height: 100vh; 
     position: fixed; 
-    left: -250px; /* Hidden by default */
-    transition: 0.4s ease;
+    left: -270px; /* Fully hidden */
+    top: 0;
+    transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 2000;
-    box-shadow: 5px 0 15px rgba(0,0,0,0.3);
+    box-shadow: 5px 0 20px rgba(0,0,0,0.1);
+    border-right: 2px solid var(--note-accent);
 }
 
-/* Jab checkbox click ho to sidebar dikhe */
+/* Sidebar khulne par position */
 #menu-checkbox:checked ~ .sidebar {
     left: 0;
 }
 
-/* Overlay for click-to-close effect */
+.logo-box { 
+    padding: 50px 15px 20px; 
+    text-align: center; 
+    background: rgba(255, 152, 0, 0.05);
+    border-bottom: 1px solid rgba(255, 152, 0, 0.2); 
+}
+
+.school-logo { 
+    width: 80px; 
+    height: 80px; 
+    border-radius: 50%; 
+    border: 2px solid var(--note-accent);
+    padding: 3px;
+    background: white;
+}
+
+.sidebar a { 
+    color: #5d4037; /* Note style deep brown ink */
+    text-decoration: none; 
+    padding: 15px 25px; 
+    display: block; 
+    font-size: 13px;
+    font-weight: 600;
+    border-bottom: 1px solid rgba(255, 152, 0, 0.1);
+    transition: 0.3s;
+}
+
+.sidebar a:hover { 
+    background: var(--note-accent);
+    color: white;
+}
+
+/* Dark overlay jab menu khule */
+.sidebar-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.3);
+    display: none;
+    z-index: 1500;
+}
+
 #menu-checkbox:checked ~ .sidebar-overlay {
     display: block;
 }
 
-.logo-box { 
-    padding: 40px 15px 20px; 
-    text-align: center; 
-    border-bottom: 1px solid #333; 
-}
-
-.school-logo { 
-    width: 70px; 
-    height: 70px; 
-    border-radius: 50%; 
-    border: 2px solid var(--note-accent);
-}
-
-.sidebar a { 
-    color: #bbb; 
-    text-decoration: none; 
-    padding: 15px 20px; 
-    display: block; 
-    font-size: 12px;
-    border-bottom: 1px solid #252525;
-}
-
-.sidebar a:hover { 
-    background: #2d2d2d;
-    color: var(--note-accent);
-}
-
-/* --- 3. MAIN DASHBOARD AREA --- */
+/* --- 3. MAIN DASHBOARD --- */
 .main-content { 
-    margin-left: 0; 
-    padding: 70px 20px 20px; /* Space for hamburger icon */
+    padding: 80px 20px 20px; 
     width: 100%; 
+    box-sizing: border-box;
 }
 
 .royal-card { 
@@ -108,14 +125,14 @@ body {
     background-image: url('https://www.transparenttextures.com/patterns/cream-paper.png');
     border: 1px solid #e0d0b0;
     border-radius: 12px;
-    padding: 30px; 
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08); 
+    padding: 40px; 
+    box-shadow: 0 4px 25px rgba(0,0,0,0.06); 
     position: relative;
     min-height: 80vh;
-    overflow: hidden;
+    z-index: 1;
 }
 
-/* --- 4. SCHOOL LOGO WATERMARK --- */
+/* --- 4. LOGO WATERMARK --- */
 .royal-card::after {
     content: "";
     position: absolute;
@@ -124,60 +141,34 @@ body {
     transform: translate(-50%, -50%);
     width: 350px;
     height: 350px;
-    background-image: url('logo.png'); /* Aapka logo path */
+    background-image: url('logo.png'); /* Logo path sahi rakhein */
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;
-    opacity: 0.05; 
+    opacity: 0.04; 
     pointer-events: none;
-    z-index: 0;
+    z-index: -1;
 }
 
-/* --- 5. HEADINGS & FONTS --- */
+/* --- 5. TYPOGRAPHY --- */
 h2, h3 { 
     font-family: 'Cinzel', serif; 
-    font-size: 2rem; 
+    font-size: 2.2rem; 
     color: #8d6e63; 
     text-align: center;
-    border-bottom: 2px solid var(--note-accent);
-    padding-bottom: 15px;
-    position: relative;
-    z-index: 1;
+    margin-bottom: 30px;
 }
 
-/* Sab font ko 12px fix kar diya */
 p, span, div, td, th, label, input {
     font-size: 12px !important;
-    position: relative;
-    z-index: 1;
 }
 
-/* --- 6. BUTTONS (CLEAN & BRIGHT) --- */
 .royal-btn { 
     background: var(--note-accent); 
     color: white; 
     border: none; 
-    padding: 8px 20px; 
+    padding: 10px 25px; 
     cursor: pointer;
     border-radius: 4px;
     font-weight: 600;
-}
-
-/* CSS-ONLY TRICK (NO JS NEEDED) */
-#menu-checkbox { display: none; }
-.sidebar-overlay {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.4);
-    display: none;
-    z-index: 1500;
-}
-
-/* Stats Box */
-.stat-box {
-    background: white;
-    border: 1px solid #eee;
-    padding: 15px;
-    border-radius: 8px;
-    text-align: center;
 }
