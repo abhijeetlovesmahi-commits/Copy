@@ -1,0 +1,104 @@
+/* Imperial Master Stylesheet */
+:root { 
+    --velvet: #300a24; 
+    --gold: #d4af37; 
+    --parchment: #f4e4bc; 
+}
+
+body { 
+    background: var(--velvet); 
+    font-family: 'Georgia', serif; 
+    color: var(--gold); 
+    display: flex; 
+    min-height: 100vh; 
+    margin: 0; 
+}
+
+/* Sidebar Navigation */
+.sidebar { 
+    width: 260px; 
+    background: rgba(0,0,0,0.4); 
+    border-right: 2px solid var(--gold); 
+    height: 100vh; 
+    position: fixed; 
+    box-shadow: 5px 0 15px rgba(0,0,0,0.5); 
+}
+
+.logo-box { 
+    padding: 30px 15px; 
+    text-align: center; 
+    border-bottom: 1px solid var(--gold); 
+}
+
+.school-logo { 
+    width: 85px; 
+    height: 85px; 
+    border-radius: 50%; 
+    border: 3px double var(--gold); 
+    box-shadow: 0 0 10px var(--gold); 
+}
+
+.sidebar a { 
+    color: var(--gold); 
+    text-decoration: none; 
+    padding: 15px 25px; 
+    display: block; 
+    font-weight: bold; 
+    transition: 0.3s; 
+    border-bottom: 1px solid rgba(212, 175, 55, 0.1); 
+}
+
+.sidebar a:hover, .sidebar a.active { 
+    background: var(--gold); 
+    color: var(--velvet); 
+}
+
+/* Main Content Area */
+.main-content { 
+    margin-left: 260px; 
+    padding: 40px; 
+    width: 100%; 
+}
+
+/* Royal Parchment Cards */
+.royal-card { 
+    background: var(--parchment); 
+    border: 8px double var(--gold); 
+    padding: 35px; 
+    color: #2c3e50; 
+    box-shadow: 10px 10px 25px rgba(0,0,0,0.5); 
+}
+
+h2, h3 { 
+    color: var(--velvet); 
+    border-bottom: 2px solid var(--gold); 
+    padding-bottom: 10px; 
+    font-style: italic; 
+}
+
+/* Imperial Buttons */
+.royal-btn { 
+    background: var(--velvet); 
+    color: var(--gold); 
+    border: 2px solid var(--gold); 
+    padding: 10px 30px; 
+    font-weight: bold; 
+    text-transform: uppercase; 
+    cursor: pointer;
+}
+
+.royal-btn:hover { 
+    background: var(--gold); 
+    color: var(--velvet); 
+}
+
+/* Forms */
+input, select { 
+    background: transparent !important; 
+    border: none !important; 
+    border-bottom: 2px solid var(--gold) !important; 
+    border-radius: 0 !important; 
+    color: #333 !important; 
+    font-weight: bold; 
+    padding: 8px;
+}
