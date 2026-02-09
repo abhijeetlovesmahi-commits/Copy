@@ -1,166 +1,142 @@
-/* ₹200 CURRENCY THEME MASTER STYLESHEET */
+/* PREMIUM CURRENCY-INSPIRED CLEAN DASHBOARD */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Poppins:wght@400;600&display=swap');
+
 :root { 
-    --note-orange: #ffab40; /* ₹200 Base Orange */
-    --light-orange: #fff3e0; /* Light background for readability */
-    --deep-brown: #5d4037;  /* Serial number and text color */
-    --gold-foil: #d4af37;   /* Security thread gold */
-    --ink-green: #2e7d32;   /* RBI Green touch */
+    --note-accent: #ff9800; /* Clean Orange */
+    --note-bg: #fffbf2;     /* Very Light Cream (Clean Note) */
+    --text-dark: #2d2d2d;   /* Professional Grey-Black */
+    --royal-gold: #c5a059;  /* Muted Gold */
+    --sidebar-dark: #1e1e1e;
 }
 
 body { 
-    background: #e0e0e0; /* Background neutral rakha hai taaki note pop kare */
-    font-family: 'Georgia', serif; 
+    background: #f0f0f0; 
+    font-family: 'Poppins', sans-serif; 
+    font-size: 12px; /* Small font for body as requested */
+    color: var(--text-dark); 
     display: flex; 
     min-height: 100vh; 
     margin: 0; 
-    /* Purane pinstripe ki jagah subtle currency texture */
-    background-image: url('https://www.transparenttextures.com/patterns/pinstriped-suit.png');
 }
 
-/* --- SIDEBAR (Deep Theme) --- */
+/* --- SIDEBAR --- */
 .sidebar { 
-    width: 260px; 
-    background: #3e2723; /* Dark Brown/Note border style */
-    border-right: 3px solid var(--note-orange); 
+    width: 250px; 
+    background: var(--sidebar-dark); 
     height: 100vh; 
     position: fixed; 
-    box-shadow: 5px 0 25px rgba(0,0,0,0.5); 
     z-index: 1000;
 }
 
-.logo-box { 
-    padding: 30px 15px; 
-    text-align: center; 
-    border-bottom: 1px solid rgba(255,171,64,0.3); 
-}
-
-.school-logo { 
-    width: 90px; 
-    height: 90px; 
-    border-radius: 50%; 
-    border: 3px solid var(--note-orange); 
-    box-shadow: 0 0 15px rgba(255,171,64,0.5); 
-}
-
 .sidebar a { 
-    color: var(--light-orange); 
+    color: #bbb; 
     text-decoration: none; 
-    padding: 15px 25px; 
+    padding: 12px 20px; 
     display: block; 
-    font-weight: bold; 
-    transition: 0.3s; 
-    border-bottom: 1px solid rgba(255,255,255,0.05); 
-    text-transform: uppercase;
-    font-size: 0.8rem;
-    letter-spacing: 1px;
+    font-size: 12px;
+    transition: 0.3s;
+    border-left: 3px solid transparent;
 }
 
 .sidebar a:hover, .sidebar a.active { 
-    background: var(--note-orange); 
-    color: #3e2723; 
+    background: #2d2d2d;
+    color: var(--note-accent);
+    border-left: 3px solid var(--note-accent);
 }
 
-/* --- MAIN CONTENT --- */
+/* --- MAIN CONTENT & CLEAN CARD --- */
 .main-content { 
-    margin-left: 260px; 
-    padding: 40px; 
+    margin-left: 250px; 
+    padding: 30px; 
     width: 100%; 
-    background-color: #f5f5f5;
 }
 
-/* --- THE ₹200 NOTE CARD --- */
 .royal-card { 
-    background-color: var(--light-orange);
-    /* Currency Patterns: Sanchi Stupa feel aur Geometric lines */
-    background-image: 
-        radial-gradient(circle at 2px 2px, rgba(255, 171, 64, 0.2) 1px, transparent 0),
-        url('https://www.transparenttextures.com/patterns/diagmonds-light.png'); 
-    background-size: 15px 15px, auto;
-
-    border: 2px solid var(--note-orange);
-    /* Note ka khas border pattern */
-    outline: 12px solid var(--note-orange);
-    outline-offset: -15px;
-    border-radius: 5px;
-
-    padding: 60px; 
-    color: var(--deep-brown); 
-    box-shadow: 15px 15px 40px rgba(0,0,0,0.2); 
+    background-color: var(--note-bg);
+    /* Subtle Currency Pattern */
+    background-image: url('https://www.transparenttextures.com/patterns/cream-paper.png');
+    
+    border: 1px solid #e0d0b0;
+    border-radius: 8px;
+    padding: 40px; 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
     position: relative;
     min-height: 85vh;
     overflow: hidden;
 }
 
-/* Security Thread (₹200 Note Blue-Green Shift) */
-.royal-card::before {
+/* --- LOGO WATERMARK --- */
+.royal-card::after {
     content: "";
     position: absolute;
-    top: 0;
-    left: 30%;
-    width: 6px;
-    height: 100%;
-    background: linear-gradient(to bottom, #008080 20%, transparent 20%, #008080 40%, transparent 40%);
-    background-size: 100% 50px;
-    opacity: 0.3;
-}
-
-/* Watermark: Gandhi ji ki jagah School ka subtle name */
-.royal-card::after {
-    content: "₹200";
-    position: absolute;
-    top: 10%;
-    left: 5%;
-    font-size: 8rem;
-    font-weight: 900;
-    color: rgba(255, 171, 64, 0.1);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    height: 400px;
+    background-image: url('logo.png'); /* Aapka logo */
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    opacity: 0.05; /* Bahut halka taaki text saaf dikhe */
     pointer-events: none;
-    font-family: sans-serif;
+    z-index: 0;
 }
 
+/* --- TYPOGRAPHY --- */
 h2, h3 { 
-    color: #bf360c; 
-    border-bottom: 3px double var(--note-orange); 
-    padding-bottom: 10px; 
+    font-family: 'Cinzel', serif; /* Royal Font */
+    font-size: 2.2rem; /* Badi Heading */
+    color: #8d6e63; /* Deep Terracotta (Note link color) */
     text-align: center;
-    font-family: 'Times New Roman', serif;
-    text-transform: uppercase;
-    letter-spacing: 2px;
+    margin-bottom: 30px;
+    border-bottom: 2px solid var(--note-accent);
+    display: block;
+    padding-bottom: 10px;
+    position: relative;
+    z-index: 1;
 }
 
-/* Currency Serial Number Style Buttons */
+p, span, div, td, th {
+    font-size: 12px !important; /* Force small font for everything else */
+    position: relative;
+    z-index: 1;
+}
+
+/* --- CLEAN BUTTONS --- */
 .royal-btn { 
-    background: #bf360c; 
+    background: var(--note-accent); 
     color: white; 
     border: none; 
-    padding: 12px 30px; 
-    font-weight: bold; 
+    padding: 10px 25px; 
+    font-size: 12px;
+    font-weight: 600;
     text-transform: uppercase; 
     cursor: pointer;
-    box-shadow: 3px 3px 0px var(--deep-brown);
-    transition: 0.2s;
+    border-radius: 4px;
+    transition: 0.3s;
 }
 
 .royal-btn:hover { 
-    background: var(--note-orange); 
-    color: #3e2723;
-    transform: translate(-2px, -2px);
-    box-shadow: 5px 5px 0px var(--deep-brown);
+    background: #e68a00;
+    box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
 }
 
-/* Stats Box (Note ke panel jaisa) */
-.stat-box {
-    background: rgba(255, 255, 255, 0.6);
-    border: 2px dashed var(--note-orange);
-    padding: 20px;
-    text-align: center;
-    border-radius: 4px;
-}
-
-/* Inputs */
+/* --- FORM ELEMENTS --- */
 input, select { 
-    background: rgba(255,255,255,0.8) !important; 
-    border: 1px solid var(--note-orange) !important; 
-    color: var(--deep-brown) !important; 
-    padding: 10px;
+    background: #ffffff !important; 
+    border: 1px solid #ddd !important; 
+    padding: 8px;
+    font-size: 12px !important;
     border-radius: 4px !important;
+}
+
+/* --- STAT BOXES --- */
+.stat-box {
+    background: #ffffff;
+    border: 1px solid #eee;
+    padding: 15px;
+    border-radius: 6px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.02);
 }
