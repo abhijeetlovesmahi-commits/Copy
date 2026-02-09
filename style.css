@@ -1,137 +1,114 @@
-/* IMPERIAL MASTER STYLESHEET - GOVERNMENT DOCUMENT VERSION */
-:root { 
-    --velvet: #300a24; 
-    --gold: #d4af37; 
-    --parchment: #f4e4bc; 
-    --ink: #1a1a1a;
-}
+/* --- UPDATED OFFICIAL DOCUMENT STYLE --- */
 
+/* Body ka background wahi velvet rakha hai taaki contrast banani rahe,
+   lekin document ab safed (white) hoga */
 body { 
-    background: var(--velvet); 
-    font-family: 'Georgia', serif; 
-    color: var(--gold); 
-    display: flex; 
-    min-height: 100vh; 
-    margin: 0; 
-    /* Velvet background par thoda pinstripe pattern */
-    background-image: url('https://www.transparenttextures.com/patterns/pinstriped-suit.png');
+    background: #2c081f; /* Dark Velvet */
+    font-family: 'Times New Roman', Times, serif; /* Official Serif Font */
 }
 
-/* Sidebar Navigation */
-.sidebar { 
-    width: 260px; 
-    background: rgba(0,0,0,0.6); 
-    border-right: 2px solid var(--gold); 
-    height: 100vh; 
-    position: fixed; 
-    box-shadow: 5px 0 25px rgba(0,0,0,0.7); 
-    z-index: 1000;
+/* Sidebar waisa hi rahega, bas thoda serious look */
+.sidebar {
+    background: #1a1a1a;
+    border-right: 3px double #d4af37;
 }
 
-.logo-box { 
-    padding: 30px 15px; 
-    text-align: center; 
-    border-bottom: 2px solid var(--gold); 
-}
-
-.school-logo { 
-    width: 90px; 
-    height: 90px; 
-    border-radius: 50%; 
-    border: 3px double var(--gold); 
-    box-shadow: 0 0 15px var(--gold); 
-}
-
-.sidebar a { 
-    color: var(--gold); 
-    text-decoration: none; 
-    padding: 15px 25px; 
-    display: block; 
-    font-weight: bold; 
-    transition: 0.3s; 
-    border-bottom: 1px solid rgba(212, 175, 55, 0.1); 
-    text-transform: uppercase;
-    font-size: 0.85rem;
-    letter-spacing: 1px;
-}
-
-.sidebar a:hover, .sidebar a.active { 
-    background: var(--gold); 
-    color: var(--velvet); 
-}
-
-/* Main Content Area */
-.main-content { 
-    margin-left: 260px; 
-    padding: 50px; 
-    width: 100%; 
-}
-
-/* ORIGINAL GOVERNMENT DOCUMENT CARD */
+/* MAIN SARKARI DOCUMENT CARD */
 .royal-card { 
-    background-color: var(--parchment);
-    /* Asli puraane paper ka texture */
-    background-image: url('https://www.transparenttextures.com/patterns/stardust.png'), 
-                      url('https://www.transparenttextures.com/patterns/old-map.png');
-    border: 2px solid #c2a366;
-    /* Shahi Double Border */
-    outline: 8px double var(--gold);
-    outline-offset: -15px;
-    padding: 50px; 
-    color: var(--ink); 
-    box-shadow: 20px 20px 50px rgba(0,0,0,0.6); 
-    position: relative;
-    min-height: 80vh;
+    /* 1. Base Paper Color - Pure White */
+    background-color: #ffffff;
+
+    /* 2. Security Patterns & Watermark */
+    background-image: 
+        /* Layer 1: The Central Watermark (Lion Capital / School Logo) - Low Opacity */
+        url('https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Emblem_of_India.svg/1200px-Emblem_of_India.svg.png'),
+        
+        /* Layer 2: Security Micro-lines (Horizontal Waves) */
+        repeating-linear-gradient(
+            0deg, 
+            transparent, 
+            transparent 19px, 
+            rgba(0, 0, 0, 0.05) 20px
+        ),
+        
+        /* Layer 3: Vertical Security mesh (Currency feel) */
+        repeating-linear-gradient(
+            90deg, 
+            rgba(0,0,0,0.02) 0px, 
+            rgba(0,0,0,0.02) 1px, 
+            transparent 1px, 
+            transparent 20px
+        );
+
+    /* Positioning the Background Layers */
+    background-position: center center, top left, top left;
+    background-repeat: no-repeat, repeat, repeat;
+    background-size: 400px auto, auto, auto; /* Watermark size control */
+    background-blend-mode: luminosity; /* Watermark ko paper me blend karne ke liye */
+
+    /* 3. Official Borders */
+    border: 1px solid #aaa;
+    /* Double border jo sarkari files pe hota hai */
+    outline: 6px double #003366; 
+    outline-offset: -12px;
+    
+    padding: 60px; 
+    min-height: 85vh;
+    
+    /* 4. Text Styling (Ink Color) */
+    color: #000000; /* Jet Black Ink */
+    box-shadow: 0 0 30px rgba(0,0,0,0.5); 
 }
 
-/* Document Header Style */
+/* Headers - Sarkari Stamp Style */
 h2, h3 { 
-    color: var(--velvet); 
-    border-bottom: 2px solid var(--gold); 
-    padding-bottom: 15px; 
-    font-style: italic; 
+    color: #003366; /* Official Govt Blue */
+    border-bottom: 2px solid #003366; 
     text-align: center;
-    font-family: 'Times New Roman', serif;
     text-transform: uppercase;
-    letter-spacing: 3px;
+    letter-spacing: 2px;
+    margin-bottom: 30px;
+    font-weight: 900;
+    text-decoration: underline double; /* Double underline for importance */
 }
 
-/* Imperial Buttons (Golden Seal Style) */
+/* Inputs - Typewriter Style */
+input, select { 
+    background: transparent !important; 
+    border: none !important; 
+    border-bottom: 1px dashed #000 !important; /* Dashed line for filling forms */
+    color: #000 !important; 
+    font-family: 'Courier New', monospace; /* Typewriter font */
+    font-size: 1.1rem;
+    padding: 5px 0;
+}
+
+input:focus {
+    outline: none;
+    border-bottom: 2px solid #003366 !important;
+}
+
+/* Buttons - Official Seal Style */
 .royal-btn { 
-    background: var(--velvet); 
-    color: var(--gold); 
-    border: 2px solid var(--gold); 
-    padding: 12px 35px; 
-    font-weight: bold; 
-    text-transform: uppercase; 
-    cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    transition: 0.3s;
+    background: #003366; 
+    color: #fff; 
+    border: 2px solid #003366; 
+    padding: 10px 30px; 
+    font-family: 'Times New Roman', serif;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    box-shadow: 3px 3px 0px rgba(0,0,0,0.2);
 }
 
 .royal-btn:hover { 
-    background: var(--gold); 
-    color: var(--velvet); 
-    transform: scale(1.05);
+    background: #fff; 
+    color: #003366; 
+    cursor: pointer;
 }
 
-/* Forms (Ink on Paper Style) */
-input, select { 
-    background: rgba(0,0,0,0.03) !important; 
-    border: none !important; 
-    border-bottom: 2px solid var(--gold) !important; 
-    border-radius: 0 !important; 
-    color: #1a1a1a !important; 
-    font-weight: bold; 
-    padding: 10px;
-    font-family: 'Courier New', monospace; /* Typewriter feel */
-}
-
-/* Stats Box for Dashboard */
+/* Stat Box - Table Style */
 .stat-box {
-    background: rgba(255, 255, 255, 0.4);
-    border: 1px solid var(--gold);
-    padding: 20px;
-    text-align: center;
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+    border: 1px solid #000;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: none;
 }
