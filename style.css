@@ -1,4 +1,4 @@
-/* PREMIUM 200-CURRENCY DASHBOARD (ANIMATED MENU & SMART CLOSE) */
+/* PREMIUM 200-CURRENCY DASHBOARD (FIXED LOGO SIZE) */
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Poppins:wght@400;600&display=swap');
 
 :root { 
@@ -42,7 +42,6 @@ body {
     transition: all 0.3s ease-in-out;
 }
 
-/* Animation: Jab menu khule to lines 'X' ban jaye */
 #menu-checkbox:checked + .menu-toggle span:nth-child(1) {
     transform: translateY(9px) rotate(45deg);
 }
@@ -77,7 +76,25 @@ body {
     left: 0;
 }
 
-/* --- 3. SMART OVERLAY (CLOSE ON CLICK) --- */
+/* --- LOGO BOX FIX (Logo ko chhota karne ke liye) --- */
+.logo-box { 
+    padding: 60px 15px 20px; /* Upar se thodi jagah hamburger ke liye */
+    text-align: center; 
+    border-bottom: 1px solid rgba(255, 152, 0, 0.2);
+}
+
+.school-logo { 
+    width: 80px !important;  /* Isse logo ka size fix ho jayega */
+    height: 80px !important; 
+    object-fit: contain;     /* Logo stretch nahi hoga */
+    border-radius: 50%; 
+    border: 2px solid var(--note-accent);
+    background: white;
+    padding: 5px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* --- 3. SMART OVERLAY --- */
 .sidebar-overlay {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
@@ -87,7 +104,6 @@ body {
     cursor: pointer;
 }
 
-/* Jab checkbox checked ho tab overlay dikhe */
 #menu-checkbox:checked ~ .sidebar-overlay {
     display: block;
 }
@@ -110,24 +126,25 @@ body {
     min-height: 80vh;
 }
 
-/* Logo Watermark */
+/* Logo Watermark (Background wala) */
 .royal-card::after {
     content: "";
     position: absolute;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    width: 350px; height: 350px;
+    width: 300px; height: 300px;
     background-image: url('logo.png'); 
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;
     opacity: 0.04; 
     pointer-events: none;
+    z-index: 0;
 }
 
-h2 { font-family: 'Cinzel', serif; font-size: 2.2rem; color: #8d6e63; text-align: center; }
+h2 { font-family: 'Cinzel', serif; font-size: 2.2rem; color: #8d6e63; text-align: center; position: relative; z-index: 1;}
 
-p, span, div, td, th, label, a { font-size: 12px !important; }
+p, span, div, td, th, label, a { font-size: 12px !important; position: relative; z-index: 1;}
 
 .sidebar a { 
     color: #5d4037; 
