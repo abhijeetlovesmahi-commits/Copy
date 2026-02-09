@@ -3,107 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admission - The Lalit International School</title>
+    <title>Admission Scroll - TLIS</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background-color: #f8f9fa; padding: 20px; }
-        .form-container { background: white; padding: 30px; border-radius: 15px; shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 800px; margin: auto; }
-        .header { border-bottom: 2px solid #3498db; margin-bottom: 20px; padding-bottom: 10px; color: #2c3e50; }
+        :root { --velvet: #300a24; --gold: #d4af37; --parchment: #f4e4bc; }
+        body { background: var(--velvet); font-family: 'Georgia', serif; color: var(--gold); display: flex; min-height: 100vh; margin: 0; }
+        .sidebar { width: 260px; background: rgba(0,0,0,0.4); border-right: 2px solid var(--gold); height: 100vh; position: fixed; }
+        .logo-box { padding: 30px 15px; text-align: center; border-bottom: 1px solid var(--gold); }
+        .school-logo { width: 80px; height: 80px; border-radius: 50%; border: 2px solid var(--gold); }
+        .sidebar a { color: var(--gold); text-decoration: none; padding: 15px 25px; display: block; font-weight: bold; }
+        .sidebar a:hover { background: var(--gold); color: var(--velvet); }
+        .main-content { margin-left: 260px; padding: 40px; width: 100%; }
+        .scroll-card { background: var(--parchment); border: 10px double var(--gold); padding: 40px; color: #2c3e50; box-shadow: 0 0 30px rgba(0,0,0,0.7); max-width: 900px; margin: auto; position: relative; }
+        .scroll-card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 10px; background: linear-gradient(to bottom, #d4af37, transparent); }
+        input, select { background: transparent !important; border: none !important; border-bottom: 2px solid var(--gold) !important; border-radius: 0 !important; color: #333 !important; font-weight: bold; }
+        label { color: var(--velvet); font-weight: bold; text-transform: uppercase; font-size: 0.8rem; }
+        .royal-btn { background: var(--velvet); color: var(--gold); border: 2px solid var(--gold); padding: 10px 30px; font-weight: bold; text-transform: uppercase; }
+        .royal-btn:hover { background: var(--gold); color: var(--velvet); }
     </style>
 </head>
 <body>
-
-<div class="form-container shadow">
-    <div class="header">
-        <h2>New Student Admission</h2>
-        <p class="text-muted">The Lalit International School Management System</p>
-    </div>
-
-    <form id="studentForm">
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label class="form-label">Full Name</label>
-                <input type="text" id="sName" class="form-control" required>
-            </div>
-            <div class="col-md-6 mb-3">
-                <label class="form-label">Admission/Roll Number</label>
-                <input type="number" id="sRoll" class="form-control" required>
-            </div>
-            <div class="col-md-6 mb-3">
-                <label class="form-label">Class</label>
-                <select id="sClass" class="form-select">
-                    <option value="1">Class 1</option>
-                    <option value="2">Class 2</option>
-                    <option value="3">Class 3</option>
-                    <option value="4">Class 4</option>
-                    <option value="5">Class 5</option>
-                    <option value="6">Class 6</option>
-                    <option value="7">Class 7</option>
-                    <option value="8">Class 8</option>
-                    <option value="9">Class 9</option>
-                    <option value="10">Class 10</option>
-                </select>
-            </div>
-            <div class="col-md-6 mb-3">
-                <label class="form-label">Father's Name</label>
-                <input type="text" id="sFather" class="form-control" required>
-            </div>
-            <div class="col-md-6 mb-3">
-                <label class="form-label">Contact Number</label>
-                <input type="tel" id="sPhone" class="form-control" required>
-            </div>
-            <div class="col-md-6 mb-3">
-                <label class="form-label">Date of Birth</label>
-                <input type="date" id="sDob" class="form-control">
-            </div>
-        </div>
-        <div class="mt-4">
-            <button type="button" class="btn btn-primary w-100" onclick="saveData()">Confirm Admission</button>
-        </div>
-    </form>
+<div class="sidebar">
+    <div class="logo-box"><img src="logo.png" class="school-logo"><h5 class="mt-2">TLIS Imperial</h5></div>
+    <a href="index.html"><i class="fas fa-crown me-2"></i> Dashboard</a>
+    <a href="add-student.html" style="background:var(--gold); color:var(--velvet);"><i class="fas fa-scroll me-2"></i> Admission</a>
+    <a href="view-students.html"><i class="fas fa-users me-2"></i> Student List</a>
+    <a href="attendance.html"><i class="fas fa-pen-fancy me-2"></i> Attendance</a>
 </div>
-
+<div class="main-content">
+    <div class="scroll-card">
+        <h2 class="text-center mb-5" style="font-style: italic;">Imperial Admission Registry</h2>
+        <form id="admissionForm">
+            <div class="row g-4">
+                <div class="col-md-6"><label>Full Name</label><input type="text" id="sName" class="form-control" required></div>
+                <div class="col-md-6"><label>Admission No</label><input type="number" id="sRoll" class="form-control" required></div>
+                <div class="col-md-6"><label>Select Class</label>
+                    <select id="sClass" class="form-select">
+                        <option value="1">Class 1</option><option value="9">Class 9</option><option value="10">Class 10</option>
+                    </select>
+                </div>
+                <div class="col-md-6"><label>Guardian's Name</label><input type="text" id="sFather" class="form-control" required></div>
+            </div>
+            <div class="mt-5 text-center"><button type="button" class="royal-btn shadow" onclick="saveData()">Seal & Register</button></div>
+        </form>
+    </div>
+</div>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
 <script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyDqDmsMp2eAuHJBcjW-ciO2JcLTXapiIrs",
-        authDomain: "the-lalit-d7472.firebaseapp.com",
-        databaseURL: "https://the-lalit-d7472-default-rtdb.firebaseio.com",
-        projectId: "the-lalit-d7472",
-        storageBucket: "the-lalit-d7472.firebasestorage.app",
-        messagingSenderId: "479237084229",
-        appId: "1:479237084229:web:f1da384b45c5883b12ff2c"
-    };
+    const firebaseConfig = { apiKey: "AIzaSyDqDmsMp2eAuHJBcjW-ciO2JcLTXapiIrs", authDomain: "the-lalit-d7472.firebaseapp.com", databaseURL: "https://the-lalit-d7472-default-rtdb.firebaseio.com", projectId: "the-lalit-d7472", storageBucket: "the-lalit-d7472.firebasestorage.app", messagingSenderId: "479237084229", appId: "1:479237084229:web:f1da384b45c5883b12ff2c" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+    firebase.auth().onAuthStateChanged(u => { if(!u) window.location.href="login.html"; });
 
     function saveData() {
         const roll = document.getElementById('sRoll').value;
         const name = document.getElementById('sName').value;
-        const cls = document.getElementById('sClass').value;
-        const father = document.getElementById('sFather').value;
-        const phone = document.getElementById('sPhone').value;
-        const dob = document.getElementById('sDob').value;
-
         if(roll && name) {
             db.ref('students/' + roll).set({
-                name: name,
-                class: cls,
-                roll: roll,
-                father: father,
-                phone: phone,
-                dob: dob,
-                admissionDate: new Date().toLocaleDateString()
-            }).then(() => {
-                alert("Student Admitted Successfully!");
-                document.getElementById('studentForm').reset();
-            }).catch((error) => {
-                alert("Error: " + error.message);
-            });
-        } else {
-            alert("Please fill name and roll number!");
+                name: name, roll: roll, class: document.getElementById('sClass').value,
+                father: document.getElementById('sFather').value, date: new Date().toLocaleDateString()
+            }).then(() => { alert("Admission Sealed!"); document.getElementById('admissionForm').reset(); });
         }
     }
 </script>
