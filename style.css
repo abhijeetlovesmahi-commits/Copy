@@ -1,9 +1,9 @@
-/* PREMIUM 200-CURRENCY DASHBOARD (FIXED LOGO SIZE) */
+/* THE LALIT INTERNATIONAL SCHOOL - FINAL MASTER STYLESHEET */
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Poppins:wght@400;600&display=swap');
 
 :root { 
-    --note-accent: #ff9800; 
-    --note-bg: #fffbf2;     
+    --note-accent: #ff9800; /* ₹200 Orange */
+    --note-bg: #fffbf2;     /* Light Cream */
     --sidebar-bg: #fff3e0;  
     --text-dark: #2d2d2d;   
 }
@@ -16,7 +16,7 @@ body {
     overflow-x: hidden;
 }
 
-/* --- 1. ANIMATED HAMBURGER TO 'X' --- */
+/* --- 1. ANIMATED MENU ICON (3 LINES) --- */
 #menu-checkbox { display: none; }
 
 .menu-toggle {
@@ -42,26 +42,16 @@ body {
     transition: all 0.3s ease-in-out;
 }
 
-#menu-checkbox:checked + .menu-toggle span:nth-child(1) {
-    transform: translateY(9px) rotate(45deg);
-}
+/* Animation to 'X' */
+#menu-checkbox:checked + .menu-toggle span:nth-child(1) { transform: translateY(9px) rotate(45deg); }
+#menu-checkbox:checked + .menu-toggle span:nth-child(2) { opacity: 0; transform: translateX(-20px); }
+#menu-checkbox:checked + .menu-toggle span:nth-child(3) { transform: translateY(-10px) rotate(-45deg); }
 
-#menu-checkbox:checked + .menu-toggle span:nth-child(2) {
-    opacity: 0;
-    transform: translateX(-20px);
-}
-
-#menu-checkbox:checked + .menu-toggle span:nth-child(3) {
-    transform: translateY(-10px) rotate(-45deg);
-}
-
-/* --- 2. CURRENCY STYLE SIDEBAR --- */
+/* --- 2. CURRENCY SIDEBAR & LOGO FIX --- */
 .sidebar { 
     width: 260px; 
     background-color: var(--sidebar-bg);
-    background-image: 
-        radial-gradient(circle at 1px 1px, rgba(255, 152, 0, 0.1) 1px, transparent 0),
-        url('https://www.transparenttextures.com/patterns/cream-paper.png');
+    background-image: url('https://www.transparenttextures.com/patterns/cream-paper.png');
     height: 100vh; 
     position: fixed; 
     left: -300px; 
@@ -72,27 +62,36 @@ body {
     border-right: 2px solid var(--note-accent);
 }
 
-#menu-checkbox:checked ~ .sidebar {
-    left: 0;
-}
+#menu-checkbox:checked ~ .sidebar { left: 0; }
 
-/* --- LOGO BOX FIX (Logo ko chhota karne ke liye) --- */
 .logo-box { 
-    padding: 60px 15px 20px; /* Upar se thodi jagah hamburger ke liye */
-    text-align: center; 
-    border-bottom: 1px solid rgba(255, 152, 0, 0.2);
+    padding: 60px 15px 20px !important; 
+    text-align: center !important;
 }
 
+/* LOGO SIZE STRICT FIX */
 .school-logo { 
-    width: 80px !important;  /* Isse logo ka size fix ho jayega */
+    width: 80px !important; 
     height: 80px !important; 
-    object-fit: contain;     /* Logo stretch nahi hoga */
-    border-radius: 50%; 
-    border: 2px solid var(--note-accent);
-    background: white;
-    padding: 5px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    object-fit: contain !important;
+    border-radius: 50% !important; 
+    border: 2px solid var(--note-accent) !important;
+    background: white !important;
+    padding: 5px !important;
+    display: inline-block !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1) !important;
 }
+
+.sidebar a { 
+    color: #5d4037; 
+    text-decoration: none; 
+    padding: 15px 25px; 
+    display: block; 
+    font-weight: 600;
+    border-bottom: 1px solid rgba(255, 152, 0, 0.1);
+}
+
+.sidebar a:hover { background: var(--note-accent); color: white; }
 
 /* --- 3. SMART OVERLAY --- */
 .sidebar-overlay {
@@ -104,16 +103,10 @@ body {
     cursor: pointer;
 }
 
-#menu-checkbox:checked ~ .sidebar-overlay {
-    display: block;
-}
+#menu-checkbox:checked ~ .sidebar-overlay { display: block; }
 
-/* --- 4. DASHBOARD CONTENT --- */
-.main-content { 
-    padding: 80px 20px 20px; 
-    width: 100%; 
-    box-sizing: border-box;
-}
+/* --- 4. MAIN CONTENT --- */
+.main-content { padding: 80px 20px 20px; width: 100%; box-sizing: border-box; }
 
 .royal-card { 
     background-color: var(--note-bg);
@@ -126,7 +119,7 @@ body {
     min-height: 80vh;
 }
 
-/* Logo Watermark (Background wala) */
+/* Background Watermark */
 .royal-card::after {
     content: "";
     position: absolute;
@@ -142,17 +135,5 @@ body {
     z-index: 0;
 }
 
-h2 { font-family: 'Cinzel', serif; font-size: 2.2rem; color: #8d6e63; text-align: center; position: relative; z-index: 1;}
-
-p, span, div, td, th, label, a { font-size: 12px !important; position: relative; z-index: 1;}
-
-.sidebar a { 
-    color: #5d4037; 
-    text-decoration: none; 
-    padding: 15px 25px; 
-    display: block; 
-    font-weight: 600;
-    border-bottom: 1px solid rgba(255, 152, 0, 0.1);
-}
-
-.sidebar a:hover { background: var(--note-accent); color: white; }
+h2 { font-family: 'Cinzel', serif; font-size: 2.2rem; color: #8d6e63; text-align: center; position: relative; z-index: 1; margin-top: 0; }
+p, span, div, td, th, label, a { font-size: 12px !important; position: relative; z-index: 1; }
