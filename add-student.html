@@ -4,180 +4,261 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Admission System</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+
+    <style>
+        /* Extra styles for better layout since I can't see your style.css */
+        body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .header { text-align: center; margin-bottom: 20px; }
+        .header img { width: 100px; }
+        section { border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 5px; }
+        h3 { margin-top: 0; color: #333; border-bottom: 2px solid #eee; padding-bottom: 5px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        input, select { width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; }
+        .full-width { grid-column: span 2; }
+        button { cursor: pointer; padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 4px; }
+        .search-section { margin-top: 40px; background: #e9ecef; padding: 20px; }
+        .student-card { background: white; padding: 10px; margin: 10px 0; border-left: 5px solid #007bff; cursor: pointer; display: flex; justify-content: space-between; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); overflow-y: auto; }
+        .modal-content { background: white; margin: 5% auto; padding: 20px; width: 80%; border-radius: 10px; }
+        .btn-delete { background: #dc3545; }
+        .btn-edit { background: #ffc107; color: black; }
+    </style>
 </head>
-<body class="bg-gray-100 p-5">
+<body>
 
-<div class="max-w-4xl mx-auto">
-    <div class="bg-white p-8 rounded-lg shadow-md mb-10">
-        <h2 class="text-2xl font-bold mb-6 text-gray-800">Student Admission Form</h2>
-        <form id="admissionForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input type="text" id="name" placeholder="Student Name" class="border p-2 rounded" required>
-            <input type="text" id="father" placeholder="Father's Name" class="border p-2 rounded" required>
-            <input type="text" id="mother" placeholder="Mother's Name" class="border p-2 rounded" required>
-            <input type="text" id="mobile" placeholder="Mobile Number" class="border p-2 rounded" required>
-            <input type="text" id="adhar" placeholder="Aadhar Number" class="border p-2 rounded" required>
-            <input type="text" id="address" placeholder="Address" class="border p-2 rounded md:col-span-2" required>
-            
-            <select id="class" class="border p-2 rounded" required>
-                <option value="">Select Class</option>
-                <option value="1">Class 1</option>
-                <option value="2">Class 2</option>
-            </select>
-            
-            <select id="section" class="border p-2 rounded" required>
-                <option value="">Select Section</option>
-                <option value="A">A</option>
-                <option value="B">B</option>
-            </select>
+<div class="container">
+    <div class="header">
+        <img src="logo.png" alt="Logo">
+        <h2>Student Admission Form</h2>
+    </div>
 
-            <select id="transport" class="border p-2 rounded" required>
-                <option value="No">Transport: No</option>
-                <option value="Yes">Transport: Yes</option>
-            </select>
-
-            <div class="md:col-span-2">
-                <label class="block text-sm text-gray-600">Upload Photo</label>
-                <input type="file" id="photo" accept="image/*" class="border p-2 w-full" required>
+    <form id="admissionForm">
+        <section>
+            <h3>Student Details</h3>
+            <div class="grid">
+                <input type="text" id="sName" placeholder="Student Name" required>
+                <input type="date" id="sDob" required>
+                <select id="sGender">
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                </select>
+                <input type="text" id="sBlood" placeholder="Blood Group">
             </div>
+        </section>
 
-            <button type="submit" class="md:col-span-2 bg-blue-600 text-white p-3 rounded hover:bg-blue-700 transition">Register Student</button>
-        </form>
+        <section>
+            <h3>Academic Details</h3>
+            <div class="grid">
+                <select id="sClass" required>
+                    <option value="">Select Class</option>
+                    <option value="Pre-Nursery">Pre-Nursery</option>
+                    <option value="Nursery">Nursery</option>
+                    <option value="1">1st</option>
+                    <option value="10">10th</option>
+                    <option value="12">12th</option>
+                </select>
+                <select id="sSection" required>
+                    <option value="A">Section A</option>
+                    <option value="B">Section B</option>
+                    <option value="C">Section C</option>
+                    <option value="D">Section D</option>
+                </select>
+                <select id="sHouse">
+                    <option value="A">House A</option>
+                    <option value="B">House B</option>
+                    <option value="C">House C</option>
+                    <option value="D">House D</option>
+                </select>
+            </div>
+        </section>
+
+        <section>
+            <h3>Parents & Contact</h3>
+            <div class="grid">
+                <input type="text" id="pFather" placeholder="Father's Name" required>
+                <input type="text" id="pMother" placeholder="Mother's Name" required>
+                <input type="tel" id="pContact" placeholder="Contact Number" required>
+            </div>
+        </section>
+
+        <section>
+            <h3>Address</h3>
+            <input type="text" id="currAddr" placeholder="Current Address" required>
+            <label><input type="checkbox" id="sameAddr" onclick="syncAddress()"> Permanent address same as current</label>
+            <input type="text" id="permAddr" placeholder="Permanent Address" required>
+        </section>
+
+        <button type="submit">Submit Admission</button>
+    </form>
+
+    <hr>
+
+    <div class="search-section">
+        <h3>Search Student</h3>
+        <div style="display: flex; gap: 10px;">
+            <input type="text" id="searchInput" placeholder="Search by name, ID or phone...">
+            <button onclick="searchStudent()" style="background: #007bff;">Search</button>
+        </div>
+        <div id="searchResults"></div>
     </div>
 
-    <hr class="my-10">
-
-    <div class="mb-6">
-        <input type="text" id="searchInput" placeholder="Search by Name, ID, Roll No, or Parents..." 
-               class="w-full p-4 rounded-full shadow border-none focus:ring-2 focus:ring-blue-400">
+    <div class="recent-section">
+        <h3>Recent Admissions (Last 10)</h3>
+        <div id="recentList"></div>
     </div>
+</div>
 
-    <div id="studentList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+<div id="profileModal" class="modal">
+    <div class="modal-content" id="modalData">
         </div>
 </div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, query, doc, runTransaction, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+<script>
+// --- Firebase Configuration ---
+const firebaseConfig = {
+  apiKey: "AIzaSyDqDmsMp2eAuHJBcjW-ciO2JcLTXapiIrs",
+  authDomain: "the-lalit-d7472.firebaseapp.com",
+  databaseURL: "https://the-lalit-d7472-default-rtdb.firebaseio.com",
+  projectId: "the-lalit-d7472",
+  storageBucket: "the-lalit-d7472.firebasestorage.app",
+  messagingSenderId: "479237084229",
+  appId: "1:479237084229:web:31078825739b3c5712ff2c"
+};
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyDqDmsMp2eAuHJBcjW-ciO2JcLTXapiIrs",
-        authDomain: "the-lalit-d7472.firebaseapp.com",
-        databaseURL: "https://the-lalit-d7472-default-rtdb.firebaseio.com",
-        projectId: "the-lalit-d7472",
-        storageBucket: "the-lalit-d7472.firebasestorage.app",
-        messagingSenderId: "479237084229",
-        appId: "1:479237084229:web:f1da384b45c5883b12ff2c"
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// --- Logic for Address Sync ---
+function syncAddress() {
+    if(document.getElementById('sameAddr').checked) {
+        document.getElementById('permAddr').value = document.getElementById('currAddr').value;
+    }
+}
+
+// --- Form Submission & Auto ID/Roll Logic ---
+document.getElementById('admissionForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const sClass = document.getElementById('sClass').value;
+    const sSection = document.getElementById('sSection').value;
+
+    // 1. Get Global Unique ID (Total students in school)
+    const schoolSnapshot = await db.ref('students').once('value');
+    const uniqueID = (schoolSnapshot.numChildren() + 1001); // Starting from 1001
+
+    // 2. Get Roll Number (Total students in same class & section)
+    const classSnapshot = await db.ref('students').orderByChild('classSection').equalTo(sClass + sSection).once('value');
+    const rollNo = classSnapshot.numChildren() + 1;
+
+    const studentData = {
+        uniqueID: uniqueID,
+        rollNo: rollNo,
+        name: document.getElementById('sName').value,
+        dob: document.getElementById('sDob').value,
+        gender: document.getElementById('sGender').value,
+        class: sClass,
+        section: sSection,
+        classSection: sClass + sSection, // For filtering
+        house: document.getElementById('sHouse').value,
+        father: document.getElementById('pFather').value,
+        mother: document.getElementById('pMother').value,
+        contact: document.getElementById('pContact').value,
+        currentAddress: document.getElementById('currAddr').value,
+        permanentAddress: document.getElementById('permAddr').value,
+        timestamp: Date.now()
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const storage = getStorage(app);
-
-    const form = document.getElementById('admissionForm');
-    const studentListDiv = document.getElementById('studentList');
-    const searchInput = document.getElementById('searchInput');
-
-    // --- 1. Save Data with Auto-IDs ---
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const photoFile = document.getElementById('photo').files[0];
-        
-        try {
-            // Upload photo
-            const storageRef = ref(storage, `students/${Date.now()}_${photoFile.name}`);
-            const uploadTask = await uploadBytes(storageRef, photoFile);
-            const photoURL = await getDownloadURL(uploadTask.ref);
-
-            // Atomic Transaction for IDs
-            await runTransaction(db, async (transaction) => {
-                const schoolRef = doc(db, "metadata", "school_stats");
-                const classKey = `${document.getElementById('class').value}_${document.getElementById('section').value}`;
-                const classRef = doc(db, "class_stats", classKey);
-
-                const schoolSnap = await transaction.get(schoolRef);
-                const classSnap = await transaction.get(classRef);
-
-                const totalStudents = (schoolSnap.exists() ? schoolSnap.data().count : 0) + 1;
-                const rollNo = (classSnap.exists() ? classSnap.data().count : 0) + 1;
-
-                const studentData = {
-                    name: document.getElementById('name').value,
-                    father: document.getElementById('father').value,
-                    mother: document.getElementById('mother').value,
-                    address: document.getElementById('address').value,
-                    mobile: document.getElementById('mobile').value,
-                    adhar: document.getElementById('adhar').value,
-                    class: document.getElementById('class').value,
-                    section: document.getElementById('section').value,
-                    transport: document.getElementById('transport').value,
-                    photoURL: photoURL,
-                    uniqueID: `LALIT-${1000 + totalStudents}`,
-                    rollNo: rollNo,
-                    createdAt: new Date()
-                };
-
-                transaction.set(schoolRef, { count: totalStudents }, { merge: true });
-                transaction.set(classRef, { count: rollNo }, { merge: true });
-                transaction.set(doc(collection(db, "students")), studentData);
-            });
-
-            alert("Student Admitted Successfully!");
-            form.reset();
-            loadStudents();
-        } catch (error) {
-            console.error(error);
-            alert("Error adding student");
-        }
+    db.ref('students/' + uniqueID).set(studentData).then(() => {
+        alert("Admission Successful! ID: " + uniqueID + " | Roll No: " + rollNo);
+        document.getElementById('admissionForm').reset();
+        loadRecent();
     });
+});
 
-    // --- 2. Load & Search Students ---
-    async function loadStudents(term = "") {
-        const querySnapshot = await getDocs(collection(db, "students"));
-        studentListDiv.innerHTML = "";
-        
-        querySnapshot.forEach((docSnap) => {
-            const data = docSnap.data();
-            const id = docSnap.id;
-            
-            // Basic multi-field search logic
-            const combinedString = `${data.name} ${data.uniqueID} ${data.rollNo} ${data.father}`.toLowerCase();
-            if (term && !combinedString.includes(term.toLowerCase())) return;
-
-            studentListDiv.innerHTML += `
-                <div class="bg-white border-t-4 border-blue-600 rounded shadow-lg p-4 relative">
-                    <img src="${data.photoURL}" class="w-20 h-20 rounded-full mx-auto mb-2 object-cover border">
-                    <h3 class="text-center font-bold text-lg">${data.name}</h3>
-                    <p class="text-xs text-center text-gray-500 mb-2">${data.uniqueID}</p>
-                    <div class="text-sm space-y-1">
-                        <p><strong>Roll:</strong> ${data.rollNo} | <strong>Class:</strong> ${data.class}-${data.section}</p>
-                        <p><strong>Father:</strong> ${data.father}</p>
-                        <p><strong>Mobile:</strong> ${data.mobile}</p>
-                    </div>
-                    <div class="mt-4 flex justify-between">
-                        <button onclick="window.deleteStudent('${id}')" class="text-red-500 text-xs font-bold uppercase">Delete</button>
-                        <button onclick="alert('Student Profile:\\nName: ${data.name}\\nAdhar: ${data.adhar}\\nAddress: ${data.address}')" class="bg-blue-600 text-white px-3 py-1 rounded text-xs">View Profile</button>
-                    </div>
+// --- Load Recent 10 Students ---
+function loadRecent() {
+    db.ref('students').limitToLast(10).on('value', (snapshot) => {
+        const list = document.getElementById('recentList');
+        list.innerHTML = "";
+        snapshot.forEach((child) => {
+            const data = child.val();
+            list.innerHTML += `
+                <div class="student-card" onclick="viewProfile('${data.uniqueID}')">
+                    <span><b>${data.name}</b> (ID: ${data.uniqueID})</span>
+                    <span>Class: ${data.class}-${data.section}</span>
                 </div>
             `;
         });
+    });
+}
+
+// --- Search Function ---
+function searchStudent() {
+    const val = document.getElementById('searchInput').value.toLowerCase();
+    db.ref('students').once('value', (snapshot) => {
+        const results = document.getElementById('searchResults');
+        results.innerHTML = "";
+        snapshot.forEach((child) => {
+            const data = child.val();
+            if(data.name.toLowerCase().includes(val) || data.uniqueID.toString().includes(val) || data.contact.includes(val)) {
+                results.innerHTML += `
+                    <div class="student-card" onclick="viewProfile('${data.uniqueID}')">
+                        <span><b>${data.name}</b></span>
+                        <span>Roll: ${data.rollNo}</span>
+                    </div>`;
+            }
+        });
+    });
+}
+
+// --- View Profile Modal ---
+function viewProfile(id) {
+    db.ref('students/' + id).once('value', (snapshot) => {
+        const data = snapshot.val();
+        const modal = document.getElementById('profileModal');
+        const content = document.getElementById('modalData');
+        
+        content.innerHTML = `
+            <h2>Student Profile</h2>
+            <div class="grid">
+                <p><b>ID:</b> ${data.uniqueID}</p>
+                <p><b>Roll No:</b> ${data.rollNo}</p>
+                <p><b>Name:</b> ${data.name}</p>
+                <p><b>Class:</b> ${data.class} (${data.section})</p>
+                <p><b>Father:</b> ${data.father}</p>
+                <p><b>Contact:</b> ${data.contact}</p>
+                <p class="full-width"><b>Address:</b> ${data.currentAddress}</p>
+            </div>
+            <br>
+            <button class="btn-edit" onclick="alert('Edit logic can be added here')">Edit</button>
+            <button class="btn-delete" onclick="deleteStudent('${data.uniqueID}')">Delete</button>
+            <button onclick="closeModal()" style="background:gray">Close</button>
+        `;
+        modal.style.display = "block";
+    });
+}
+
+function closeModal() {
+    document.getElementById('profileModal').style.display = "none";
+}
+
+function deleteStudent(id) {
+    if(confirm("Are you sure you want to delete?")) {
+        db.ref('students/' + id).remove().then(() => {
+            closeModal();
+            loadRecent();
+        });
     }
+}
 
-    // --- 3. Global Functions for Buttons ---
-    window.deleteStudent = async (id) => {
-        if(confirm("Are you sure?")) {
-            await deleteDoc(doc(db, "students", id));
-            loadStudents();
-        }
-    };
+// Initial Load
+loadRecent();
 
-    searchInput.addEventListener('input', (e) => loadStudents(e.target.value));
-    
-    // Initial Load
-    loadStudents();
 </script>
-
 </body>
 </html>
