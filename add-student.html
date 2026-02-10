@@ -3,137 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admission Scroll - TLIS</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
-    <style>
-        .photo-preview-box { width: 140px; height: 140px; border: 2px dashed #ff9800; border-radius: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden; margin: 0 auto; background: #f8f9fa; }
-        .photo-preview-box img { width: 100%; height: 100%; object-fit: cover; }
-        .section-header { border-bottom: 2px solid #ff9800; padding-bottom: 5px; margin-bottom: 20px; margin-top: 20px; font-weight: bold; color: #300a24; }
-        .student-card-mini { background: #fff; border: 1px solid #e0d0b0; border-radius: 10px; padding: 15px; text-align: center; transition: 0.3s; cursor: pointer; position: relative; }
-        .student-card-mini:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .mini-photo { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid #ff9800; margin-bottom: 10px; }
-        .mini-id { font-size: 10px; color: #ff9800; font-weight: bold; }
-    </style>
+    <title>Student Admission System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="bg-gray-100 p-5">
 
-<div class="sidebar">
-    <div class="logo-box"><img src="logo.png" class="school-logo"><h5 class="mt-2">TLIS Imperial</h5></div>
-    <a href="index.html"><i class="fas fa-crown me-2"></i> Dashboard</a>
-    <a href="add-student.html" class="active"><i class="fas fa-scroll me-2"></i> Admission</a>
-</div>
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white p-8 rounded-lg shadow-md mb-10">
+        <h2 class="text-2xl font-bold mb-6 text-gray-800">Student Admission Form</h2>
+        <form id="admissionForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input type="text" id="name" placeholder="Student Name" class="border p-2 rounded" required>
+            <input type="text" id="father" placeholder="Father's Name" class="border p-2 rounded" required>
+            <input type="text" id="mother" placeholder="Mother's Name" class="border p-2 rounded" required>
+            <input type="text" id="mobile" placeholder="Mobile Number" class="border p-2 rounded" required>
+            <input type="text" id="adhar" placeholder="Aadhar Number" class="border p-2 rounded" required>
+            <input type="text" id="address" placeholder="Address" class="border p-2 rounded md:col-span-2" required>
+            
+            <select id="class" class="border p-2 rounded" required>
+                <option value="">Select Class</option>
+                <option value="1">Class 1</option>
+                <option value="2">Class 2</option>
+            </select>
+            
+            <select id="section" class="border p-2 rounded" required>
+                <option value="">Select Section</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+            </select>
 
-<div class="main-content">
-    <div class="royal-card">
-        <h2 class="text-center mb-4">Imperial Admission Registry</h2>
-        <form id="admissionForm">
-            <div class="row mb-4 align-items-center">
-                <div class="col-md-8">
-                    <h5 class="section-header"><i class="fas fa-id-card me-2"></i>Official Records</h5>
-                    <div class="row g-3">
-                        <div class="col-md-6"><label class="small">Unique ID</label><input type="text" class="form-control" placeholder="Auto" disabled></div>
-                        <div class="col-md-6"><label class="small">Roll No</label><input type="text" class="form-control" placeholder="Auto" disabled></div>
-                    </div>
-                </div>
-                <div class="col-md-4 text-center">
-                    <label class="small">Student Photo</label>
-                    <div class="photo-preview-box mb-2" id="photoPreview"><i class="fas fa-camera text-muted"></i></div>
-                    <input type="file" id="sPhoto" class="form-control form-control-sm" accept="image/*" onchange="previewAndCompress(this)">
-                </div>
+            <select id="transport" class="border p-2 rounded" required>
+                <option value="No">Transport: No</option>
+                <option value="Yes">Transport: Yes</option>
+            </select>
+
+            <div class="md:col-span-2">
+                <label class="block text-sm text-gray-600">Upload Photo</label>
+                <input type="file" id="photo" accept="image/*" class="border p-2 w-full" required>
             </div>
-            <div class="row g-3">
-                <div class="col-md-4"><label>Full Name *</label><input type="text" id="sName" class="form-control" required></div>
-                <div class="col-md-4"><label>DOB *</label><input type="date" id="sDob" class="form-control" required></div>
-                <div class="col-md-4"><label>Father's Name *</label><input type="text" id="sFather" class="form-control" required></div>
-                <div class="col-md-4"><label>Mother's Name *</label><input type="text" id="sMother" class="form-control" required></div>
-                <div class="col-md-4"><label>Mobile *</label><input type="tel" id="sMobile" class="form-control" required></div>
-                <div class="col-md-4"><label>Class *</label><select id="sClass" class="form-select"><option value="1">Class 1</option><option value="10">Class 10</option></select></div>
-            </div>
-            <div class="mt-4 text-center"><button type="button" id="submitBtn" class="royal-btn px-5" onclick="saveData()">Seal Admission</button></div>
+
+            <button type="submit" class="md:col-span-2 bg-blue-600 text-white p-3 rounded hover:bg-blue-700 transition">Register Student</button>
         </form>
-
-        <hr class="my-5">
-        
-        <div class="mb-4">
-            <input type="text" id="searchInput" class="form-control" style="border: 2px solid #ff9800; border-radius: 20px;" placeholder="🔍 Search student by name..." onkeyup="searchStudent()">
-        </div>
-
-        <h4 class="section-header"><i class="fas fa-users me-2"></i>Recent Admissions</h4>
-        <div class="row g-3" id="recentStudentsList"></div>
     </div>
+
+    <hr class="my-10">
+
+    <div class="mb-6">
+        <input type="text" id="searchInput" placeholder="Search by Name, ID, Roll No, or Parents..." 
+               class="w-full p-4 rounded-full shadow border-none focus:ring-2 focus:ring-blue-400">
+    </div>
+
+    <div id="studentList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        </div>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-<script>
-    const firebaseConfig = { apiKey: "AIzaSyDqDmsMp2eAuHJBcjW-ciO2JcLTXapiIrs", authDomain: "the-lalit-d7472.firebaseapp.com", databaseURL: "https://the-lalit-d7472-default-rtdb.firebaseio.com", projectId: "the-lalit-d7472", storageBucket: "the-lalit-d7472.firebasestorage.app", messagingSenderId: "479237084229", appId: "1:479237084229:web:f1da384b45c5883b12ff2c" };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, query, doc, runTransaction, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-    let photoBase64 = "";
+    const firebaseConfig = {
+        apiKey: "AIzaSyDqDmsMp2eAuHJBcjW-ciO2JcLTXapiIrs",
+        authDomain: "the-lalit-d7472.firebaseapp.com",
+        databaseURL: "https://the-lalit-d7472-default-rtdb.firebaseio.com",
+        projectId: "the-lalit-d7472",
+        storageBucket: "the-lalit-d7472.firebasestorage.app",
+        messagingSenderId: "479237084229",
+        appId: "1:479237084229:web:f1da384b45c5883b12ff2c"
+    };
 
-    function previewAndCompress(input) {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = e => {
-                const img = new Image();
-                img.src = e.target.result;
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 300;
-                    canvas.width = MAX_WIDTH;
-                    canvas.height = img.height * (MAX_WIDTH / img.width);
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    photoBase64 = canvas.toDataURL('image/jpeg', 0.6);
-                    document.getElementById('photoPreview').innerHTML = `<img src="${photoBase64}">`;
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    const form = document.getElementById('admissionForm');
+    const studentListDiv = document.getElementById('studentList');
+    const searchInput = document.getElementById('searchInput');
+
+    // --- 1. Save Data with Auto-IDs ---
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const photoFile = document.getElementById('photo').files[0];
+        
+        try {
+            // Upload photo
+            const storageRef = ref(storage, `students/${Date.now()}_${photoFile.name}`);
+            const uploadTask = await uploadBytes(storageRef, photoFile);
+            const photoURL = await getDownloadURL(uploadTask.ref);
+
+            // Atomic Transaction for IDs
+            await runTransaction(db, async (transaction) => {
+                const schoolRef = doc(db, "metadata", "school_stats");
+                const classKey = `${document.getElementById('class').value}_${document.getElementById('section').value}`;
+                const classRef = doc(db, "class_stats", classKey);
+
+                const schoolSnap = await transaction.get(schoolRef);
+                const classSnap = await transaction.get(classRef);
+
+                const totalStudents = (schoolSnap.exists() ? schoolSnap.data().count : 0) + 1;
+                const rollNo = (classSnap.exists() ? classSnap.data().count : 0) + 1;
+
+                const studentData = {
+                    name: document.getElementById('name').value,
+                    father: document.getElementById('father').value,
+                    mother: document.getElementById('mother').value,
+                    address: document.getElementById('address').value,
+                    mobile: document.getElementById('mobile').value,
+                    adhar: document.getElementById('adhar').value,
+                    class: document.getElementById('class').value,
+                    section: document.getElementById('section').value,
+                    transport: document.getElementById('transport').value,
+                    photoURL: photoURL,
+                    uniqueID: `LALIT-${1000 + totalStudents}`,
+                    rollNo: rollNo,
+                    createdAt: new Date()
                 };
-            };
-            reader.readAsDataURL(input.files[0]);
+
+                transaction.set(schoolRef, { count: totalStudents }, { merge: true });
+                transaction.set(classRef, { count: rollNo }, { merge: true });
+                transaction.set(doc(collection(db, "students")), studentData);
+            });
+
+            alert("Student Admitted Successfully!");
+            form.reset();
+            loadStudents();
+        } catch (error) {
+            console.error(error);
+            alert("Error adding student");
         }
-    }
+    });
 
-    function renderList(snap) {
-        const list = document.getElementById('recentStudentsList');
-        list.innerHTML = "";
-        snap.forEach(child => {
-            const s = child.val();
-            list.innerHTML += `
-                <div class="col-6 col-md-3">
-                    <div class="student-card-mini" onclick="window.location.href='profile.html?id=${s.uniqueId}'">
-                        <img src="${s.photo || 'https://via.placeholder.com/70'}" class="mini-photo">
-                        <div class="mini-id">${s.uniqueId}</div>
-                        <div class="fw-bold" style="font-size:12px;">${s.name}</div>
-                        <div class="text-muted" style="font-size:10px;">Class: ${s.class}</div>
+    // --- 2. Load & Search Students ---
+    async function loadStudents(term = "") {
+        const querySnapshot = await getDocs(collection(db, "students"));
+        studentListDiv.innerHTML = "";
+        
+        querySnapshot.forEach((docSnap) => {
+            const data = docSnap.data();
+            const id = docSnap.id;
+            
+            // Basic multi-field search logic
+            const combinedString = `${data.name} ${data.uniqueID} ${data.rollNo} ${data.father}`.toLowerCase();
+            if (term && !combinedString.includes(term.toLowerCase())) return;
+
+            studentListDiv.innerHTML += `
+                <div class="bg-white border-t-4 border-blue-600 rounded shadow-lg p-4 relative">
+                    <img src="${data.photoURL}" class="w-20 h-20 rounded-full mx-auto mb-2 object-cover border">
+                    <h3 class="text-center font-bold text-lg">${data.name}</h3>
+                    <p class="text-xs text-center text-gray-500 mb-2">${data.uniqueID}</p>
+                    <div class="text-sm space-y-1">
+                        <p><strong>Roll:</strong> ${data.rollNo} | <strong>Class:</strong> ${data.class}-${data.section}</p>
+                        <p><strong>Father:</strong> ${data.father}</p>
+                        <p><strong>Mobile:</strong> ${data.mobile}</p>
                     </div>
-                </div>`;
+                    <div class="mt-4 flex justify-between">
+                        <button onclick="window.deleteStudent('${id}')" class="text-red-500 text-xs font-bold uppercase">Delete</button>
+                        <button onclick="alert('Student Profile:\\nName: ${data.name}\\nAdhar: ${data.adhar}\\nAddress: ${data.address}')" class="bg-blue-600 text-white px-3 py-1 rounded text-xs">View Profile</button>
+                    </div>
+                </div>
+            `;
         });
     }
 
-    function searchStudent() {
-        const q = document.getElementById('searchInput').value;
-        if(!q) return loadRecent();
-        db.ref('students').orderByChild('name').startAt(q).endAt(q + "\uf8ff").once('value', renderList);
-    }
+    // --- 3. Global Functions for Buttons ---
+    window.deleteStudent = async (id) => {
+        if(confirm("Are you sure?")) {
+            await deleteDoc(doc(db, "students", id));
+            loadStudents();
+        }
+    };
 
-    function loadRecent() { db.ref('students').limitToLast(8).on('value', renderList); }
-    loadRecent();
-
-    function saveData() {
-        const name = document.getElementById('sName').value;
-        if(!name) return alert("Name is required");
-        db.ref('metadata/counters').transaction(c => {
-            if(!c) return {total:1};
-            c.total = (c.total || 0) + 1;
-            return c;
-        }, (err, comm, snap) => {
-            const id = "TLIS-" + String(snap.val().total).padStart(4, '0');
-            const data = { uniqueId: id, name: name, photo: photoBase64, class: document.getElementById('sClass').value, father: document.getElementById('sFather').value, mobile: document.getElementById('sMobile').value, dob: document.getElementById('sDob').value };
-            db.ref('students/' + id).set(data).then(() => { alert("Saved!"); location.reload(); });
-        });
-    }
+    searchInput.addEventListener('input', (e) => loadStudents(e.target.value));
+    
+    // Initial Load
+    loadStudents();
 </script>
+
 </body>
 </html>
