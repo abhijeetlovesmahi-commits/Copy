@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Profile - TLIS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css"> <style>
+        .profile-header-card { background: linear-gradient(135deg, #300a24 0%, #5e1b3d 100%); color: white; border-radius: 15px; padding: 30px; margin-top: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        .profile-pic-large { width: 150px; height: 150px; border-radius: 50%; border: 5px solid #ff9800; object-fit: cover; background: #fff; }
+        .detail-row { border-bottom: 1px dashed #ddd; padding: 12px 0; }
+        .detail-label { font-weight: bold; color: #555; }
+        .royal-badge { background: #ff9800; color: #300a24; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="logo-box">
+        <h5 class="mt-2 text-white">TLIS Imperial</h5>
+    </div>
+    <a href="index.html"><i class="fas fa-crown me-2"></i> Dashboard</a>
+    <a href="add-student.html"><i class="fas fa-arrow-left me-2"></i> Back to List</a>
+</div>
+
+<div class="main-content">
+    <div class="container">
+        
+        <div id="loader" class="text-center mt-5">
+            <div class="spinner-border text-warning" role="status"></div>
+            <p>Fetching Royal Records...</p>
+        </div>
+
+        <div id="profileContent" style="display: none;">
+            
+            <div class="profile-header-card text-center position-relative">
+                <img id="pPhoto" src="" class="profile-pic-large mb-3">
+                <h2 id="pName">Student Name</h2>
+                <div class="d-flex justify-content-center gap-3">
+                    <span class="royal-badge" id="pId">ID: Loading</span>
+                    <span class="royal-badge bg-white" id="pClass">Class: --</span>
+                </div>
+            </div>
+
+            <div class="royal-card mt-4">
+                <h4 class="section-header"><i class="fas fa-info-circle me-2"></i>Full Details</h4>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="detail-row"><span class="detail-label">Father's Name:</span> <span id="pFather" class="float-end">--</span></div>
+                        <div class="detail-row"><span class="detail-label">Mother's Name:</span> <span id="pMother" class="float-end">--</span></div>
+                        <div class="detail-row"><span class="detail-label">Date of Birth:</span> <span id="pDob" class="float-end">--</span></div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-row"><span class="detail-label">Mobile:</span> <span id="pMobile" class="float-end">--</span></div>
+                        <div class="detail-row"><span class="detail-label">Aadhaar:</span> <span id="pAadhaar" class="float-end">--</span></div>
+                        <div class="detail-row"><span class="detail-label">Transport:</span> <span id="pTransport" class="float-end">--</span></div>
+                    </div>
+                </div>
+
+                <div class="mt-4 text-center">
+                    <button onclick="window.print()" class="btn btn-outline-dark"><i class="fas fa-print me-2"></i>Print Profile</button>
+                    </div>
+            </div>
+        </div>
+
+        <div id="errorMsg" class="text-center mt-5 text-danger" style="display:none;">
+            <h3>Student Not Found!</h3>
+            <p>The ID provided is invalid or deleted.</p>
+            <a href="add-student.html" class="btn btn-primary">Go Back</a>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<script>
+    // SAME CONFIG AS OTHER PAGES
+    const firebaseConfig = { apiKey: "AIzaSyDqDmsMp2eAuHJBcjW-ciO2JcLTXapiIrs", authDomain: "the-lalit-d7472.firebaseapp.com", databaseURL: "https://the-lalit-d7472-default-rtdb.firebaseio.com", projectId: "the-lalit-d7472", storageBucket: "the-lalit-d7472.firebasestorage.app", messagingSenderId: "479237084229", appId: "1:479237084229:web:f1da384b45c5883b12ff2c" };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // 1. URL se ID nikalo
+    const urlParams = new URLSearchParams(window.location.search);
+    const studentId = urlParams.get('id');
+
+    if(studentId) {
+        loadProfile(studentId);
+    } else {
+        document.getElementById('loader').style.display = 'none';
+        document.getElementById('errorMsg').style.display = 'block';
+    }
+
+    function loadProfile(id) {
+        db.ref('students/' + id).once('value').then((snapshot) => {
+            if (snapshot.exists()) {
+                const s = snapshot.val();
+                
+                // Data ko HTML me set karo
+                document.getElementById('pPhoto').src = s.photo || 'https://via.placeholder.com/150';
+                document.getElementById('pName').innerText = s.name;
+                document.getElementById('pId').innerText = "ID: " + s.uniqueId;
+                document.getElementById('pClass').innerText = "Class " + s.class;
+                
+                document.getElementById('pFather').innerText = s.father;
+                document.getElementById('pMother').innerText = s.mother;
+                document.getElementById('pDob').innerText = s.dob;
+                document.getElementById('pMobile').innerText = s.mobile;
+                document.getElementById('pAadhaar').innerText = s.aadhaar || "N/A";
+                document.getElementById('pTransport').innerText = s.transport ? "Yes" : "No";
+
+                // Show Content
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('profileContent').style.display = 'block';
+            } else {
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('errorMsg').style.display = 'block';
+            }
+        }).catch((error) => {
+            console.error(error);
+        });
+    }
+</script>
+
+</body>
+</html>
