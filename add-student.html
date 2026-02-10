@@ -11,6 +11,7 @@
             --deep-gold: #aa8a2e;
             --light-gold: #FDFBF0;
             --white: #ffffff;
+            --danger: #c0392b;
         }
 
         body {
@@ -90,6 +91,7 @@
             background: #fff;
             font-size: 1rem;
             border-bottom: 2px solid var(--gold);
+            outline: none;
         }
 
         .main-btn {
@@ -102,7 +104,10 @@
             font-weight: bold;
             cursor: pointer;
             letter-spacing: 2px;
+            transition: 0.3s;
         }
+
+        .main-btn:hover { background: #001a4d; }
 
         .profile-grid {
             display: grid;
@@ -118,20 +123,70 @@
             display: flex;
             align-items: center;
             gap: 15px;
-            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s;
             background-image: radial-gradient(var(--light-gold) 1px, transparent 0);
             background-size: 10px 10px;
-            overflow: hidden;
         }
+
+        .profile-card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
 
         .card-img {
             width: 80px; height: 100px;
             object-fit: cover;
             border: 1px solid var(--gold);
-            box-shadow: 3px 3px 0px var(--gold);
         }
 
         .card-info h4 { margin: 0; color: var(--royal-blue); text-transform: uppercase; }
+        .card-info p { margin: 5px 0; font-size: 0.85rem; }
+
+        /* MODAL STYLES */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: var(--light-gold);
+            margin: 5% auto;
+            padding: 30px;
+            border: 3px solid var(--gold);
+            width: 80%;
+            max-width: 800px;
+            position: relative;
+            animation: slideDown 0.4s;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .close-modal {
+            position: absolute;
+            right: 20px; top: 10px;
+            font-size: 30px; cursor: pointer; color: var(--royal-blue);
+        }
+
+        .modal-body { display: flex; gap: 30px; flex-wrap: wrap; }
+        .modal-photo { width: 180px; height: 220px; border: 4px solid var(--gold); object-fit: cover; }
+        .modal-details { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .modal-details p { margin: 5px 0; border-bottom: 1px solid #ddd; padding-bottom: 3px; }
+
+        .action-bar {
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+        }
+
+        .btn-edit { background: var(--royal-blue); color: white; border: none; padding: 10px 25px; cursor: pointer; }
+        .btn-delete { background: var(--danger); color: white; border: none; padding: 10px 25px; cursor: pointer; }
+
     </style>
     
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
@@ -142,11 +197,12 @@
 <div class="container">
     <div class="header">
         <img src="logo.png" alt="Logo" class="school-logo">
-        <h1>Student Admission Portal</h1>
+        <h1 id="formTitle">Student Admission Portal</h1>
         <p style="letter-spacing: 5px; font-size: 0.8rem; color: var(--deep-gold);">OFFICIAL REGISTRATION FORM</p>
     </div>
 
     <form id="admissionForm">
+        <input type="hidden" id="editingId">
         <section class="form-section">
             <span class="section-title">Photo Upload</span>
             <div style="text-align: center;">
@@ -223,11 +279,28 @@
         </section>
 
         <button type="submit" id="submitBtn" class="main-btn">REGISTER STUDENT</button>
+        <button type="button" id="cancelEdit" class="main-btn" style="display:none; margin-top:10px; background:#666;" onclick="resetForm()">CANCEL EDIT</button>
     </form>
 
     <div style="margin-top:50px;">
         <h2 style="text-align:center; color:var(--gold); font-size: 1.2rem;">REGISTRY LOG</h2>
         <div id="recentList" class="profile-grid"></div>
+    </div>
+</div>
+
+<div id="detailModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <h2 id="modalName" style="text-align:center; border-bottom: 2px solid var(--gold); padding-bottom:10px;">STUDENT PROFILE</h2>
+        <div class="modal-body">
+            <img id="modalPhoto" src="" class="modal-photo">
+            <div class="modal-details" id="modalDetails">
+                </div>
+        </div>
+        <div class="action-bar">
+            <button class="btn-edit" id="modalEditBtn">EDIT RECORD</button>
+            <button class="btn-delete" id="modalDeleteBtn">DELETE RECORD</button>
+        </div>
     </div>
 </div>
 
@@ -242,6 +315,7 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 let compressedBase64 = "";
+let currentViewData = null;
 
 function processPhoto(input) {
     const file = input.files[0];
@@ -272,19 +346,25 @@ function syncAddress() {
 document.getElementById('admissionForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const btn = document.getElementById('submitBtn');
+    const editingId = document.getElementById('editingId').value;
     btn.disabled = true;
 
     try {
-        const lastSnap = await db.collection('students').orderBy('uniqueID', 'desc').limit(1).get();
-        let uniqueID = lastSnap.empty ? 1001 : Number(lastSnap.docs[0].data().uniqueID) + 1;
-
+        let uniqueID = editingId;
+        let rollNo;
         const sClass = document.getElementById('sClass').value;
         const sSection = document.getElementById('sSection').value;
         const classSection = sClass + sSection;
-        const classSnap = await db.collection('students').where("classSection", "==", classSection).get();
+
+        if(!editingId) {
+            const lastSnap = await db.collection('students').orderBy('uniqueID', 'desc').limit(1).get();
+            uniqueID = lastSnap.empty ? 1001 : Number(lastSnap.docs[0].data().uniqueID) + 1;
+            const classSnap = await db.collection('students').where("classSection", "==", classSection).get();
+            rollNo = classSnap.size + 1;
+        }
 
         const studentData = {
-            uniqueID, rollNo: classSnap.size + 1, classSection,
+            uniqueID: Number(uniqueID),
             name: document.getElementById('sName').value,
             dob: document.getElementById('sDob').value,
             gender: document.getElementById('sGender').value,
@@ -296,12 +376,15 @@ document.getElementById('admissionForm').addEventListener('submit', async (e) =>
             contact: document.getElementById('pContact').value,
             currentAddr: document.getElementById('currAddr').value,
             permanentAddr: document.getElementById('permAddr').value,
-            photo: compressedBase64,
-            timestamp: Date.now()
+            photo: compressedBase64 || (currentViewData ? currentViewData.photo : ""),
+            timestamp: Date.now(),
+            classSection
         };
+        
+        if(!editingId) studentData.rollNo = rollNo;
 
-        await db.collection('students').doc(uniqueID.toString()).set(studentData);
-        alert("Registration Successful! ID: " + uniqueID);
+        await db.collection('students').doc(uniqueID.toString()).set(studentData, {merge: true});
+        alert(editingId ? "Update Successful!" : "Registration Successful! ID: " + uniqueID);
         location.reload();
     } catch (err) { alert(err.message); btn.disabled = false; }
 });
@@ -312,17 +395,87 @@ async function loadRecent() {
     list.innerHTML = "";
     snap.forEach(doc => {
         const data = doc.data();
-        list.innerHTML += `
-            <div class="profile-card">
-                <img src="${data.photo}" class="card-img">
-                <div class="card-info">
-                    <h4>${data.name}</h4>
-                    <p><b>ID:</b> ${data.uniqueID} | <b>Roll:</b> ${data.rollNo}</p>
-                    <p><b>Class:</b> ${data.class}-${data.section}</p>
-                </div>
+        const card = document.createElement('div');
+        card.className = 'profile-card';
+        card.onclick = () => showDetails(data);
+        card.innerHTML = `
+            <img src="${data.photo}" class="card-img">
+            <div class="card-info">
+                <h4>${data.name}</h4>
+                <p><b>ID:</b> ${data.uniqueID} | <b>Roll:</b> ${data.rollNo}</p>
+                <p><b>Class:</b> ${data.class}-${data.section}</p>
             </div>`;
+        list.appendChild(card);
     });
 }
+
+function showDetails(data) {
+    currentViewData = data;
+    document.getElementById('modalName').innerText = data.name;
+    document.getElementById('modalPhoto').src = data.photo;
+    
+    const detailsHtml = `
+        <p><b>Admission ID:</b> ${data.uniqueID}</p>
+        <p><b>Roll No:</b> ${data.rollNo}</p>
+        <p><b>DOB:</b> ${data.dob}</p>
+        <p><b>Gender:</b> ${data.gender}</p>
+        <p><b>Class:</b> ${data.class} (${data.section})</p>
+        <p><b>House:</b> ${data.house}</p>
+        <p><b>Aadhar:</b> ${data.aadhar}</p>
+        <p><b>Blood:</b> ${data.blood}</p>
+        <p><b>Father:</b> ${data.father}</p>
+        <p><b>Mother:</b> ${data.mother}</p>
+        <p><b>Contact:</b> ${data.contact}</p>
+        <p style="grid-column: 1 / -1;"><b>Address:</b> ${data.currentAddr}</p>
+    `;
+    document.getElementById('modalDetails').innerHTML = detailsHtml;
+    
+    document.getElementById('modalEditBtn').onclick = () => startEdit(data);
+    document.getElementById('modalDeleteBtn').onclick = () => deleteRecord(data.uniqueID);
+    
+    document.getElementById('detailModal').style.display = 'block';
+}
+
+function startEdit(data) {
+    closeModal();
+    window.scrollTo(0,0);
+    document.getElementById('formTitle').innerText = "Update Student Record";
+    document.getElementById('submitBtn').innerText = "UPDATE RECORD";
+    document.getElementById('cancelEdit').style.display = 'block';
+    
+    document.getElementById('editingId').value = data.uniqueID;
+    document.getElementById('sName').value = data.name;
+    document.getElementById('sDob').value = data.dob;
+    document.getElementById('sGender').value = data.gender;
+    document.getElementById('sBlood').value = data.blood;
+    document.getElementById('sAadhar').value = data.aadhar;
+    document.getElementById('sClass').value = data.class;
+    document.getElementById('sSection').value = data.section;
+    document.getElementById('sHouse').value = data.house;
+    document.getElementById('pFather').value = data.father;
+    document.getElementById('pMother').value = data.mother;
+    document.getElementById('pContact').value = data.contact;
+    document.getElementById('currAddr').value = data.currentAddr;
+    document.getElementById('permAddr').value = data.permanentAddr;
+    
+    if(data.photo) {
+        const preview = document.getElementById('imgPreview');
+        preview.src = data.photo;
+        preview.style.display = 'block';
+    }
+}
+
+async function deleteRecord(id) {
+    if(confirm("Are you sure you want to delete this royal record?")) {
+        await db.collection('students').doc(id.toString()).delete();
+        alert("Record deleted.");
+        location.reload();
+    }
+}
+
+function closeModal() { document.getElementById('detailModal').style.display = 'none'; }
+function resetForm() { location.reload(); }
+
 loadRecent();
 </script>
 </body>
