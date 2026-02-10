@@ -3,86 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Admission System - Final</title>
+    <title>The Lalit - Royal Admission System</title>
     <style>
+        :root {
+            --royal-blue: #002366;
+            --gold: #D4AF37;
+            --deep-gold: #aa8a2e;
+            --light-gold: #FDFBF0;
+            --white: #ffffff;
+        }
+
         body {
-            background-color: #f4f4f9;
+            background: var(--light-gold);
             margin: 0;
-            padding: 20px; /* Screen ke kinare se gap ke liye */
-            font-family: Arial, sans-serif;
+            padding: 40px 20px;
+            font-family: 'Georgia', serif;
+            color: var(--royal-blue);
         }
+
         .container {
-            max-width: 900px;
-            margin: 0 auto; /* Page ko center karne ke liye */
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            max-width: 1100px;
+            margin: 0 auto;
+            background: var(--white);
+            padding: 50px;
+            border-radius: 5px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            border: 1px solid var(--gold);
+            position: relative;
         }
+
+        .container::before {
+            content: "";
+            position: absolute;
+            top: 10px; left: 10px; right: 10px; bottom: 10px;
+            border: 1px solid var(--gold);
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
         .header {
-            text-align: center; /* Logo aur Title center karne ke liye */
-            margin-bottom: 30px;
+            text-align: center;
+            border-bottom: 3px double var(--gold);
+            margin-bottom: 40px;
+            padding-bottom: 20px;
         }
-        .school-logo {
-            width: 120px;
-            height: auto;
-            margin-bottom: 15px;
+
+        .school-logo { width: 110px; margin-bottom: 10px; }
+
+        h1 {
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            font-size: 2.2rem;
+            margin: 10px 0;
+            color: var(--royal-blue);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
+
         .form-section {
-            margin-bottom: 25px;
-            padding: 15px;
+            margin-bottom: 35px;
             border: 1px solid #eee;
-            border-radius: 8px;
+            padding: 25px;
+            background: #fff;
+            position: relative;
         }
+
         .section-title {
-            margin-top: 0;
-            color: #333;
-            border-bottom: 2px solid #007bff;
-            display: inline-block;
-            padding-bottom: 5px;
-            margin-bottom: 15px;
+            position: absolute;
+            top: -12px; left: 20px;
+            background: white;
+            padding: 0 15px;
+            font-weight: bold;
+            color: var(--deep-gold);
+            text-transform: uppercase;
+            font-size: 0.9rem;
         }
+
         .input-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
         }
+
         input, select {
-            padding: 10px;
+            padding: 12px;
             border: 1px solid #ccc;
-            border-radius: 5px;
-            width: 100%;
-            box-sizing: border-box;
+            background: #fff;
+            font-size: 1rem;
+            border-bottom: 2px solid var(--gold);
         }
+
         .main-btn {
             width: 100%;
-            padding: 15px;
-            background: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 18px;
+            padding: 20px;
+            background: var(--royal-blue);
+            color: var(--gold);
+            border: 1px solid var(--gold);
+            font-size: 1.3rem;
+            font-weight: bold;
             cursor: pointer;
+            letter-spacing: 2px;
         }
-        .main-btn:disabled { background: #ccc; }
-        .photo-box { text-align: center; }
+
         .profile-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
         }
+
         .profile-card {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: center;
-            border-radius: 8px;
-            cursor: pointer;
+            background: #fff;
+            border: 2px solid var(--gold);
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+            background-image: radial-gradient(var(--light-gold) 1px, transparent 0);
+            background-size: 10px 10px;
+            overflow: hidden;
         }
-        .card-img { width: 100%; height: 120px; object-fit: cover; border-radius: 5px; }
-        /* Modal Style */
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-        .modal-content { background: white; padding: 20px; border-radius: 10px; max-width: 500px; width: 90%; }
+
+        .card-img {
+            width: 80px; height: 100px;
+            object-fit: cover;
+            border: 1px solid var(--gold);
+            box-shadow: 3px 3px 0px var(--gold);
+        }
+
+        .card-info h4 { margin: 0; color: var(--royal-blue); text-transform: uppercase; }
     </style>
     
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
@@ -93,36 +142,35 @@
 <div class="container">
     <div class="header">
         <img src="logo.png" alt="Logo" class="school-logo">
-        <h1>Student Admission Form</h1>
+        <h1>Student Admission Portal</h1>
+        <p style="letter-spacing: 5px; font-size: 0.8rem; color: var(--deep-gold);">OFFICIAL REGISTRATION FORM</p>
     </div>
 
     <form id="admissionForm">
         <section class="form-section">
-            <h3 class="section-title">Student Photo</h3>
-            <div class="photo-box">
-                <input type="file" id="studentPhoto" accept="image/*" onchange="compressAndPreview(this)">
-                <img id="imgPreview" class="photo-preview" style="display:none; width:120px; height:130px; border:1px solid #ccc; margin-top:10px; object-fit:cover; margin-left:auto; margin-right:auto;">
-                <p id="compressStatus"></p>
+            <span class="section-title">Photo Upload</span>
+            <div style="text-align: center;">
+                <input type="file" id="studentPhoto" accept="image/*" onchange="processPhoto(this)">
+                <center><img id="imgPreview" style="width:132px; height:170px; border:3px solid var(--gold); margin-top:15px; display:none; object-fit:cover;"></center>
             </div>
         </section>
 
         <section class="form-section">
-            <h3 class="section-title">Student Details</h3>
+            <span class="section-title">Personal Details</span>
             <div class="input-grid">
                 <input type="text" id="sName" placeholder="Student Name" required>
-                <input type="text" id="sDob" placeholder="Date of Birth" onfocus="(this.type='date')" onblur="if(!this.value)this.type='text'" required>
+                <input type="text" id="sDob" placeholder="DOB" onfocus="(this.type='date')" required>
                 <select id="sGender">
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>
-                    <option value="Other">Other</option>
                 </select>
                 <input type="text" id="sBlood" placeholder="Blood Group">
-                <input type="number" id="sAadhar" placeholder="Aadhar Number" oninput="if(this.value.length > 12) this.value = this.value.slice(0, 12);" required>
+                <input type="number" id="sAadhar" placeholder="Aadhar Number" oninput="this.value=this.value.slice(0,12)" required>
             </div>
         </section>
 
         <section class="form-section">
-            <h3 class="section-title">Academic Details</h3>
+            <span class="section-title">Academic Details</span>
             <div class="input-grid">
                 <select id="sClass" required>
                     <option value="">Select Class</option>
@@ -150,79 +198,52 @@
                     <option value="D">Section D</option>
                 </select>
                 <select id="sHouse">
-                    <option value="A">House A</option>
-                    <option value="B">House B</option>
-                    <option value="C">House C</option>
-                    <option value="D">House D</option>
+                    <option value="House A">House A</option>
+                    <option value="House B">House B</option>
+                    <option value="House C">House C</option>
+                    <option value="House D">House D</option>
                 </select>
             </div>
         </section>
 
         <section class="form-section">
-            <h3 class="section-title">Parents Details</h3>
+            <span class="section-title">Guardian Details</span>
             <div class="input-grid">
                 <input type="text" id="pFather" placeholder="Father's Name" required>
                 <input type="text" id="pMother" placeholder="Mother's Name" required>
-                <input type="tel" id="pContact" placeholder="Contact Number" required>
+                <input type="tel" id="pContact" placeholder="Contact No" required>
             </div>
         </section>
 
         <section class="form-section">
-            <h3 class="section-title">Address</h3>
-            <div class="full-width">
-                <input type="text" id="currAddr" placeholder="Current Address" required style="margin-bottom: 10px;">
-                <div class="checkbox-row" style="margin:10px 0;">
-                    <input type="checkbox" id="sameAddr" onclick="syncAddress()" style="width: auto;"> <label>Permanent address same as current</label>
-                </div>
-                <input type="text" id="permAddr" placeholder="Permanent Address" required>
-            </div>
+            <span class="section-title">Residential Address</span>
+            <input type="text" id="currAddr" placeholder="Current Address" required style="width:100%; margin-bottom:10px;">
+            <label style="font-size:0.8rem;"><input type="checkbox" id="sameAddr" onclick="syncAddress()"> Permanent same as current</label>
+            <input type="text" id="permAddr" placeholder="Permanent Address" required style="width:100%; margin-top:10px;">
         </section>
 
-        <button type="submit" id="submitBtn" class="main-btn">Submit Admission</button>
+        <button type="submit" id="submitBtn" class="main-btn">REGISTER STUDENT</button>
     </form>
 
-    <hr style="margin: 40px 0;">
-
-    <div class="search-section">
-        <h3>Search Student</h3>
-        <div class="input-grid" style="grid-template-columns: 1fr auto;">
-            <input type="text" id="searchInput" placeholder="Search name, ID, Aadhar or Phone...">
-            <button onclick="searchStudent()" style="padding: 10px 20px; cursor: pointer;">Search</button>
-        </div>
-        <div id="searchResults" style="margin-top: 15px;"></div>
-    </div>
-
-    <div class="recent-section" style="margin-top: 40px;">
-        <h3>Recent Admissions</h3>
+    <div style="margin-top:50px;">
+        <h2 style="text-align:center; color:var(--gold); font-size: 1.2rem;">REGISTRY LOG</h2>
         <div id="recentList" class="profile-grid"></div>
     </div>
 </div>
 
-<div id="profileModal" class="modal" style="display:none;" onclick="if(event.target==this)this.style.display='none'">
-    <div class="modal-content" id="modalData"></div>
-</div>
-
 <script>
-// --- Firebase Config ---
 const firebaseConfig = {
   apiKey: "AIzaSyDqDmsMp2eAuHJBcjW-ciO2JcLTXapiIrs",
   authDomain: "the-lalit-d7472.firebaseapp.com",
   projectId: "the-lalit-d7472",
   appId: "1:479237084229:web:31078825739b3c5712ff2c"
 };
-
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 let compressedBase64 = "";
 
-function syncAddress() {
-    if(document.getElementById('sameAddr').checked) {
-        document.getElementById('permAddr').value = document.getElementById('currAddr').value;
-    }
-}
-
-function compressAndPreview(input) {
+function processPhoto(input) {
     const file = input.files[0];
     if (file) {
         const reader = new FileReader();
@@ -232,18 +253,20 @@ function compressAndPreview(input) {
             img.src = e.target.result;
             img.onload = function() {
                 const canvas = document.createElement('canvas');
+                canvas.width = 150; canvas.height = 190;
                 const ctx = canvas.getContext('2d');
-                const MAX_WIDTH = 400; 
-                canvas.width = MAX_WIDTH;
-                canvas.height = img.height * (MAX_WIDTH / img.width);
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                compressedBase64 = canvas.toDataURL('image/jpeg', 0.6);
-                document.getElementById('imgPreview').src = compressedBase64;
-                document.getElementById('imgPreview').style.display = 'block';
-                document.getElementById('compressStatus').innerText = "Image Ready!";
+                ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, 150, 190);
+                compressedBase64 = canvas.toDataURL('image/jpeg', 0.5);
+                const preview = document.getElementById('imgPreview');
+                preview.src = compressedBase64;
+                preview.style.display = 'block';
             }
         }
     }
+}
+
+function syncAddress() {
+    if(document.getElementById('sameAddr').checked) document.getElementById('permAddr').value = document.getElementById('currAddr').value;
 }
 
 document.getElementById('admissionForm').addEventListener('submit', async (e) => {
@@ -252,29 +275,22 @@ document.getElementById('admissionForm').addEventListener('submit', async (e) =>
     btn.disabled = true;
 
     try {
-        // Find Latest ID to prevent overwrite
-        const lastStudentSnap = await db.collection('students').orderBy('uniqueID', 'desc').limit(1).get();
-        let uniqueID = 1001;
-        if (!lastStudentSnap.empty) {
-            uniqueID = Number(lastStudentSnap.docs[0].data().uniqueID) + 1;
-        }
+        const lastSnap = await db.collection('students').orderBy('uniqueID', 'desc').limit(1).get();
+        let uniqueID = lastSnap.empty ? 1001 : Number(lastSnap.docs[0].data().uniqueID) + 1;
 
         const sClass = document.getElementById('sClass').value;
         const sSection = document.getElementById('sSection').value;
         const classSection = sClass + sSection;
         const classSnap = await db.collection('students').where("classSection", "==", classSection).get();
-        const rollNo = classSnap.size + 1;
 
         const studentData = {
-            uniqueID, rollNo, classSection,
+            uniqueID, rollNo: classSnap.size + 1, classSection,
             name: document.getElementById('sName').value,
             dob: document.getElementById('sDob').value,
             gender: document.getElementById('sGender').value,
             blood: document.getElementById('sBlood').value,
             aadhar: document.getElementById('sAadhar').value,
-            class: sClass,
-            section: sSection,
-            house: document.getElementById('sHouse').value,
+            class: sClass, section: sSection, house: document.getElementById('sHouse').value,
             father: document.getElementById('pFather').value,
             mother: document.getElementById('pMother').value,
             contact: document.getElementById('pContact').value,
@@ -285,7 +301,7 @@ document.getElementById('admissionForm').addEventListener('submit', async (e) =>
         };
 
         await db.collection('students').doc(uniqueID.toString()).set(studentData);
-        alert("Admission Done! ID: " + uniqueID);
+        alert("Registration Successful! ID: " + uniqueID);
         location.reload();
     } catch (err) { alert(err.message); btn.disabled = false; }
 });
@@ -297,59 +313,16 @@ async function loadRecent() {
     snap.forEach(doc => {
         const data = doc.data();
         list.innerHTML += `
-            <div class="profile-card" onclick="viewProfile('${data.uniqueID}')">
-                <img src="${data.photo || 'no-photo.png'}" class="card-img">
+            <div class="profile-card">
+                <img src="${data.photo}" class="card-img">
                 <div class="card-info">
                     <h4>${data.name}</h4>
-                    <p>ID: ${data.uniqueID} | Roll: ${data.rollNo}</p>
-                    <p>Class: ${data.class}-${data.section}</p>
+                    <p><b>ID:</b> ${data.uniqueID} | <b>Roll:</b> ${data.rollNo}</p>
+                    <p><b>Class:</b> ${data.class}-${data.section}</p>
                 </div>
             </div>`;
     });
 }
-
-async function searchStudent() {
-    const val = document.getElementById('searchInput').value.toLowerCase();
-    if(!val) return;
-    const snap = await db.collection('students').get();
-    const results = document.getElementById('searchResults');
-    results.innerHTML = "";
-    snap.forEach(doc => {
-        const data = doc.data();
-        if(data.name.toLowerCase().includes(val) || data.uniqueID.toString().includes(val) || data.aadhar.includes(val) || data.contact.includes(val)) {
-            results.innerHTML += `<div style="padding:10px; border-bottom:1px solid #eee; cursor:pointer;" onclick="viewProfile('${data.uniqueID}')">${data.name} (ID: ${data.uniqueID}) - Class ${data.class}</div>`;
-        }
-    });
-}
-
-async function viewProfile(id) {
-    const doc = await db.collection('students').doc(id).get();
-    const data = doc.data();
-    const modal = document.getElementById('profileModal');
-    document.getElementById('modalData').innerHTML = `
-        <div style="text-align:center;">
-            <img src="${data.photo}" style="width:120px; border-radius:8px; margin-bottom:15px;">
-            <h2>${data.name}</h2>
-            <p><b>ID:</b> ${data.uniqueID} | <b>Roll:</b> ${data.rollNo}</p>
-            <p><b>Class:</b> ${data.class} (${data.section})</p>
-            <p><b>Father:</b> ${data.father} | <b>Mother:</b> ${data.mother}</p>
-            <p><b>Contact:</b> ${data.contact}</p>
-            <p><b>Address:</b> ${data.currentAddr}</p>
-            <div style="margin-top:20px;">
-                <button onclick="deleteStudent('${data.uniqueID}')" style="background:red; color:white; border:none; padding:10px; border-radius:5px; margin-right:10px;">Delete</button>
-                <button onclick="document.getElementById('profileModal').style.display='none'" style="padding:10px;">Close</button>
-            </div>
-        </div>`;
-    modal.style.display = "flex";
-}
-
-async function deleteStudent(id) {
-    if(confirm("Are you sure?")) {
-        await db.collection('students').doc(id).delete();
-        location.reload();
-    }
-}
-
 loadRecent();
 </script>
 </body>
