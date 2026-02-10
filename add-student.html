@@ -4,8 +4,87 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Admission System - Final</title>
-    <link rel="stylesheet" href="style.css">
-</style>
+    <style>
+        body {
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px; /* Screen ke kinare se gap ke liye */
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto; /* Page ko center karne ke liye */
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center; /* Logo aur Title center karne ke liye */
+            margin-bottom: 30px;
+        }
+        .school-logo {
+            width: 120px;
+            height: auto;
+            margin-bottom: 15px;
+        }
+        .form-section {
+            margin-bottom: 25px;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+        }
+        .section-title {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            display: inline-block;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+        }
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        input, select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .main-btn {
+            width: 100%;
+            padding: 15px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        .main-btn:disabled { background: #ccc; }
+        .photo-box { text-align: center; }
+        .profile-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .profile-card {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .card-img { width: 100%; height: 120px; object-fit: cover; border-radius: 5px; }
+        /* Modal Style */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: white; padding: 20px; border-radius: 10px; max-width: 500px; width: 90%; }
+    </style>
+    
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
 </head>
@@ -22,7 +101,7 @@
             <h3 class="section-title">Student Photo</h3>
             <div class="photo-box">
                 <input type="file" id="studentPhoto" accept="image/*" onchange="compressAndPreview(this)">
-                <img id="imgPreview" class="photo-preview" style="display:none; width:120px; height:130px; border:1px solid #ccc; margin-top:10px; object-fit:cover;">
+                <img id="imgPreview" class="photo-preview" style="display:none; width:120px; height:130px; border:1px solid #ccc; margin-top:10px; object-fit:cover; margin-left:auto; margin-right:auto;">
                 <p id="compressStatus"></p>
             </div>
         </section>
@@ -91,9 +170,9 @@
         <section class="form-section">
             <h3 class="section-title">Address</h3>
             <div class="full-width">
-                <input type="text" id="currAddr" placeholder="Current Address" required>
+                <input type="text" id="currAddr" placeholder="Current Address" required style="margin-bottom: 10px;">
                 <div class="checkbox-row" style="margin:10px 0;">
-                    <input type="checkbox" id="sameAddr" onclick="syncAddress()"> <label>Permanent address same as current</label>
+                    <input type="checkbox" id="sameAddr" onclick="syncAddress()" style="width: auto;"> <label>Permanent address same as current</label>
                 </div>
                 <input type="text" id="permAddr" placeholder="Permanent Address" required>
             </div>
@@ -102,24 +181,24 @@
         <button type="submit" id="submitBtn" class="main-btn">Submit Admission</button>
     </form>
 
-    <hr>
+    <hr style="margin: 40px 0;">
 
     <div class="search-section">
         <h3>Search Student</h3>
-        <div class="search-box">
+        <div class="input-grid" style="grid-template-columns: 1fr auto;">
             <input type="text" id="searchInput" placeholder="Search name, ID, Aadhar or Phone...">
-            <button onclick="searchStudent()" class="search-btn">Search</button>
+            <button onclick="searchStudent()" style="padding: 10px 20px; cursor: pointer;">Search</button>
         </div>
-        <div id="searchResults" class="list-container"></div>
+        <div id="searchResults" style="margin-top: 15px;"></div>
     </div>
 
-    <div class="recent-section">
+    <div class="recent-section" style="margin-top: 40px;">
         <h3>Recent Admissions</h3>
         <div id="recentList" class="profile-grid"></div>
     </div>
 </div>
 
-<div id="profileModal" class="modal" style="display:none;">
+<div id="profileModal" class="modal" style="display:none;" onclick="if(event.target==this)this.style.display='none'">
     <div class="modal-content" id="modalData"></div>
 </div>
 
@@ -137,14 +216,12 @@ const db = firebase.firestore();
 
 let compressedBase64 = "";
 
-// Sync Address
 function syncAddress() {
     if(document.getElementById('sameAddr').checked) {
         document.getElementById('permAddr').value = document.getElementById('currAddr').value;
     }
 }
 
-// Compressor & Preview
 function compressAndPreview(input) {
     const file = input.files[0];
     if (file) {
@@ -163,21 +240,24 @@ function compressAndPreview(input) {
                 compressedBase64 = canvas.toDataURL('image/jpeg', 0.6);
                 document.getElementById('imgPreview').src = compressedBase64;
                 document.getElementById('imgPreview').style.display = 'block';
-                document.getElementById('compressStatus').innerText = "Image Compressed & Ready!";
+                document.getElementById('compressStatus').innerText = "Image Ready!";
             }
         }
     }
 }
 
-// Form Submission
 document.getElementById('admissionForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;
 
     try {
-        const schoolSnap = await db.collection('students').get();
-        const uniqueID = schoolSnap.size + 1001;
+        // Find Latest ID to prevent overwrite
+        const lastStudentSnap = await db.collection('students').orderBy('uniqueID', 'desc').limit(1).get();
+        let uniqueID = 1001;
+        if (!lastStudentSnap.empty) {
+            uniqueID = Number(lastStudentSnap.docs[0].data().uniqueID) + 1;
+        }
 
         const sClass = document.getElementById('sClass').value;
         const sSection = document.getElementById('sSection').value;
@@ -205,12 +285,11 @@ document.getElementById('admissionForm').addEventListener('submit', async (e) =>
         };
 
         await db.collection('students').doc(uniqueID.toString()).set(studentData);
-        alert("Success! Unique ID: " + uniqueID + " | Roll No: " + rollNo);
+        alert("Admission Done! ID: " + uniqueID);
         location.reload();
     } catch (err) { alert(err.message); btn.disabled = false; }
 });
 
-// Load Recent 10 Profiles
 async function loadRecent() {
     const snap = await db.collection('students').orderBy('timestamp', 'desc').limit(10).get();
     const list = document.getElementById('recentList');
@@ -223,13 +302,12 @@ async function loadRecent() {
                 <div class="card-info">
                     <h4>${data.name}</h4>
                     <p>ID: ${data.uniqueID} | Roll: ${data.rollNo}</p>
-                    <p>${data.class} - ${data.section}</p>
+                    <p>Class: ${data.class}-${data.section}</p>
                 </div>
             </div>`;
     });
 }
 
-// Search Student
 async function searchStudent() {
     const val = document.getElementById('searchInput').value.toLowerCase();
     if(!val) return;
@@ -239,37 +317,34 @@ async function searchStudent() {
     snap.forEach(doc => {
         const data = doc.data();
         if(data.name.toLowerCase().includes(val) || data.uniqueID.toString().includes(val) || data.aadhar.includes(val) || data.contact.includes(val)) {
-            results.innerHTML += `<div class="search-item" onclick="viewProfile('${data.uniqueID}')">${data.name} (ID: ${data.uniqueID})</div>`;
+            results.innerHTML += `<div style="padding:10px; border-bottom:1px solid #eee; cursor:pointer;" onclick="viewProfile('${data.uniqueID}')">${data.name} (ID: ${data.uniqueID}) - Class ${data.class}</div>`;
         }
     });
 }
 
-// Profile Modal View
 async function viewProfile(id) {
     const doc = await db.collection('students').doc(id).get();
     const data = doc.data();
     const modal = document.getElementById('profileModal');
     document.getElementById('modalData').innerHTML = `
-        <div class="details-view">
-            <img src="${data.photo}" style="width:130px; border:2px solid #ddd; border-radius:8px;">
+        <div style="text-align:center;">
+            <img src="${data.photo}" style="width:120px; border-radius:8px; margin-bottom:15px;">
             <h2>${data.name}</h2>
-            <hr>
-            <p><b>Unique ID:</b> ${data.uniqueID} | <b>Roll No:</b> ${data.rollNo}</p>
-            <p><b>Aadhar:</b> ${data.aadhar}</p>
-            <p><b>Class:</b> ${data.class} (${data.section}) | <b>House:</b> ${data.house}</p>
+            <p><b>ID:</b> ${data.uniqueID} | <b>Roll:</b> ${data.rollNo}</p>
+            <p><b>Class:</b> ${data.class} (${data.section})</p>
             <p><b>Father:</b> ${data.father} | <b>Mother:</b> ${data.mother}</p>
             <p><b>Contact:</b> ${data.contact}</p>
             <p><b>Address:</b> ${data.currentAddr}</p>
-            <div class="modal-btns">
-                <button onclick="deleteStudent('${data.uniqueID}')" style="background:#d32f2f; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer;">Delete</button>
+            <div style="margin-top:20px;">
+                <button onclick="deleteStudent('${data.uniqueID}')" style="background:red; color:white; border:none; padding:10px; border-radius:5px; margin-right:10px;">Delete</button>
                 <button onclick="document.getElementById('profileModal').style.display='none'" style="padding:10px;">Close</button>
             </div>
         </div>`;
-    modal.style.display = "block";
+    modal.style.display = "flex";
 }
 
 async function deleteStudent(id) {
-    if(confirm("Are you sure you want to delete this student record?")) {
+    if(confirm("Are you sure?")) {
         await db.collection('students').doc(id).delete();
         location.reload();
     }
