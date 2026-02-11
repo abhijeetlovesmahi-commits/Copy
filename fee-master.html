@@ -118,7 +118,6 @@
         .tag-tr { color: var(--accent-purple); font-weight: bold; }
 
         .edit-btn { background: var(--gold); color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 3px; margin: 2px; }
-        .del-btn { background: #e74c3c; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 3px; }
         tr:nth-child(even) { background: #f9f9f9; }
     </style>
     
@@ -280,6 +279,7 @@ async function loadMasterFees() {
     tableBody.innerHTML = "";
     snapshot.forEach(doc => {
         const d = doc.data();
+        // JSON.stringify used to pass object to edit function
         tableBody.innerHTML += `<tr>
             <td><b>${d.className}</b></td>
             <td>₹${d.registration}</td>
@@ -305,7 +305,7 @@ function editAcademic(d) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// --- TRANSPORT FEE LOGIC ---
+// --- TRANSPORT FEE LOGIC (FIXED) ---
 async function saveTransportFee() {
     const slab = document.getElementById('tSlab').value;
     const amount = document.getElementById('tAmount').value;
@@ -323,7 +323,8 @@ async function saveTransportFee() {
         });
         alert("Transport slab updated!");
         document.getElementById('tAmount').value = "";
-        loadTransportFees();
+        document.getElementById('tSlab').value = "";
+        loadTransportFees(); // Refresh table after save
     } catch (e) { alert("Error: " + e.message); }
     finally { btn.innerText = "Update Transport Rate"; }
 }
@@ -331,10 +332,14 @@ async function saveTransportFee() {
 async function loadTransportFees() {
     const tableBody = document.getElementById('transportFeeBody');
     tableBody.innerHTML = "<tr><td colspan='3'>Loading...</td></tr>";
+    
+    // Always fetch fresh data from DB
     const snapshot = await db.collection('transport_master').get();
     tableBody.innerHTML = "";
+    
     snapshot.forEach(doc => {
         const d = doc.data();
+        // FIXED: Quotes added around ${d.slab} to handle string properly
         tableBody.innerHTML += `<tr>
             <td><b>${d.slab}</b></td>
             <td class="tag-tr">₹${d.amount}</td>
@@ -348,6 +353,8 @@ async function loadTransportFees() {
 function editTransport(slab, amount) {
     document.getElementById('tSlab').value = slab;
     document.getElementById('tAmount').value = amount;
+    // Scroll to transport section
+    window.scrollTo({ top: 500, behavior: 'smooth' });
 }
 
 function resetAcademicForm() {
