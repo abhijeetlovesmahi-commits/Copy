@@ -51,9 +51,9 @@
             body { background: white; padding: 0; }
             #ledgerArea { display: flex !important; flex-direction: column; height: 275mm; border: none; padding: 0; }
             
-            .table-ledger { flex-grow: 1; height: 100%; } /* This makes the table fill the page */
+            .table-ledger { flex-grow: 1; height: 100%; }
             .table-ledger tr { height: auto; }
-            .table-ledger td { height: 45px; } /* Minimum height to ensure it fills the page */
+            .table-ledger td { height: 45px; }
             
             .student-strip { background: #fff !important; }
             .breakdown-row { background: #fff !important; }
@@ -197,18 +197,33 @@
         `;
 
         let html = '', gPay = 0, gPaid = 0;
+        let runningBalance = 0; // Balance Forward Logic
         const mT = Number(fm.tuition||0), mH = (s.hostel==='Yes'?Number(fm.hostel||0):0), mTr = tRate;
 
-        // Registration Row
-        const aPaid = payData.filter(p => ["Admission", "Exam", "Books", "Annual", "Development"].includes(p.month)).reduce((sum, p) => sum + Number(p.amount), 0);
-        html += `<tr><td class="month-name">REGISTRATION</td><td>-</td><td>-</td><td>-</td><td>₹${annualTotal}</td><td>₹${annualTotal}</td><td>₹${aPaid}</td><td>₹${annualTotal-aPaid}</td></tr>`;
+        // REGISTRATION ROW
+        const aPaid = payData.filter(p => ["Admission", "Exam", "Books", "Annual", "Development", "Registration"].includes(p.month)).reduce((sum, p) => sum + Number(p.amount), 0);
+        runningBalance = annualTotal - aPaid;
+        html += `<tr><td class="month-name">REGISTRATION</td><td>-</td><td>-</td><td>-</td><td>₹${annualTotal}</td><td>₹${annualTotal}</td><td>₹${aPaid}</td><td>₹${runningBalance}</td></tr>`;
         gPay += annualTotal; gPaid += aPaid;
 
+        // MONTHLY ROWS WITH ACCUMULATED BALANCE
         months.forEach(m => {
             const total = mT + mH + mTr;
-            const paid = payData.filter(p => p.month === m).reduce((sum, p) => sum + Number(sum, p.amount), 0); // Simplified paid calculation
             const monthPaid = payData.filter(p => p.month === m).reduce((acc, curr) => acc + Number(curr.amount), 0);
-            html += `<tr><td class="month-name">${m.toUpperCase()}</td><td>₹${mT}</td><td>${mH>0?'₹'+mH:'-'}</td><td>${mTr>0?'₹'+mTr:'-'}</td><td>-</td><td>₹${total}</td><td>₹${monthPaid}</td><td>₹${total-monthPaid}</td></tr>`;
+            
+            // Forward Logic: Old Balance + Current Month Payable - Current Month Paid
+            runningBalance = (runningBalance + total) - monthPaid;
+
+            html += `<tr>
+                <td class="month-name">${m.toUpperCase()}</td>
+                <td>₹${mT}</td>
+                <td>${mH>0?'₹'+mH:'-'}</td>
+                <td>${mTr>0?'₹'+mTr:'-'}</td>
+                <td>-</td>
+                <td>₹${total}</td>
+                <td>₹${monthPaid}</td>
+                <td>₹${runningBalance}</td>
+            </tr>`;
             gPay += total; gPaid += monthPaid;
         });
 
