@@ -1,4 +1,4 @@
-/* THE LALIT INTERNATIONAL SCHOOL - ULTIMATE NAVIGATION JS (FIXED CROSS TAP) */
+/* THE LALIT INTERNATIONAL SCHOOL - MENU JS (FIXED CROSS TOGGLE) */
 
 function loadMenu() {
     if (document.getElementById('sidebar-wrapper')) return;
@@ -7,7 +7,7 @@ function loadMenu() {
     <div id="sidebar-wrapper">
         <div id="sidebar-overlay" onclick="toggleMenu(false)"></div>
         
-        <div id="menu-trigger" onclick="handleTriggerClick()">
+        <div id="menu-trigger" onclick="handleMenuClick()">
             <div class="bar1"></div>
             <div class="bar2"></div>
             <div class="bar3"></div>
@@ -33,33 +33,29 @@ function loadMenu() {
         </div>
 
         <style>
-            /* 3-Lines (Hamburger) Icon */
             #menu-trigger {
-                position: fixed; top: 20px; left: 20px; z-index: 10001;
+                position: fixed; top: 20px; left: 20px; z-index: 10002; /* Overlay se bhi upar */
                 cursor: pointer; display: inline-block; padding: 5px;
             }
             .bar1, .bar2, .bar3 {
                 width: 30px; height: 3px; background-color: #002366;
                 margin: 6px 0; transition: 0.4s; border-radius: 2px;
             }
-            /* Animation on open (CROSS) */
+            /* Cross Animation */
             .change .bar1 { transform: rotate(-45deg) translate(-8px, 7px); background-color: #D4AF37; }
             .change .bar2 { opacity: 0; }
             .change .bar3 { transform: rotate(45deg) translate(-8px, -8px); background-color: #D4AF37; }
 
-            /* Sidebar */
             .sidebar {
                 width: 280px; background: #002366; height: 100vh;
-                position: fixed; left: -300px; top: 0; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-                z-index: 10000; border-right: 4px solid #D4AF37; overflow-y: auto;
+                position: fixed; left: -300px; top: 0; transition: 0.4s ease;
+                z-index: 10001; border-right: 4px solid #D4AF37; overflow-y: auto;
             }
             .sidebar.open { left: 0; }
 
-            /* Overlay effect */
             #sidebar-overlay {
                 position: fixed; display: none; width: 100%; height: 100%;
-                top: 0; left: 0; right: 0; bottom: 0;
-                background-color: rgba(0,0,0,0.5); z-index: 9999; cursor: pointer;
+                top: 0; left: 0; z-index: 10000; background: rgba(0,0,0,0.5);
             }
 
             .sidebar-header { padding: 40px 20px; text-align: center; border-bottom: 1px solid rgba(212,175,55,0.2); }
@@ -82,11 +78,11 @@ function loadMenu() {
     document.body.insertAdjacentHTML('afterbegin', menuHTML);
 }
 
-// Logical toggle based on current state
-function handleTriggerClick() {
+// Ye function decide karega ki kholna hai ya band karna hai
+function handleMenuClick() {
     const sidebar = document.getElementById('mySidebar');
     const isOpen = sidebar.classList.contains('open');
-    toggleMenu(!isOpen);
+    toggleMenu(!isOpen); // Agar open hai to false bhejega (band karega), agar band hai to true (kholega)
 }
 
 function toggleMenu(isOpen) {
@@ -105,7 +101,6 @@ function toggleMenu(isOpen) {
     }
 }
 
-// Auto Load
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', loadMenu);
 } else {
