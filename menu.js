@@ -1,7 +1,16 @@
-/* THE LALIT INTERNATIONAL SCHOOL - MENU JS (CROSS TAP FIX) */
+/* THE LALIT INTERNATIONAL SCHOOL - FINAL MENU (WITH AUTO-ICONS FIX) */
 
 function loadMenu() {
     if (document.getElementById('sidebar-wrapper')) return;
+
+    // Har page par Icons lane ke liye Font Awesome ko inject karna
+    if (!document.getElementById('fa-icons-link')) {
+        const fa = document.createElement('link');
+        fa.id = 'fa-icons-link';
+        fa.rel = 'stylesheet';
+        fa.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css';
+        document.head.appendChild(fa);
+    }
 
     const menuHTML = `
     <div id="sidebar-wrapper">
@@ -15,7 +24,7 @@ function loadMenu() {
 
         <div id="mySidebar" class="sidebar">
             <div class="sidebar-header">
-                <img src="logo.png" class="menu-logo">
+                <img src="logo.png" class="menu-logo" onerror="this.src='https://via.placeholder.com/65'">
                 <h4 class="school-name">THE LALIT</h4>
             </div>
             
@@ -33,50 +42,55 @@ function loadMenu() {
         </div>
 
         <style>
-            /* Menu Button Styling */
+            @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Poppins:wght@400;500&display=swap');
+
             #menu-trigger {
-                position: fixed; top: 20px; left: 20px; 
-                z-index: 20000; /* Iska z-index sidebar se bhi zyada rakha hai */
+                position: fixed; top: 20px; left: 20px; z-index: 20000;
                 cursor: pointer; display: inline-block; padding: 5px;
             }
             .bar1, .bar2, .bar3 {
                 width: 30px; height: 3px; background-color: #002366;
                 margin: 6px 0; transition: 0.4s; border-radius: 2px;
             }
-            /* Jab cross banega */
             .change .bar1 { transform: rotate(-45deg) translate(-8px, 7px); background-color: #D4AF37; }
             .change .bar2 { opacity: 0; }
             .change .bar3 { transform: rotate(45deg) translate(-8px, -8px); background-color: #D4AF37; }
 
-            /* Sidebar Styling */
             .sidebar {
                 width: 280px; background: #002366; height: 100vh;
                 position: fixed; left: -300px; top: 0; 
                 transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
                 z-index: 15000; border-right: 4px solid #D4AF37; overflow-y: auto;
+                font-family: 'Poppins', sans-serif;
             }
             .sidebar.open { left: 0; }
 
-            /* Background Overlay */
             #sidebar-overlay {
                 position: fixed; display: none; width: 100%; height: 100%;
                 top: 0; left: 0; background-color: rgba(0,0,0,0.5); 
                 z-index: 10000; cursor: pointer;
             }
 
-            /* Logo & Links */
             .sidebar-header { padding: 40px 20px; text-align: center; border-bottom: 1px solid rgba(212,175,55,0.2); }
             .menu-logo { width: 65px; background: white; border-radius: 50%; padding: 3px; border: 2px solid #D4AF37; }
             .school-name { color: #D4AF37; font-family: 'Cinzel', serif; margin-top:10px; font-size: 1.2rem; }
+            
             .nav-links { padding: 20px 10px; }
             .nav-links a {
-                color: #ffffff; display: block; padding: 12px 20px;
+                color: #ffffff; display: flex; align-items: center; padding: 12px 20px;
                 text-decoration: none; font-size: 15px; transition: 0.3s;
                 border-radius: 8px; margin-bottom: 5px;
             }
+            /* Icons ko ek jaisa line mein karne ke liye style */
+            .nav-links a i { 
+                margin-right: 15px; 
+                width: 25px; 
+                text-align: center; 
+                color: #D4AF37; 
+                font-size: 18px;
+            }
             .nav-links a:hover { background: rgba(212,175,55,0.15); color: #D4AF37; }
             
-            body { margin: 0; }
             .main-content { padding-top: 60px !important; }
         </style>
     </div>
@@ -84,9 +98,8 @@ function loadMenu() {
     document.body.insertAdjacentHTML('afterbegin', menuHTML);
 }
 
-// Click Handle karne wala function
 function handleMenuClick(e) {
-    e.stopPropagation(); // Click event ko kahin aur jane se rokta hai
+    e.stopPropagation();
     const sidebar = document.getElementById('mySidebar');
     const isOpen = sidebar.classList.contains('open');
     toggleMenu(!isOpen);
@@ -108,7 +121,6 @@ function toggleMenu(isOpen) {
     }
 }
 
-// Auto Load
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', loadMenu);
 } else {
