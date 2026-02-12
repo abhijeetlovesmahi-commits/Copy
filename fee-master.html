@@ -12,7 +12,7 @@
         }
 
         body { background: var(--light-gold); margin: 0; padding: 20px; font-family: 'Georgia', serif; color: var(--royal-blue); }
-        .container { max-width: 1200px; margin: 0 auto; background: var(--white); padding: 30px; border: 1px solid var(--gold); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .container { max-width: 1300px; margin: 0 auto; background: var(--white); padding: 30px; border: 1px solid var(--gold); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         
         .header { text-align: center; border-bottom: 3px double var(--gold); margin-bottom: 30px; padding-bottom: 10px; }
         .logo-img { max-width: 120px; margin-bottom: 10px; }
@@ -22,25 +22,25 @@
         
         .section-title { position: absolute; top: -12px; left: 15px; background: white; padding: 0 10px; font-weight: bold; color: var(--deep-gold); text-transform: uppercase; font-size: 0.8rem; }
 
-        .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
+        .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
         .field-group { display: flex; flex-direction: column; }
-        label { font-size: 0.75rem; margin-bottom: 5px; color: #555; font-weight: bold; }
+        label { font-size: 0.7rem; margin-bottom: 5px; color: #555; font-weight: bold; }
 
-        input, select { padding: 10px; border: 1px solid #ccc; border-bottom: 2px solid var(--gold); font-size: 0.9rem; outline: none; }
+        input, select { padding: 10px; border: 1px solid #ccc; border-bottom: 2px solid var(--gold); font-size: 0.85rem; outline: none; }
         
         .main-btn { width: 100%; padding: 15px; background: var(--royal-blue); color: var(--gold); border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; margin-top: 15px; transition: 0.3s; }
         .trans-btn { background: var(--accent-purple); color: white; }
         .main-btn:hover { filter: brightness(1.2); }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.85rem; background: white; }
-        th { background: var(--royal-blue); color: var(--gold); padding: 12px; border: 1px solid var(--gold); }
-        td { padding: 10px; border: 1px solid #ddd; text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.8rem; background: white; }
+        th { background: var(--royal-blue); color: var(--gold); padding: 10px; border: 1px solid var(--gold); }
+        td { padding: 8px; border: 1px solid #ddd; text-align: center; }
         
         .tag-mo { color: #2ecc71; font-weight: bold; }
         .tag-an { color: #e67e22; font-weight: bold; }
         
-        .edit-btn { background: var(--gold); color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; margin-right: 5px; }
-        .del-btn { background: var(--danger-red); color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; }
+        .edit-btn { background: var(--gold); color: white; border: none; padding: 4px 8px; cursor: pointer; border-radius: 3px; margin-right: 2px; }
+        .del-btn { background: var(--danger-red); color: white; border: none; padding: 4px 8px; cursor: pointer; border-radius: 3px; }
         
         tr:nth-child(even) { background: #f9f9f9; }
     </style>
@@ -71,11 +71,13 @@
                     <script>for(let i=1; i<=12; i++) document.write(`<option value="${i}">${i}</option>`);</script>
                 </select>
             </div>
-            <div class="field-group"><label>Admission Fee (An)</label><input type="number" id="mAdmission"></div>
-            <div class="field-group"><label>Tuition Fee (Mo)</label><input type="number" id="mTuition"></div>
+            <div class="field-group"><label>Admission (An)</label><input type="number" id="mAdmission"></div>
+            <div class="field-group"><label>Tuition (Mo)</label><input type="number" id="mTuition"></div>
             <div class="field-group"><label>Development (An)</label><input type="number" id="mDev"></div>
             <div class="field-group"><label>Exam Fee (An)</label><input type="number" id="mExam"></div>
-            <div class="field-group"><label>Hostel Fee (Mo)</label><input type="number" id="mHostel"></div>
+            <div class="field-group"><label>Hostel (Mo)</label><input type="number" id="mHostel"></div>
+            <div class="field-group"><label>Book Cost (An)</label><input type="number" id="mBooks"></div>
+            <div class="field-group"><label>Miscellaneous</label><input type="number" id="mMisc"></div>
         </div>
         <button onclick="saveFeeMaster()" class="main-btn" id="saveBtn">Update Academic Structure</button>
     </section>
@@ -111,11 +113,13 @@
                 <thead>
                     <tr>
                         <th>Class</th>
-                        <th>Admission (An)</th>
-                        <th>Tuition (Mo)</th>
-                        <th>Dev. (An)</th>
-                        <th>Exam (An)</th>
-                        <th>Hostel (Mo)</th>
+                        <th>Admission</th>
+                        <th>Tuition</th>
+                        <th>Dev.</th>
+                        <th>Exam</th>
+                        <th>Hostel</th>
+                        <th>Books</th>
+                        <th>Misc.</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -149,7 +153,6 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// --- Academic Logic ---
 async function saveFeeMaster() {
     const cls = document.getElementById('mClass').value;
     if(!cls) return alert("Select Class!");
@@ -159,11 +162,13 @@ async function saveFeeMaster() {
         tuition: Number(document.getElementById('mTuition').value) || 0,
         development: Number(document.getElementById('mDev').value) || 0,
         exam: Number(document.getElementById('mExam').value) || 0,
-        hostel: Number(document.getElementById('mHostel').value) || 0
+        hostel: Number(document.getElementById('mHostel').value) || 0,
+        books: Number(document.getElementById('mBooks').value) || 0,
+        misc: Number(document.getElementById('mMisc').value) || 0
     };
 
     await db.collection('fee_master').doc(cls).set(data);
-    alert("Updated Academic Fee for " + cls);
+    alert("Updated " + cls);
     loadData();
 }
 
@@ -174,7 +179,6 @@ async function deleteAcademic(id) {
     }
 }
 
-// --- Transport Logic ---
 async function saveTransportFee() {
     const slab = document.getElementById('tSlab').value;
     const amt = document.getElementById('tAmount').value;
@@ -193,7 +197,6 @@ async function deleteTransport(id) {
 }
 
 async function loadData() {
-    // Load Academic
     const aSnap = await db.collection('fee_master').get();
     const aBody = document.getElementById('masterFeeBody');
     aBody.innerHTML = "";
@@ -206,14 +209,15 @@ async function loadData() {
             <td>₹${d.development}</td>
             <td>₹${d.exam}</td>
             <td class="tag-mo">₹${d.hostel}</td>
+            <td>₹${d.books || 0}</td>
+            <td>₹${d.misc || 0}</td>
             <td>
-                <button class="edit-btn" onclick="editA('${doc.id}', ${d.admission}, ${d.tuition}, ${d.development}, ${d.exam}, ${d.hostel})">Edit</button>
+                <button class="edit-btn" onclick="editA('${doc.id}', ${d.admission}, ${d.tuition}, ${d.development}, ${d.exam}, ${d.hostel}, ${d.books || 0}, ${d.misc || 0})">Edit</button>
                 <button class="del-btn" onclick="deleteAcademic('${doc.id}')">Del</button>
             </td>
         </tr>`;
     });
 
-    // Load Transport
     const tSnap = await db.collection('transport_master').get();
     const tBody = document.getElementById('transportFeeBody');
     tBody.innerHTML = "";
@@ -230,13 +234,15 @@ async function loadData() {
     });
 }
 
-function editA(cls, adm, tui, dev, exm, hos) {
+function editA(cls, adm, tui, dev, exm, hos, bks, msc) {
     document.getElementById('mClass').value = cls;
     document.getElementById('mAdmission').value = adm;
     document.getElementById('mTuition').value = tui;
     document.getElementById('mDev').value = dev;
     document.getElementById('mExam').value = exm;
     document.getElementById('mHostel').value = hos;
+    document.getElementById('mBooks').value = bks;
+    document.getElementById('mMisc').value = msc;
     document.getElementById('academic-form').scrollIntoView({behavior: 'smooth'});
 }
 
@@ -248,6 +254,5 @@ function editT(slab, amt) {
 
 window.onload = loadData;
 </script>
-<script src="menu.js"></script>
 </body>
 </html>
