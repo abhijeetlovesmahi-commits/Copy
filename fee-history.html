@@ -3,65 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Imperial Archive - The Lalit Intl.</title>
+    <title>Master Ledger - The Lalit Intl.</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --royal-blue: #002366; --gold: #D4AF37; --light-gold: #FDFBF0; }
-        body { background-color: var(--light-gold); font-family: 'Georgia', serif; }
+        body { background-color: var(--light-gold); font-family: 'Poppins', sans-serif; }
+        .main-content { padding: 20px; max-width: 1300px; margin: auto; }
         
-        .main-content { padding: 40px; max-width: 900px; margin: auto; }
-        .royal-card { 
-            background: white; border: 1px solid var(--gold); 
-            padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
-            border-radius: 8px;
-        }
-        .text-gold { color: var(--gold) !important; }
-        .text-velvet { color: var(--royal-blue); font-weight: bold; }
-        
-        .archive-card { 
-            border-left: 5px solid var(--gold); 
-            background: #fff; margin-bottom: 15px; 
-            transition: 0.3s; border-radius: 0 8px 8px 0;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }
-        .archive-card:hover { transform: translateX(10px); background: #fdfdfd; }
-        
-        .royal-btn { 
-            background: var(--royal-blue); color: var(--gold); 
-            border: 1px solid var(--gold); padding: 10px 25px; 
-            font-weight: bold; transition: 0.3s;
-        }
-        .royal-btn:hover { background: #001a4d; color: #fff; }
+        #searchSuggestions { background: white; border: 1px solid var(--gold); position: absolute; width: 100%; z-index: 1000; display: none; max-height: 250px; overflow-y: auto; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-radius: 0 0 10px 10px; }
+        .suggestion-item { padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; align-items: center; }
+        .suggestion-item:hover { background: #fdf6e3; }
+        .suggestion-item img { width: 45px; height: 45px; border-radius: 50%; margin-right: 12px; border: 1px solid var(--gold); object-fit: cover; }
 
-        /* Sidebar simple for now or use your menu.js */
-        #historyContainer { margin-top: 20px; }
+        .rate-card { background: #fff; border-top: 4px solid var(--gold); padding: 15px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        
+        .ledger-container { display: none; background: white; padding: 20px; border-radius: 15px; border: 1px solid #ddd; }
+        .table-ledger { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .table-ledger th { background: var(--royal-blue); color: var(--gold); padding: 10px; font-size: 0.75rem; border: 1px solid #001a4d; text-align: center; }
+        .table-ledger td { padding: 10px; border: 1px solid #eee; font-size: 0.85rem; text-align: center; }
+        
+        .month-name { font-weight: bold; color: var(--royal-blue); text-align: left !important; background: #f8f9fa; }
+        .text-paid { color: #28a745; font-weight: bold; }
+        .text-due { color: #dc3545; font-weight: bold; }
+        .bg-master { background: #fff9e6; font-weight: bold; color: #856404; }
+        .bg-total { background: #eee; font-weight: bold; }
+
+        @media print { .no-print { display: none; } .ledger-container { box-shadow: none; border: 1px solid #000; } }
     </style>
-
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
 <div class="main-content">
-    <div class="royal-card">
-        <h2 class="text-center mb-4 text-velvet"><i class="fas fa-book-open me-2"></i>TREASURY ARCHIVES</h2>
-        
-        <div class="p-4 mb-4" style="background: #f9f9f9; border: 1px dashed var(--gold);">
-            <label class="fw-bold mb-2 text-velvet">Search Treasury Records by Student ID:</label>
-            <div class="input-group">
-                <input type="number" id="searchID" class="form-control border-gold" placeholder="Enter Unique Student ID...">
-                <button class="royal-btn" onclick="loadHistory()">RETRIEVE RECORDS</button>
+    <h3 class="text-center mb-4 no-print" style="color: var(--royal-blue); font-family: 'Cinzel';">Imperial Detailed Ledger</h3>
+
+    <div class="position-relative no-print mb-4">
+        <div class="input-group">
+            <span class="input-group-text bg-white border-gold text-gold"><i class="fas fa-search"></i></span>
+            <input type="text" id="searchID" class="form-control border-gold" placeholder="Type Student Name or ID..." oninput="liveSearch()">
+        </div>
+        <div id="searchSuggestions"></div>
+    </div>
+
+    <div id="profileResult" style="display:none;" class="card border-0 shadow-sm p-3 mb-4">
+        <div class="d-flex align-items-center">
+            <img id="resPhoto" src="" style="width:90px; height:90px; border: 2px solid var(--gold); border-radius: 8px; object-fit:cover;">
+            <div class="ms-4">
+                <h4 id="resName" class="mb-1 fw-bold"></h4>
+                <p class="mb-2 text-muted small">ID: <b id="resID"></b> | Class: <b id="resClass"></b> | Father: <b id="resFather"></b></p>
+                <button class="btn btn-primary btn-sm" onclick="generateLedger()">GENERATE FINANCIAL LEDGER</button>
             </div>
         </div>
+    </div>
 
-        <div id="studentNameHeader" class="h4 mb-4 text-center text-velvet"></div>
-        <div id="historyContainer">
-            <p class="text-center text-muted">Enter a student ID to view the scroll of payments.</p>
+    <div id="ledgerArea" class="ledger-container">
+        <div class="table-responsive">
+            <table class="table-ledger">
+                <thead>
+                    <tr>
+                        <th>Month / Head</th>
+                        <th>Tuition Fee</th>
+                        <th>Hostel Fee</th>
+                        <th>Transport</th>
+                        <th>Annual/Books</th>
+                        <th>Total Payable</th>
+                        <th>Total Paid</th>
+                        <th>Balance Due</th>
+                    </tr>
+                </thead>
+                <tbody id="ledgerTableBody"></tbody>
+                <tfoot id="ledgerFooter"></tfoot>
+            </table>
+        </div>
+        <div class="text-end mt-3 no-print">
+            <button class="btn btn-dark" onclick="window.print()"><i class="fas fa-print me-2"></i>PRINT REPORT</button>
         </div>
     </div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
 <script>
     const firebaseConfig = {
       apiKey: "AIzaSyDqDmsMp2eAuHJBcjW-ciO2JcLTXapiIrs",
@@ -72,67 +93,108 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    async function loadHistory() {
-        const id = document.getElementById('searchID').value;
-        const container = document.getElementById('historyContainer');
-        const header = document.getElementById('studentNameHeader');
-        
-        if(!id) return alert("Please specify a Student ID.");
+    let selectedStudent = null;
+    const months = ["April", "May", "June", "July", "August", "September", "October", "November", "December", "January", "February", "March"];
 
-        container.innerHTML = "<p class='text-center'>Searching the archives... 🏛️</p>";
+    async function liveSearch() {
+        const input = document.getElementById('searchID').value.trim().toLowerCase();
+        const suggBox = document.getElementById('searchSuggestions');
+        if (input.length < 2) { suggBox.style.display = 'none'; return; }
+        const snap = await db.collection('students').get();
+        let matches = [];
+        snap.forEach(doc => {
+            const d = doc.data();
+            if (d.name.toLowerCase().includes(input) || d.uniqueID.toString().includes(input)) matches.push(d);
+        });
+        if (matches.length > 0) {
+            suggBox.innerHTML = matches.slice(0,5).map(s => `
+                <div class="suggestion-item" onclick='selectStudent(${JSON.stringify(s)})'>
+                    <img src="${s.photo || 'https://via.placeholder.com/45'}">
+                    <div><b>${s.name}</b><br><small>ID: ${s.uniqueID} | Class: ${s.class}</small></div>
+                </div>`).join('');
+            suggBox.style.display = 'block';
+        } else suggBox.style.display = 'none';
+    }
+
+    function selectStudent(student) {
+        selectedStudent = student;
+        document.getElementById('searchSuggestions').style.display = 'none';
+        document.getElementById('resName').innerText = student.name;
+        document.getElementById('resID').innerText = student.uniqueID;
+        document.getElementById('resClass').innerText = student.class;
+        document.getElementById('resFather').innerText = student.father || 'N/A';
+        document.getElementById('resPhoto').src = student.photo || 'https://via.placeholder.com/100';
+        document.getElementById('profileResult').style.display = 'block';
+        document.getElementById('ledgerArea').style.display = 'none';
+    }
+
+    async function generateLedger() {
+        const tbody = document.getElementById('ledgerTableBody');
+        document.getElementById('ledgerArea').style.display = 'block';
+        tbody.innerHTML = "<tr><td colspan='8'>Syncing Monthly Accounts...</td></tr>";
 
         try {
-            // 1. Pehle student ko dhoondho uniqueID se
-            const sSnap = await db.collection('students').where('uniqueID', '==', Number(id)).get();
+            // 1. Fee Master & Transport Rates
+            const mDoc = await db.collection('fee_master').doc(selectedStudent.class).get();
+            const fm = mDoc.exists ? mDoc.data() : {};
             
-            if(!sSnap.empty) {
-                const student = sSnap.docs[0].data();
-                header.innerText = "Financial Scroll for: " + student.name;
-                
-                // 2. Us student ki fee history dhoondho
-                const fSnap = await db.collection('fee_transactions')
-                                    .where('studentID', '==', Number(id))
-                                    .orderBy('timestamp', 'desc')
-                                    .get();
+            const transPolicy = await db.collection('transport_policy').get();
+            let transRate = 0;
+            transPolicy.forEach(doc => {
+                if(doc.id === selectedStudent.transportSlab) transRate = Number(doc.data().monthlyFee || 0);
+            });
 
-                container.innerHTML = "";
-                if(!fSnap.empty) {
-                    let totalPaid = 0;
-                    fSnap.forEach(doc => {
-                        const f = doc.data();
-                        totalPaid += Number(f.amount);
-                        container.innerHTML += `
-                            <div class="archive-card p-3 shadow-sm border">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="fs-5"><strong>Paid:</strong> <span class="text-success">₹${f.amount}</span></span>
-                                    <span class="badge bg-dark text-gold">${f.date}</span>
-                                </div>
-                                <div class="mt-2 text-muted">
-                                    <small><i class="fas fa-receipt me-1"></i> Transaction ID: ${doc.id}</small>
-                                </div>
-                            </div>
-                        `;
-                    });
-                    
-                    container.innerHTML = `
-                        <div class="alert alert-info text-center fw-bold">
-                            Grand Total Deposited: ₹${totalPaid}
-                        </div>
-                    ` + container.innerHTML;
-                    
-                } else {
-                    container.innerHTML = "<div class='alert alert-light text-center border'>No treasury records found for this student.</div>";
-                }
-            } else {
-                header.innerText = "";
-                container.innerHTML = "<div class='alert alert-danger text-center'>Soul not found in Imperial Registry.</div>";
-            }
-        } catch (err) {
-            console.error(err);
-            container.innerHTML = "<div class='alert alert-warning text-center'>Archive access denied. (Database Index Required)</div>";
-        }
+            // 2. Payments
+            const tSnap = await db.collection('fee_transactions').where('studentID', '==', selectedStudent.uniqueID.toString()).get();
+            let payments = []; tSnap.forEach(doc => payments.push(doc.data()));
+
+            let html = '';
+            let gPayable = 0, gPaid = 0;
+
+            // --- MASTER RATE ROW (Shows what is applicable) ---
+            const mTuition = Number(fm.tuition || fm.monthly || 0);
+            const mHostel = (selectedStudent.hostel === 'Yes' || selectedStudent.useHostel === 'Yes') ? Number(fm.hostel || 0) : 0;
+            const mTrans = (selectedStudent.transport === 'Yes' || selectedStudent.useTransport === 'Yes') ? transRate : 0;
+            
+            html += `<tr class="bg-master">
+                <td class="month-name">MASTER RATE (Monthly)</td>
+                <td>₹${mTuition}</td>
+                <td>₹${mHostel}</td>
+                <td>₹${mTrans}</td>
+                <td>-</td>
+                <td colspan="3" class="text-center small">Rates as per Class Structure</td>
+            </tr>`;
+
+            // --- ANNUAL CHARGES ROW ---
+            const annualPay = Number(fm.admission||0) + Number(fm.development||0) + Number(fm.examFee||0) + Number(fm.bookCost||0) + Number(fm.misc||0);
+            const annualPaid = payments.filter(p => ["Admission", "Exam", "Books", "Annual", "Development"].includes(p.month)).reduce((s, p) => s + Number(p.amount), 0);
+            html += `<tr><td class="month-name">Registration & Books</td><td>-</td><td>-</td><td>-</td><td>₹${annualPay}</td><td>₹${annualPay}</td><td class="text-paid">₹${annualPaid}</td><td class="text-due">₹${annualPay-annualPaid}</td></tr>`;
+            gPayable += annualPay; gPaid += annualPaid;
+
+            // --- MONTHLY LEDGER ---
+            months.forEach(m => {
+                const monthTotal = mTuition + mHostel + mTrans;
+                const mPaid = payments.filter(p => p.month === m).reduce((s, p) => s + Number(p.amount), 0);
+                const mBal = monthTotal - mPaid;
+
+                html += `<tr>
+                    <td class="month-name">${m}</td>
+                    <td>₹${mTuition}</td>
+                    <td>${mHostel > 0 ? '₹'+mHostel : '-'}</td>
+                    <td>${mTrans > 0 ? '₹'+mTrans : '-'}</td>
+                    <td>-</td>
+                    <td>₹${monthTotal}</td>
+                    <td class="text-paid">₹${mPaid}</td>
+                    <td class="${mBal>0?'text-due':''}">₹${mBal}</td>
+                </tr>`;
+                gPayable += monthTotal; gPaid += mPaid;
+            });
+
+            tbody.innerHTML = html;
+            document.getElementById('ledgerFooter').innerHTML = `<tr class="bg-total"><td colspan="5">SESSION GRAND TOTAL</td><td>₹${gPayable}</td><td class="text-paid">₹${gPaid}</td><td class="text-due">₹${gPayable-gPaid}</td></tr>`;
+
+        } catch (e) { console.error(e); }
     }
 </script>
-<script src="menu.js"></script>
 </body>
 </html>
