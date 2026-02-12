@@ -1,4 +1,4 @@
-/* THE LALIT INTERNATIONAL SCHOOL - ULTIMATE NAVIGATION JS */
+/* THE LALIT INTERNATIONAL SCHOOL - ULTIMATE NAVIGATION JS (FIXED CROSS TAP) */
 
 function loadMenu() {
     if (document.getElementById('sidebar-wrapper')) return;
@@ -7,7 +7,7 @@ function loadMenu() {
     <div id="sidebar-wrapper">
         <div id="sidebar-overlay" onclick="toggleMenu(false)"></div>
         
-        <div id="menu-trigger" onclick="toggleMenu(true)">
+        <div id="menu-trigger" onclick="handleTriggerClick()">
             <div class="bar1"></div>
             <div class="bar2"></div>
             <div class="bar3"></div>
@@ -42,7 +42,7 @@ function loadMenu() {
                 width: 30px; height: 3px; background-color: #002366;
                 margin: 6px 0; transition: 0.4s; border-radius: 2px;
             }
-            /* Animation on open */
+            /* Animation on open (CROSS) */
             .change .bar1 { transform: rotate(-45deg) translate(-8px, 7px); background-color: #D4AF37; }
             .change .bar2 { opacity: 0; }
             .change .bar3 { transform: rotate(45deg) translate(-8px, -8px); background-color: #D4AF37; }
@@ -62,7 +62,6 @@ function loadMenu() {
                 background-color: rgba(0,0,0,0.5); z-index: 9999; cursor: pointer;
             }
 
-            /* Rest of Sidebar Styles */
             .sidebar-header { padding: 40px 20px; text-align: center; border-bottom: 1px solid rgba(212,175,55,0.2); }
             .menu-logo { width: 65px; background: white; border-radius: 50%; padding: 3px; border: 2px solid #D4AF37; }
             .school-name { color: #D4AF37; font-family: 'Cinzel', serif; margin-top:10px; font-size: 1.2rem; }
@@ -83,7 +82,13 @@ function loadMenu() {
     document.body.insertAdjacentHTML('afterbegin', menuHTML);
 }
 
-// Function to handle open/close
+// Logical toggle based on current state
+function handleTriggerClick() {
+    const sidebar = document.getElementById('mySidebar');
+    const isOpen = sidebar.classList.contains('open');
+    toggleMenu(!isOpen);
+}
+
 function toggleMenu(isOpen) {
     const sidebar = document.getElementById('mySidebar');
     const overlay = document.getElementById('sidebar-overlay');
