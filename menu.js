@@ -1,131 +1,297 @@
-/* THE LALIT INTERNATIONAL SCHOOL - UPDATED MENU (WITH EXAM MASTER) */
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Lalit - Exam Master</title>
+    <style>
+        :root {
+            --royal-blue: #002366;
+            --gold: #D4AF37;
+            --deep-gold: #aa8a2e;
+            --light-gold: #FDFBF0;
+            --white: #ffffff;
+            --danger: #c0392b;
+        }
 
-function loadMenu() {
-    if (document.getElementById('sidebar-wrapper')) return;
+        body {
+            background: var(--light-gold);
+            margin: 0;
+            padding: 40px 20px;
+            font-family: 'Georgia', serif;
+            color: var(--royal-blue);
+        }
 
-    // Har page par Icons lane ke liye Font Awesome ko inject karna
-    if (!document.getElementById('fa-icons-link')) {
-        const fa = document.createElement('link');
-        fa.id = 'fa-icons-link';
-        fa.rel = 'stylesheet';
-        fa.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css';
-        document.head.appendChild(fa);
-    }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: var(--white);
+            padding: 50px;
+            border-radius: 5px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            border: 1px solid var(--gold);
+            position: relative;
+        }
 
-    const menuHTML = `
-    <div id="sidebar-wrapper">
-        <div id="sidebar-overlay" onclick="toggleMenu(false)"></div>
-        
-        <div id="menu-trigger" onclick="handleMenuClick(event)">
-            <div class="bar1"></div>
-            <div class="bar2"></div>
-            <div class="bar3"></div>
-        </div>
+        .container::before {
+            content: "";
+            position: absolute;
+            top: 10px; left: 10px; right: 10px; bottom: 10px;
+            border: 1px solid var(--gold);
+            pointer-events: none;
+            opacity: 0.5;
+        }
 
-        <div id="mySidebar" class="sidebar">
-            <div class="sidebar-header">
-                <img src="logo.png" class="menu-logo" onerror="this.src='https://via.placeholder.com/65'">
-                <h4 class="school-name">THE LALIT</h4>
-            </div>
-            
-            <nav class="nav-links">
-                <a href="index.html"><i class="fas fa-home"></i> Dashboard</a>
-                <a href="view-students.html"><i class="fas fa-users"></i> Student Registry</a>
-                <a href="add-student.html"><i class="fas fa-user-plus"></i> Admission</a>
-                
-                <a href="exam-master.html" style="border-left: 3px solid #D4AF37; background: rgba(212,175,55,0.05);">
-                    <i class="fas fa-file-signature"></i> Exam Master
-                </a>
-                <a href="fee-master.html"><i class="fas fa-cog"></i> Fee Structure</a>
-                <a href="collect-fees.html"><i class="fas fa-money-bill-wave"></i> Collect Fees</a>
-                <a href="fee-history.html"><i class="fas fa-history"></i> Fee History</a>
-                <a href="fee-demand-slip.html"><i class="fas fa-file-invoice"></i> Demand Slips</a>
-                <a href="attendance.html"><i class="fas fa-calendar-check"></i> Attendance</a>
-                <a href="defaulter-list.html"><i class="fas fa-exclamation-triangle"></i> Defaulter List</a>
-            </nav>
-        </div>
+        .header {
+            text-align: center;
+            border-bottom: 3px double var(--gold);
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+        }
 
-        <style>
-            @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Poppins:wght@400;500&display=swap');
+        .school-logo { width: 110px; margin-bottom: 10px; }
 
-            #menu-trigger {
-                position: fixed; top: 20px; left: 20px; z-index: 20000;
-                cursor: pointer; display: inline-block; padding: 5px;
-            }
-            .bar1, .bar2, .bar3 {
-                width: 30px; height: 3px; background-color: #002366;
-                margin: 6px 0; transition: 0.4s; border-radius: 2px;
-            }
-            .change .bar1 { transform: rotate(-45deg) translate(-8px, 7px); background-color: #D4AF37; }
-            .change .bar2 { opacity: 0; }
-            .change .bar3 { transform: rotate(45deg) translate(-8px, -8px); background-color: #D4AF37; }
+        h1 {
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            font-size: 2.2rem;
+            margin: 10px 0;
+            color: var(--royal-blue);
+        }
 
-            .sidebar {
-                width: 280px; background: #002366; height: 100vh;
-                position: fixed; left: -300px; top: 0; 
-                transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-                z-index: 15000; border-right: 4px solid #D4AF37; overflow-y: auto;
-                font-family: 'Poppins', sans-serif;
-            }
-            .sidebar.open { left: 0; }
+        .form-section {
+            margin-bottom: 35px;
+            border: 1px solid #eee;
+            padding: 25px;
+            background: #fff;
+            position: relative;
+        }
 
-            #sidebar-overlay {
-                position: fixed; display: none; width: 100%; height: 100%;
-                top: 0; left: 0; background-color: rgba(0,0,0,0.5); 
-                z-index: 10000; cursor: pointer;
-            }
+        .section-title {
+            position: absolute;
+            top: -12px; left: 20px;
+            background: white;
+            padding: 0 15px;
+            font-weight: bold;
+            color: var(--deep-gold);
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
 
-            .sidebar-header { padding: 40px 20px; text-align: center; border-bottom: 1px solid rgba(212,175,55,0.2); }
-            .menu-logo { width: 65px; background: white; border-radius: 50%; padding: 3px; border: 2px solid #D4AF37; }
-            .school-name { color: #D4AF37; font-family: 'Cinzel', serif; margin-top:10px; font-size: 1.2rem; }
-            
-            .nav-links { padding: 20px 10px; }
-            .nav-links a {
-                color: #ffffff; display: flex; align-items: center; padding: 12px 20px;
-                text-decoration: none; font-size: 15px; transition: 0.3s;
-                border-radius: 8px; margin-bottom: 5px;
-            }
-            .nav-links a i { 
-                margin-right: 15px; 
-                width: 25px; 
-                text-align: center; 
-                color: #D4AF37; 
-                font-size: 18px;
-            }
-            .nav-links a:hover { background: rgba(212,175,55,0.15); color: #D4AF37; }
-            
-            .main-content { padding-top: 60px !important; }
-        </style>
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        input, select {
+            padding: 12px;
+            border: 1px solid #ccc;
+            background: #fff;
+            font-size: 1rem;
+            border-bottom: 2px solid var(--gold);
+            outline: none;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th {
+            background: var(--royal-blue);
+            color: var(--gold);
+            padding: 15px;
+            text-align: left;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .main-btn {
+            width: 100%;
+            padding: 20px;
+            background: var(--royal-blue);
+            color: var(--gold);
+            border: 1px solid var(--gold);
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            letter-spacing: 2px;
+            transition: 0.3s;
+            margin-top: 20px;
+        }
+
+        .main-btn:hover { background: #001a4d; }
+
+        .btn-small {
+            padding: 8px 15px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            border: 1px solid var(--gold);
+            font-weight: bold;
+        }
+
+        .btn-add { background: var(--gold); color: white; }
+        .btn-reset { background: #666; color: white; border: none; }
+        .btn-del { background: var(--danger); color: white; border: none; }
+
+        #status { text-align: center; margin-top: 15px; font-weight: bold; }
+
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <img src="logo.png" alt="Logo" class="school-logo">
+        <h1>Exam Master Settings</h1>
+        <p style="letter-spacing: 5px; font-size: 0.8rem; color: var(--deep-gold);">ACADEMIC CONFIGURATION PANEL</p>
     </div>
+
+    <section class="form-section">
+        <span class="section-title">Examination Details</span>
+        <div class="config-grid">
+            <div>
+                <label style="font-size: 0.8rem; font-weight: bold;">Exam Type</label>
+                <select id="examType" onchange="autoPopulate()">
+                    <option value="">-- Select Exam --</option>
+                    <option value="Formative 1st">Formative 1st</option>
+                    <option value="Summative 1st">Summative 1st</option>
+                    <option value="Half Yearly">Half Yearly</option>
+                    <option value="Formative 2nd">Formative 2nd</option>
+                    <option value="Summative 2nd">Summative 2nd</option>
+                    <option value="Final">Final</option>
+                </select>
+            </div>
+            <div>
+                <label style="font-size: 0.8rem; font-weight: bold;">Class</label>
+                <select id="examClass" onchange="autoPopulate()">
+                    <option value="">-- Select Class --</option>
+                    <option value="Pre-Nursery">Pre-Nursery</option>
+                    <option value="Nursery">Nursery</option>
+                    <option value="LKG">LKG</option>
+                    <option value="UKG">UKG</option>
+                    <script>
+                        for(let i=1; i<=12; i++) document.write(`<option value="${i}">Class ${i}</option>`);
+                    </script>
+                </select>
+            </div>
+            <div>
+                <label style="font-size: 0.8rem; font-weight: bold;">Exam Date</label>
+                <input type="date" id="examDate">
+            </div>
+        </div>
+    </section>
+
+    <section class="form-section">
+        <span class="section-title">Subject & Marks Mapping</span>
+        <table id="subjectTable">
+            <thead>
+                <tr>
+                    <th>Subject Name</th>
+                    <th style="width: 150px;">Full Marks</th>
+                    <th style="width: 100px;">Action</th>
+                </tr>
+            </thead>
+            <tbody id="subjectBody"></tbody>
+        </table>
+        <div style="margin-top: 20px; display: flex; gap: 10px;">
+            <button class="btn-small btn-add" onclick="addRow('', 0)">+ ADD SUBJECT</button>
+            <button class="btn-small btn-reset" onclick="autoPopulate()">RESET TO DEFAULT</button>
+        </div>
+    </section>
+
+    <button class="main-btn" onclick="saveExamSettings()">SAVE EXAM CONFIGURATION</button>
+    <div id="status"></div>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDqDmsMp2eAuHJBcjW-ciO2JcLTXapiIrs",
+  authDomain: "the-lalit-d7472.firebaseapp.com",
+  projectId: "the-lalit-d7472",
+  appId: "1:479237084229:web:31078825739b3c5712ff2c"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+const defaultSubjects = [
+    "English", "Hindi", "Sanskrit", "Science", "Social Science", 
+    "Mathematics", "Computer", "General Knowledge", "Moral Education", "Drawing"
+];
+
+function getMarksByExam(examType) {
+    if(examType.includes("Summative")) return 40;
+    if(examType.includes("Half Yearly") || examType.includes("Final")) return 80;
+    return 20; 
+}
+
+function autoPopulate() {
+    const examType = document.getElementById('examType').value;
+    const sClass = document.getElementById('examClass').value;
+    const tbody = document.getElementById('subjectBody');
+    if(!examType || !sClass) return;
+
+    const marks = getMarksByExam(examType);
+    tbody.innerHTML = ""; 
+    defaultSubjects.forEach(sub => addRow(sub, marks));
+}
+
+function addRow(name = "", marks = "") {
+    const tbody = document.getElementById('subjectBody');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+        <td><input type="text" class="sub-name" value="${name}"></td>
+        <td><input type="number" class="sub-marks" value="${marks}"></td>
+        <td><button class="btn-small btn-del" onclick="this.parentElement.parentElement.remove()">DEL</button></td>
     `;
-    document.body.insertAdjacentHTML('afterbegin', menuHTML);
+    tbody.appendChild(tr);
 }
 
-function handleMenuClick(e) {
-    e.stopPropagation();
-    const sidebar = document.getElementById('mySidebar');
-    const isOpen = sidebar.classList.contains('open');
-    toggleMenu(!isOpen);
-}
+async function saveExamSettings() {
+    const examType = document.getElementById('examType').value;
+    const sClass = document.getElementById('examClass').value;
+    const examDate = document.getElementById('examDate').value;
+    const status = document.getElementById('status');
 
-function toggleMenu(isOpen) {
-    const sidebar = document.getElementById('mySidebar');
-    const overlay = document.getElementById('sidebar-overlay');
-    const trigger = document.getElementById('menu-trigger');
-    
-    if (isOpen) {
-        sidebar.classList.add('open');
-        overlay.style.display = 'block';
-        trigger.classList.add('change');
-    } else {
-        sidebar.classList.remove('open');
-        overlay.style.display = 'none';
-        trigger.classList.remove('change');
+    if(!examType || !sClass || !examDate) {
+        alert("Pehle Exam Type, Class aur Date select karein.");
+        return;
+    }
+
+    const subjects = [];
+    document.querySelectorAll('#subjectBody tr').forEach(row => {
+        const name = row.querySelector('.sub-name').value;
+        const marks = row.querySelector('.sub-marks').value;
+        if(name) subjects.push({ subjectName: name, fullMarks: Number(marks) });
+    });
+
+    const docId = `${sClass}_${examType}`.replace(/\s+/g, '');
+
+    try {
+        await db.collection('exam_settings').doc(docId).set({
+            class: sClass,
+            examType: examType,
+            examDate: examDate,
+            subjects: subjects,
+            timestamp: Date.now()
+        });
+        status.innerHTML = `<span style="color:green;">✓ Settings saved for ${sClass} - ${examType}</span>`;
+    } catch (err) {
+        status.innerHTML = `<span style="color:red;">Error: ${err.message}</span>`;
     }
 }
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadMenu);
-} else {
-    loadMenu();
-}
+</script>
+<script src="menu.js"></script>
+</body>
+</html>
