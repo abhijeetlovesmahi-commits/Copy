@@ -1,4 +1,4 @@
-/* THE LALIT INTERNATIONAL SCHOOL - FINAL MENU (WITH AUTO-ICONS FIX) */
+/* THE LALIT INTERNATIONAL SCHOOL - UPDATED MENU */
 
 function loadMenu() {
     if (document.getElementById('sidebar-wrapper')) return;
@@ -33,6 +33,7 @@ function loadMenu() {
                 <a href="view-students.html"><i class="fas fa-users"></i> Student Registry</a>
                 <a href="add-student.html"><i class="fas fa-user-plus"></i> Admission</a>
                 <a href="fee-master.html"><i class="fas fa-cog"></i> Fee Structure</a>
+                <a href="exam-master.html"><i class="fas fa-book-open"></i> Exam Master</a>
                 <a href="collect-fees.html"><i class="fas fa-money-bill-wave"></i> Collect Fees</a>
                 <a href="fee-history.html"><i class="fas fa-history"></i> Fee History</a>
                 <a href="fee-demand-slip.html"><i class="fas fa-file-invoice"></i> Demand Slips</a>
@@ -72,7 +73,19 @@ function loadMenu() {
             }
 
             .sidebar-header { padding: 40px 20px; text-align: center; border-bottom: 1px solid rgba(212,175,55,0.2); }
-            .menu-logo { width: 65px; background: white; border-radius: 50%; padding: 3px; border: 2px solid #D4AF37; }
+            
+            /* Circular Logo Frame Style */
+            .menu-logo { 
+                width: 80px; 
+                height: 80px; 
+                object-fit: contain;
+                background: white; 
+                border-radius: 50%; 
+                padding: 5px; 
+                border: 3px solid #D4AF37; 
+                box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            }
+
             .school-name { color: #D4AF37; font-family: 'Cinzel', serif; margin-top:10px; font-size: 1.2rem; }
             
             .nav-links { padding: 20px 10px; }
@@ -81,7 +94,6 @@ function loadMenu() {
                 text-decoration: none; font-size: 15px; transition: 0.3s;
                 border-radius: 8px; margin-bottom: 5px;
             }
-            /* Icons ko ek jaisa line mein karne ke liye style */
             .nav-links a i { 
                 margin-right: 15px; 
                 width: 25px; 
