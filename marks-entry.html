@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Lalit - Marks Entry</title>
+    <style>
+        :root {
+            --royal-blue: #002366;
+            --gold: #D4AF37;
+            --deep-gold: #aa8a2e;
+            --light-gold: #FDFBF0;
+            --white: #ffffff;
+            --danger: #c0392b;
+        }
+
+        body {
+            background: var(--light-gold);
+            margin: 0;
+            padding: 40px 20px;
+            font-family: 'Georgia', serif;
+            color: var(--royal-blue);
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: var(--white);
+            padding: 50px;
+            border-radius: 5px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            border: 1px solid var(--gold);
+            position: relative;
+        }
+
+        .container::before {
+            content: "";
+            position: absolute;
+            top: 10px; left: 10px; right: 10px; bottom: 10px;
+            border: 1px solid var(--gold);
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 3px double var(--gold);
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+        }
+
+        .school-logo { width: 110px; margin-bottom: 10px; }
+
+        h1 {
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            font-size: 2.2rem;
+            margin: 10px 0;
+            color: var(--royal-blue);
+        }
+
+        .form-section {
+            margin-bottom: 35px;
+            border: 1px solid #eee;
+            padding: 25px;
+            background: #fff;
+            position: relative;
+        }
+
+        .section-title {
+            position: absolute;
+            top: -12px; left: 20px;
+            background: white;
+            padding: 0 15px;
+            font-weight: bold;
+            color: var(--deep-gold);
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+        }
+
+        input, select {
+            padding: 12px;
+            border: 1px solid #ccc;
+            background: #fff;
+            font-size: 1rem;
+            border-bottom: 2px solid var(--gold);
+            outline: none;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .student-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .student-table th {
+            background: var(--royal-blue);
+            color: var(--gold);
+            padding: 15px;
+            text-align: left;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        .student-table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .marks-input {
+            width: 80px !important;
+            text-align: center;
+            font-weight: bold;
+            color: var(--royal-blue);
+            border: 1px solid var(--gold) !important;
+        }
+
+        .main-btn {
+            width: 100%;
+            padding: 20px;
+            background: var(--royal-blue);
+            color: var(--gold);
+            border: 1px solid var(--gold);
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            letter-spacing: 2px;
+            transition: 0.3s;
+            margin-top: 20px;
+        }
+
+        .main-btn:hover { background: #001a4d; }
+
+        .info-bar {
+            background: var(--light-gold);
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid var(--gold);
+            font-weight: bold;
+            display: none;
+            text-align: center;
+            color: var(--royal-blue);
+        }
+
+        .status-tag {
+            font-size: 0.8rem;
+            padding: 2px 8px;
+            border-radius: 3px;
+            background: #eee;
+            margin-left: 10px;
+        }
+
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <img src="logo.png" alt="Logo" class="school-logo">
+        <h1>THE LALIT INTERNATIONAL SCHOOL</h1>
+        <p style="letter-spacing: 5px; font-size: 0.8rem; color: var(--deep-gold);">OFFICIAL MARKS ENTRY PORTAL</p>
+    </div>
+
+    <section class="form-section">
+        <span class="section-title">Step 1: Select Class & Exam</span>
+        <div class="filter-grid">
+            <select id="examType" onchange="fetchSubjects()">
+                <option value="">-- Select Exam --</option>
+                <option value="Formative 1st">Formative 1st</option>
+                <option value="Summative 1st">Summative 1st</option>
+                <option value="Half Yearly">Half Yearly</option>
+                <option value="Formative 2nd">Formative 2nd</option>
+                <option value="Summative 2nd">Summative 2nd</option>
+                <option value="Final">Final</option>
+            </select>
+            <select id="sClass" onchange="fetchSubjects()">
+                <option value="">-- Select Class --</option>
+                <option value="Pre-Nursery">Pre-Nursery</option>
+                <option value="Nursery">Nursery</option>
+                <option value="LKG">LKG</option>
+                <option value="UKG">UKG</option>
+                <script>for(let i=1; i<=12; i++) document.write(`<option value="${i}">Class ${i}</option>`);</script>
+            </select>
+            <select id="sSection">
+                <option value="A">Section A</option>
+                <option value="B">Section B</option>
+                <option value="C">Section C</option>
+                <option value="D">Section D</option>
+            </select>
+            <select id="sSubject">
+                <option value="">-- Select Subject --</option>
+            </select>
+            <button style="background:var(--royal-blue); color:var(--gold); font-weight:bold; cursor:pointer; border:1px solid var(--gold);" onclick="loadStudents()">LOAD STUDENTS</button>
+        </div>
+    </section>
+
+    <div id="examInfo" class="info-bar"></div>
+
+    <section class="form-section" id="marksSection" style="display:none;">
+        <span class="section-title" id="tableTitle">Student List</span>
+        <table class="student-table">
+            <thead>
+                <tr>
+                    <th style="width:80px;">Roll No</th>
+                    <th>Student Name</th>
+                    <th>Unique ID</th>
+                    <th>Obtained Marks</th>
+                </tr>
+            </thead>
+            <tbody id="studentListBody"></tbody>
+        </table>
+        <button class="main-btn" id="submitBtn" onclick="submitMarks()">SAVE & SUBMIT MARKS</button>
+    </section>
+
+    <div id="status" style="text-align:center; margin-top:15px; font-weight:bold;"></div>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDqDmsMp2eAuHJBcjW-ciO2JcLTXapiIrs",
+  authDomain: "the-lalit-d7472.firebaseapp.com",
+  projectId: "the-lalit-d7472",
+  appId: "1:479237084229:web:31078825739b3c5712ff2c"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+let currentFullMarks = 0;
+
+async function fetchSubjects() {
+    const exam = document.getElementById('examType').value;
+    const cls = document.getElementById('sClass').value;
+    const subSelect = document.getElementById('sSubject');
+    
+    if(!exam || !cls) return;
+
+    subSelect.innerHTML = '<option value="">Loading...</option>';
+    const docId = `${cls}_${exam}`.replace(/\s+/g, '');
+    
+    try {
+        const doc = await db.collection('exam_settings').doc(docId).get();
+        if(doc.exists) {
+            const data = doc.data();
+            subSelect.innerHTML = '<option value="">-- Select Subject --</option>';
+            data.subjects.forEach(s => {
+                subSelect.innerHTML += `<option value="${s.subjectName}" data-marks="${s.fullMarks}">${s.subjectName} (Max: ${s.fullMarks})</option>`;
+            });
+            document.getElementById('examInfo').style.display = 'block';
+            document.getElementById('examInfo').innerHTML = `Exam Configuration Found: <b>${exam}</b> for <b>Class ${cls}</b> (Date: ${data.examDate})`;
+        } else {
+            subSelect.innerHTML = '<option value="">No Subjects</option>';
+            alert("No settings found! Pehle Exam Master page par jaakar subjects aur marks set karein.");
+        }
+    } catch(e) { console.error(e); }
+}
+
+async function loadStudents() {
+    const cls = document.getElementById('sClass').value;
+    const sec = document.getElementById('sSection').value;
+    const sub = document.getElementById('sSubject').value;
+    
+    if(!cls || !sub) { alert("Please select Class and Subject first!"); return; }
+
+    const subOption = document.getElementById('sSubject').selectedOptions[0];
+    currentFullMarks = subOption.getAttribute('data-marks');
+
+    const tbody = document.getElementById('studentListBody');
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:30px;">Loading Student Database...</td></tr>';
+    document.getElementById('marksSection').style.display = 'block';
+
+    try {
+        const snap = await db.collection('students')
+            .where('class', '==', cls)
+            .where('section', '==', sec)
+            .get();
+
+        if(snap.empty) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:red; padding:30px;">No students found in Class '+cls+' Section '+sec+'</td></tr>';
+            return;
+        }
+
+        let students = [];
+        snap.forEach(doc => students.push(doc.data()));
+        students.sort((a,b) => a.uniqueID - b.uniqueID); 
+
+        tbody.innerHTML = "";
+        students.forEach((s, index) => {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td><b style="color:var(--royal-blue)">${s.name}</b></td>
+                    <td>${s.uniqueID}</td>
+                    <td>
+                        <input type="number" class="marks-input" 
+                               data-id="${s.uniqueID}" 
+                               data-name="${s.name}"
+                               value="0" min="0" max="${currentFullMarks}">
+                        <span style="color:#666; font-size:0.9rem;"> / ${currentFullMarks}</span>
+                    </td>
+                </tr>
+            `;
+        });
+        document.getElementById('tableTitle').innerText = `Subject: ${sub} | Maximum Marks: ${currentFullMarks}`;
+    } catch(e) { alert(e.message); }
+}
+
+async function submitMarks() {
+    const exam = document.getElementById('examType').value;
+    const cls = document.getElementById('sClass').value;
+    const sub = document.getElementById('sSubject').value;
+    const inputs = document.querySelectorAll('.marks-input');
+    const btn = document.getElementById('submitBtn');
+
+    if(!confirm("Kya aap marks save karna chahte hain?")) return;
+
+    btn.disabled = true;
+    btn.innerText = "Saving to Database...";
+
+    const batch = db.batch();
+
+    inputs.forEach(input => {
+        const studentId = input.getAttribute('data-id');
+        const obtained = Number(input.value);
+        
+        // Storage ID: StudentID_ExamName_SubjectName
+        const marksId = `${studentId}_${exam}_${sub}`.replace(/\s+/g, '_');
+        const ref = db.collection('marks').doc(marksId);
+        
+        batch.set(ref, {
+            studentId: studentId,
+            studentName: input.getAttribute('data-name'),
+            class: cls,
+            examType: exam,
+            subject: sub,
+            obtainedMarks: obtained,
+            fullMarks: Number(currentFullMarks),
+            timestamp: Date.now()
+        });
+    });
+
+    try {
+        await batch.commit();
+        alert("Success! Marks have been recorded.");
+        location.reload();
+    } catch(e) {
+        alert("Error: " + e.message);
+        btn.disabled = false;
+        btn.innerText = "SAVE & SUBMIT MARKS";
+    }
+}
+</script>
+<script src="menu.js"></script>
+</body>
+</html>
