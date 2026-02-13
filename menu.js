@@ -126,7 +126,3 @@ if (document.readyState === 'loading') {
 } else {
     loadMenu();
 }
-
-Isme ek aur jodo. 
-
-exam-master.html
