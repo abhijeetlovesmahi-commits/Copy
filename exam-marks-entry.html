@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Card Generator - The Lalit</title>
+    <style>
+        :root { --line-color: #333; }
+        body { font-family: Arial, sans-serif; background: #f0f0f0; padding: 20px; }
+        
+        /* Control Panel Styles */
+        .controls { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end; }
+        .controls div { display: flex; flex-direction: column; gap: 5px; }
+        select, input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        
+        /* Report Card Print Styles */
+        .report-card { width: 210mm; min-height: 297mm; padding: 15mm; background: white; margin: 0 auto; border: 2px solid #000; box-sizing: border-box; position: relative; }
+        
+        .header-section { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; }
+        .school-name { font-size: 28px; font-weight: bold; margin: 0; }
+        
+        .student-info { display: grid; grid-template-columns: 1fr 1fr; margin-bottom: 15px; line-height: 1.8; }
+        
+        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 12px; }
+        th, td { border: 1px solid #000; padding: 5px; text-align: center; }
+        th { background: #f2f2f2; }
+        .sub-name { text-align: left; padding-left: 10px; font-weight: bold; }
+
+        .co-scholastic { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        
+        .sign-box { display: flex; justify-content: space-between; margin-top: 50px; text-align: center; }
+        .signature-img { width: 120px; height: 50px; object-fit: contain; mix-blend-mode: multiply; display: block; margin: 0 auto; }
+        
+        @media print {
+            .controls, .no-print { display: none; }
+            body { padding: 0; background: none; }
+            .report-card { border: none; margin: 0; }
+        }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+<div class="controls no-print">
+    <div>
+        <label>Select Student (Unique ID)</label>
+        <input type="text" id="studentID" placeholder="e.g. 101">
+    </div>
+    <div>
+        <label>Term Mode</label>
+        <select id="reportMode">
+            <option value="1">Term-1 Only</option>
+            <option value="2">Full Academic (Term 1 & 2)</option>
+        </select>
+    </div>
+    <div>
+        <label>CT Signature</label>
+        <input type="file" onchange="previewSign(this, 'ctSign')">
+    </div>
+    <div>
+        <label>Principal Signature</label>
+        <input type="file" onchange="previewSign(this, 'pSign')">
+    </div>
+    <button onclick="generateReport()" style="background: #002366; color: gold; padding: 10px 20px; cursor: pointer;">Generate Report</button>
+    <button onclick="window.print()" style="padding: 10px;">Print PDF</button>
+</div>
+
+<div class="report-card" id="printArea">
+    <div class="header-section">
+        <h1 class="school-name">THE LALIT INTERNATIONAL SCHOOL</h1>
+        <p>Affiliated to CBSE, Affiliation No. 223366</p>
+        <h3>Academic Session: 2025-26</h3>
+        <h2 style="text-decoration: underline;">REPORT CARD</h2>
+    </div>
+
+    <div class="student-info" id="studentDetails">
+        <div>Student's Name: <b id="rName">........</b></div>
+        <div>Roll No: <b id="rRoll">........</b></div>
+        <div>Father's Name: <b id="rFather">........</b></div>
+        <div>Class/Section: <b id="rClass">........</b></div>
+    </div>
+
+    <table>
+        <thead>
+            <tr id="tableHeaderMain">
+                <th rowspan="2">Scholastic Areas</th>
+                <th colspan="6" id="t1Header">Term-1 (100 Marks)</th>
+                <th colspan="6" class="t2-ui">Term-2 (100 Marks)</th>
+            </tr>
+            <tr>
+                <th>Per. Test (10)</th><th>NB (5)</th><th>SEA (5)</th><th>Half Yearly (80)</th><th>Total</th><th>Grade</th>
+                <th class="t2-ui">Per. Test (10)</th><th class="t2-ui">NB (5)</th><th class="t2-ui">SEA (5)</th><th class="t2-ui">Yearly (80)</th><th class="t2-ui">Total</th><th class="t2-ui">Grade</th>
+            </tr>
+        </thead>
+        <tbody id="marksBody">
+            </tbody>
+    </table>
+
+    <div class="co-scholastic">
+        <div>
+            <table style="height: 100px;">
+                <tr><th colspan="2">Co-Scholastic Areas: Term-1</th></tr>
+                <tr><td class="sub-name">Art Education</td><td contenteditable="true">A</td></tr>
+                <tr><td class="sub-name">Health & Physical Ed.</td><td contenteditable="true">A</td></tr>
+            </table>
+        </div>
+        <div class="t2-ui">
+            <table style="height: 100px;">
+                <tr><th colspan="2">Co-Scholastic Areas: Term-2</th></tr>
+                <tr><td class="sub-name">Art Education</td><td contenteditable="true">A</td></tr>
+                <tr><td class="sub-name">Health & Physical Ed.</td><td contenteditable="true">A</td></tr>
+            </table>
+        </div>
+    </div>
+
+    <div style="margin-top: 10px; border: 1px solid #000; padding: 10px;">
+        <b>Class Teacher's Remarks:</b> <span id="autoRemarks" contenteditable="true">Excellent performance.</span>
+    </div>
+
+    <div class="sign-box">
+        <div>
+            <img id="ctSign" class="signature-img">
+            <p>Class Teacher</p>
+        </div>
+        <div>
+            <p id="rDate">Date: 14-02-2026</p>
+            <p>Place: School Campus</p>
+        </div>
+        <div>
+            <img id="pSign" class="signature-img">
+            <p>Principal</p>
+        </div>
+    </div>
+</div>
+
+<script>
+// Firebase Init (Use your config)
+const firebaseConfig = {
+  apiKey: "AIzaSyDqDmsMp2eAuHJBcjW-ciO2JcLTXapiIrs",
+  authDomain: "the-lalit-d7472.firebaseapp.com",
+  projectId: "the-lalit-d7472",
+  appId: "1:479237084229:web:31078825739b3c5712ff2c"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+function previewSign(input, targetID) {
+    if (input.files && input.files[0]) {
+        let reader = new FileReader();
+        reader.onload = e => document.getElementById(targetID).src = e.target.result;
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+async function generateReport() {
+    const sid = document.getElementById('studentID').value;
+    const mode = document.getElementById('reportMode').value;
+    
+    // UI Toggle for Term 2
+    document.querySelectorAll('.t2-ui').forEach(el => el.style.display = (mode === "2" ? "" : "none"));
+    if(mode === "1") document.getElementById('t1Header').setAttribute('colspan', '6');
+    else document.getElementById('t1Header').setAttribute('colspan', '6');
+
+    try {
+        // 1. Fetch Student Info
+        const sDoc = await db.collection('students').where('uniqueID', '==', sid).get();
+        if(sDoc.empty) { alert("Student not found!"); return; }
+        const sData = sDoc.docs[0].data();
+        document.getElementById('rName').innerText = sData.name;
+        document.getElementById('rRoll').innerText = sData.uniqueID;
+        document.getElementById('rClass').innerText = sData.class + " " + sData.section;
+
+        // 2. Fetch All Marks
+        const mSnap = await db.collection('marks').where('studentId', '==', sid).get();
+        let marksMap = {};
+        mSnap.forEach(doc => {
+            const d = doc.data();
+            const key = `${d.subject}_${d.examType}`;
+            marksMap[key] = d;
+        });
+
+        // 3. Render Table
+        const subjects = ["English", "Hindi", "Mathematics", "Science", "Social Science"];
+        const tbody = document.getElementById('marksBody');
+        tbody.innerHTML = "";
+        
+        let grandTotal = 0;
+
+        subjects.forEach(sub => {
+            // Term 1 Data
+            const t1PT = marksMap[`${sub}_Periodic Test -I`]?.obtainedMarks || 0;
+            const t1NB = marksMap[`${sub}_Term -I`]?.notebookMarks || 0;
+            const t1SEA = marksMap[`${sub}_Term -I`]?.seaMarks || 0;
+            const t1Half = marksMap[`${sub}_Term -I`]?.obtainedMarks || 0;
+            const t1Total = Math.round((t1PT/4) + t1NB + t1SEA + t1Half); // Assuming PT is of 40, reduced to 10
+            
+            // Term 2 Data
+            const t2PT = marksMap[`${sub}_Periodic -II`]?.obtainedMarks || 0;
+            const t2NB = marksMap[`${sub}_Term -II`]?.notebookMarks || 0;
+            const t2SEA = marksMap[`${sub}_Term -II`]?.seaMarks || 0;
+            const t2Yearly = marksMap[`${sub}_Term -II`]?.obtainedMarks || 0;
+            const t2Total = Math.round((t2PT/4) + t2NB + t2SEA + t2Yearly);
+
+            let row = `<tr><td class="sub-name">${sub}</td>
+                <td>${t1PT}</td><td>${t1NB}</td><td>${t1SEA}</td><td>${t1Half}</td><td>${t1Total}</td><td>${calculateGrade(t1Total)}</td>`;
+            
+            if(mode === "2") {
+                row += `<td class="t2-ui">${t2PT}</td><td class="t2-ui">${t2NB}</td><td class="t2-ui">${t2SEA}</td><td class="t2-ui">${t2Yearly}</td><td class="t2-ui">${t2Total}</td><td class="t2-ui">${calculateGrade(t2Total)}</td>`;
+            }
+            row += `</tr>`;
+            tbody.innerHTML += row;
+            grandTotal += (mode === "2" ? (t1Total + t2Total)/2 : t1Total);
+        });
+
+        // 4. Remarks Logic
+        const avg = grandTotal / subjects.length;
+        let remark = "Needs Improvement";
+        if(avg > 90) remark = "Outstanding Performance! Keep it up.";
+        else if(avg > 75) remark = "Very Good. Hardworking student.";
+        else if(avg > 50) remark = "Good, but can do better in Mathematics.";
+        document.getElementById('autoRemarks').innerText = remark;
+
+    } catch (e) { console.error(e); }
+}
+
+function calculateGrade(m) {
+    if(m >= 91) return 'A1'; if(m >= 81) return 'A2';
+    if(m >= 71) return 'B1'; if(m >= 61) return 'B2';
+    if(m >= 51) return 'C1'; if(m >= 41) return 'C2';
+    if(m >= 33) return 'D'; return 'E';
+}
+</script>
+</body>
+</html>
+
