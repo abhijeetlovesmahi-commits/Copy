@@ -165,12 +165,12 @@
                 <label style="font-size: 0.8rem; font-weight: bold;">Exam Type</label>
                 <select id="examType" onchange="autoPopulate()">
                     <option value="">-- Select Exam --</option>
-                    <option value="Formative 1st">Formative 1st</option>
-                    <option value="Summative 1st">Summative 1st</option>
-                    <option value="Half Yearly">Half Yearly</option>
-                    <option value="Formative 2nd">Formative 2nd</option>
-                    <option value="Summative 2nd">Summative 2nd</option>
-                    <option value="Final">Final</option>
+                    <option value="Formative Test -I">Formative Test -I</option>
+                    <option value="Periodic Test -I">Periodic Test -I</option>
+                    <option value="Term -I">Term -I</option>
+                    <option value="Formative Test -II">Formative Test -II</option>
+                    <option value="Periodic -II">Periodic -II</option>
+                    <option value="Term -II">Term -II</option>
                 </select>
             </div>
             <div>
@@ -231,9 +231,10 @@ const defaultSubjects = [
 ];
 
 function getMarksByExam(examType) {
-    if(examType.includes("Summative")) return 40;
-    if(examType.includes("Half Yearly") || examType.includes("Final")) return 80;
-    return 20; 
+    // New logic based on updated names
+    if(examType.includes("Term")) return 80;
+    if(examType.includes("Periodic")) return 40;
+    return 20; // Default for Formative
 }
 
 function autoPopulate() {
