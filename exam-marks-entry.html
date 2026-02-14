@@ -186,7 +186,7 @@
         </div>
         <div>
             <label>Subject</label>
-            <select id="subjectSelect" class="subject-highlight" onchange="updateMaxMarks()">
+            <select id="subjectSelect" class="subject-highlight" onchange="updateMaxMarks(); loadExistingMarks();">
                 <option value="">-- Select Subject --</option>
             </select>
         </div>
@@ -277,7 +277,6 @@ async function fetchStudents() {
         let students = [];
         snap.forEach(doc => students.push(doc.data()));
         
-        // Sorting by uniqueID (Assuming it's your Roll No)
         students.sort((a, b) => a.uniqueID - b.uniqueID);
 
         tbody.innerHTML = "";
@@ -297,7 +296,52 @@ async function fetchStudents() {
             `;
             tbody.appendChild(tr);
         });
+        
+        // After loading students, if subject is already selected, load marks
+        if(document.getElementById('subjectSelect').value) {
+            loadExistingMarks();
+        }
+        
     } catch (e) { alert(e.message); }
+}
+
+// NEW FUNCTION: Loads existing marks from database
+async function loadExistingMarks() {
+    const exam = document.getElementById('examType').value;
+    const cls = document.getElementById('examClass').value;
+    const sec = document.getElementById('sSection').value;
+    const subject = document.getElementById('subjectSelect').value;
+
+    if(!exam || !cls || !sec || !subject) return;
+
+    document.getElementById('status').innerHTML = "Checking for existing marks...";
+
+    try {
+        const snap = await db.collection('marks_entry')
+            .where('class', '==', cls)
+            .where('section', '==', sec)
+            .where('exam', '==', exam)
+            .where('subject', '==', subject)
+            .get();
+
+        if(!snap.empty) {
+            snap.forEach(doc => {
+                const data = doc.data();
+                const row = document.querySelector(`.main-m[data-id="${data.uID}"]`);
+                if(row) {
+                    const parentTr = row.closest('tr');
+                    row.value = data.marks;
+                    if(parentTr.querySelector('.note-m')) parentTr.querySelector('.note-m').value = data.notebook;
+                    if(parentTr.querySelector('.sea-m')) parentTr.querySelector('.sea-m').value = data.sea;
+                }
+            });
+            document.getElementById('status').innerHTML = "<span style='color:blue;'>✓ Existing marks loaded for editing.</span>";
+        } else {
+            // Clear inputs if no marks found (for fresh entry)
+            document.querySelectorAll('.marks-input').forEach(i => i.value = "");
+            document.getElementById('status').innerHTML = "No previous marks found. Ready for new entry.";
+        }
+    } catch (e) { console.error("Error loading marks: ", e); }
 }
 
 async function saveMarks() {
@@ -312,8 +356,11 @@ async function saveMarks() {
     const sec = document.getElementById('sSection').value;
 
     rows.forEach(row => {
-        const uID = row.querySelector('.main-m').getAttribute('data-id');
-        const m = row.querySelector('.main-m').value;
+        const mainInput = row.querySelector('.main-m');
+        if(!mainInput) return;
+        
+        const uID = mainInput.getAttribute('data-id');
+        const m = mainInput.value;
         const n = row.querySelector('.note-m')?.value || 0;
         const s = row.querySelector('.sea-m')?.value || 0;
 
@@ -325,8 +372,7 @@ async function saveMarks() {
 
     try {
         await batch.commit();
-        document.getElementById('status').innerHTML = "<span style='color:green;'>✓ Saved Successfully!</span>";
-        document.querySelectorAll('.marks-input').forEach(i => i.value = "");
+        document.getElementById('status').innerHTML = "<span style='color:green;'>✓ Saved/Updated Successfully!</span>";
     } catch (e) { alert(e.message); }
 }
 </script>
