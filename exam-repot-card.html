@@ -16,7 +16,6 @@
         @page { size: A4; margin: 0; }
         body { font-family: 'Georgia', serif; background: var(--light-gold); margin: 0; padding: 0; }
 
-        /* BRANDED CONTROL PANEL */
         .admin-container {
             max-width: 1100px; margin: 30px auto; background: var(--white);
             padding: 40px; border: 1px solid var(--gold);
@@ -35,7 +34,6 @@
         .main-btn:hover { background: #001a4d; }
         .print-btn { background: #27ae60; color: white; border: none; }
 
-        /* REPORT CARD STYLES */
         .report-card { 
             width: 210mm; height: 296mm; padding: 10mm; background: white; 
             margin: 40px auto; border: 15px double var(--royal-blue);
@@ -60,7 +58,6 @@
         .marks-table th, .marks-table td { border: 1px solid #000; padding: 5px; text-align: center; }
         .marks-table th { background: #f2f2f2; }
 
-        /* Result Summary Box */
         .result-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border: 2px solid #000; margin-bottom: 15px; background: #f9f9f9; }
         .res-item { padding: 10px; text-align: center; border-right: 1px solid #000; }
         .res-item:last-child { border-right: none; }
@@ -87,8 +84,14 @@
     </div>
 
     <div class="controls-grid">
-        <div><label>Class</label><select id="selClass"><script>for(let i=1;i<=12;i++)document.write(`<option value="${i}">Class ${i}</option>`)</script></select></div>
-        <div><label>Section</label><select id="selSection"><option value="A">A</option><option value="B">B</option></select></div>
+        <div><label>Class</label><select id="selClass">
+            <option value="Pre-Nursery">Pre-Nursery</option>
+            <option value="Nursery">Nursery</option>
+            <option value="LKG">LKG</option>
+            <option value="UKG">UKG</option>
+            <script>for(let i=1;i<=12;i++)document.write(`<option value="${i}">Class ${i}</option>`)</script>
+        </select></div>
+        <div><label>Section</label><select id="selSection"><option value="A">A</option><option value="B">B</option><option value="C">C</option></select></div>
         <div><label>Mode</label><select id="reportMode"><option value="1">Half Yearly (Term-I)</option><option value="2">Annual (Term-I + II)</option></select></div>
         <div><label>Teacher Sign</label><input type="file" onchange="loadSign(this, 'ct')"></div>
         <div><label>Principal Sign</label><input type="file" onchange="loadSign(this, 'pr')"></div>
@@ -121,30 +124,50 @@ async function generateBulk() {
     const sSec = document.getElementById('selSection').value;
     const mode = document.getElementById('reportMode').value;
     const container = document.getElementById('bulkContainer');
-    container.innerHTML = "<h2>Generating Reports...</h2>";
+    container.innerHTML = "<h2 style='text-align:center;'>Fetching Data... Please Wait.</h2>";
 
     try {
         const stdSnap = await db.collection('students').where('class','==',sClass).where('section','==',sSec).get();
         const marksSnap = await db.collection('marks_entry').where('class','==',sClass).where('section','==',sSec).get();
 
         let allMarks = {};
-        marksSnap.forEach(doc => { let d = doc.data(); if(!allMarks[d.studentID]) allMarks[d.studentID] = {}; allMarks[d.studentID][`${d.subject}_${d.examType}`] = d; });
+        marksSnap.forEach(doc => { 
+            let d = doc.data(); 
+            let sID = d.uID || d.studentID; 
+            if(!allMarks[sID]) allMarks[sID] = {}; 
+            // Mapping exactly to how it's saved in Marks Entry Page
+            allMarks[sID][`${d.subject}_${d.exam}`] = d; 
+        });
 
         const subjects = ["English", "Hindi", "Mathematics", "Science", "Social Science", "Computer", "General Knowledge"];
         let students = [];
+
         stdSnap.forEach(doc => {
             let sData = doc.data();
+            let sid = sData.uniqueID;
             let grandTotal = 0;
+            
             subjects.forEach(sub => {
-                const t1 = Math.round(((allMarks[sData.uniqueID]?.[`${sub}_Periodic Test -I`]?.marks || 0)/4) + (allMarks[sData.uniqueID]?.[`${sub}_Term -I`]?.notebook || 0) + (allMarks[sData.uniqueID]?.[`${sub}_Term -I`]?.sea || 0) + (allMarks[sData.uniqueID]?.[`${sub}_Term -I`]?.marks || 0));
-                const t2 = Math.round(((allMarks[sData.uniqueID]?.[`${sub}_Periodic -II`]?.marks || 0)/4) + (allMarks[sData.uniqueID]?.[`${sub}_Term -II`]?.notebook || 0) + (allMarks[sData.uniqueID]?.[`${sub}_Term -II`]?.sea || 0) + (allMarks[sData.uniqueID]?.[`${sub}_Term -II`]?.marks || 0));
+                const sm = allMarks[sid] || {};
+                const t1_pt = sm[`${sub}_Periodic Test -I`]?.marks || 0;
+                const t1_nb = sm[`${sub}_Term -I`]?.notebook || 0;
+                const t1_sea = sm[`${sub}_Term -I`]?.sea || 0;
+                const t1_exam = sm[`${sub}_Term -I`]?.marks || 0;
+                const t1 = Math.round((t1_pt/4) + t1_nb + t1_sea + t1_exam);
+
+                const t2_pt = sm[`${sub}_Periodic -II`]?.marks || 0;
+                const t2_nb = sm[`${sub}_Term -II`]?.notebook || 0;
+                const t2_sea = sm[`${sub}_Term -II`]?.sea || 0;
+                const t2_exam = sm[`${sub}_Term -II`]?.marks || 0;
+                const t2 = Math.round((t2_pt/4) + t2_nb + t2_sea + t2_exam);
+
                 grandTotal += (mode === "2") ? (t1 + t2) : t1;
             });
             sData.tempTotal = grandTotal;
             students.push(sData);
         });
 
-        // Calculate Rank
+        // Rank Calculation
         students.sort((a,b) => b.tempTotal - a.tempTotal);
         students.forEach((s, index) => s.rank = index + 1);
         students.sort((a,b) => a.uniqueID - b.uniqueID);
@@ -152,13 +175,30 @@ async function generateBulk() {
         let html = "";
         students.forEach(s => {
             let rows = ""; let totalObtained = 0;
+            const sid = s.uniqueID;
+            
             subjects.forEach(sub => {
-                const sm = allMarks[s.uniqueID] || {};
-                const t1 = Math.round(((sm[`${sub}_Periodic Test -I`]?.marks || 0)/4) + (sm[`${sub}_Term -I`]?.notebook || 0) + (sm[`${sub}_Term -I`]?.sea || 0) + (sm[`${sub}_Term -I`]?.marks || 0));
-                const t2 = Math.round(((sm[`${sub}_Periodic -II`]?.marks || 0)/4) + (sm[`${sub}_Term -II`]?.notebook || 0) + (sm[`${sub}_Term -II`]?.sea || 0) + (sm[`${sub}_Term -II`]?.marks || 0));
+                const sm = allMarks[sid] || {};
+                const t1_pt = sm[`${sub}_Periodic Test -I`]?.marks || 0;
+                const t1_nb = sm[`${sub}_Term -I`]?.notebook || 0;
+                const t1_sea = sm[`${sub}_Term -I`]?.sea || 0;
+                const t1_exam = sm[`${sub}_Term -I`]?.marks || 0;
+                const t1 = Math.round((t1_pt/4) + t1_nb + t1_sea + t1_exam);
+
+                const t2_pt = sm[`${sub}_Periodic -II`]?.marks || 0;
+                const t2_nb = sm[`${sub}_Term -II`]?.notebook || 0;
+                const t2_sea = sm[`${sub}_Term -II`]?.sea || 0;
+                const t2_exam = sm[`${sub}_Term -II`]?.marks || 0;
+                const t2 = Math.round((t2_pt/4) + t2_nb + t2_sea + t2_exam);
+
                 const subFinal = (mode === "2") ? (t1 + t2) : t1;
                 totalObtained += subFinal;
-                rows += `<tr><td style="text-align:left; padding-left:10px;"><b>${sub}</b></td><td>${sm[`${sub}_Periodic Test -I`]?.marks || 0}</td><td>${sm[`${sub}_Term -I`]?.notebook || 0}</td><td>${sm[`${sub}_Term -I`]?.sea || 0}</td><td>${sm[`${sub}_Term -I`]?.marks || 0}</td><td><b>${t1}</b></td><td>${calcGrade(t1)}</td>${mode==="2"?`<td>${sm[`${sub}_Periodic -II`]?.marks||0}</td><td>${sm[`${sub}_Term -II`]?.notebook||0}</td><td>${sm[`${sub}_Term -II`]?.sea||0}</td><td>${sm[`${sub}_Term -II`]?.marks||0}</td><td><b>${t2}</b></td><td>${calcGrade(t2)}</td>`:""}</tr>`;
+
+                rows += `<tr>
+                    <td style="text-align:left; padding-left:10px;"><b>${sub}</b></td>
+                    <td>${t1_pt}</td><td>${t1_nb}</td><td>${t1_sea}</td><td>${t1_exam}</td><td><b>${t1}</b></td><td>${calcGrade(t1)}</td>
+                    ${mode==="2"?`<td>${t2_pt}</td><td>${t2_nb}</td><td>${t2_sea}</td><td>${t2_exam}</td><td><b>${t2}</b></td><td>${calcGrade(t2)}</td>`:""}
+                </tr>`;
             });
 
             const maxTotal = mode === "2" ? (subjects.length * 200) : (subjects.length * 100);
@@ -169,7 +209,7 @@ async function generateBulk() {
             <div class="report-card">
                 <table class="card-header-table">
                     <tr>
-                        <td style="width:100px; border:none;"><img src="logo.png" class="card-logo"></td>
+                        <td style="width:100px; border:none;"><img src="logo.png" class="card-logo" onerror="this.src='https://via.placeholder.com/90'"></td>
                         <td style="text-align:center; border:none;">
                             <h1 class="card-school-name">THE LALIT INTERNATIONAL SCHOOL</h1>
                             <p style="margin:2px 0;">Affiliated to CBSE | Session: 2025-26</p>
@@ -200,7 +240,7 @@ async function generateBulk() {
                     <div class="res-item"><span class="res-label">CLASS RANK</span><span class="res-val">${s.rank}</span></div>
                 </div>
 
-                <div class="section-title" style="background:var(--royal-blue); color:var(--gold); text-align:center; padding:5px; margin-bottom:10px;">CO-SCHOLASTIC AREAS</div>
+                <div style="background:var(--royal-blue); color:var(--gold); text-align:center; padding:5px; margin-bottom:10px; font-weight:bold;">CO-SCHOLASTIC AREAS</div>
                 <div class="co-scholastic-section">
                     <table class="marks-table"><tr><th>Term I Activity</th><th>Grade</th></tr><tr><td>Work/Art/Health/Disc.</td><td>A</td></tr></table>
                     <table class="marks-table"><tr><th>Term II Activity</th><th>Grade</th></tr><tr><td>Work/Art/Health/Disc.</td><td>A</td></tr></table>
@@ -217,7 +257,7 @@ async function generateBulk() {
             </div>`;
         });
         container.innerHTML = html;
-    } catch (e) { alert(e.message); }
+    } catch (e) { alert("Error: " + e.message); }
 }
 
 function calcGrade(m) {
