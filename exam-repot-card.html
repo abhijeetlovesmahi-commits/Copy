@@ -6,11 +6,8 @@
     <title>The Lalit - Advanced Report System</title>
     <style>
         :root { 
-            --royal-blue: #002366;
-            --gold: #D4AF37;
-            --deep-gold: #aa8a2e;
-            --light-gold: #FDFBF0;
-            --white: #ffffff;
+            --royal-blue: #002366; --gold: #D4AF37; --deep-gold: #aa8a2e;
+            --light-gold: #FDFBF0; --white: #ffffff;
         }
 
         @page { size: A4; margin: 0; }
@@ -106,16 +103,10 @@
 
 <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyDqDmsMp2eAuHJBcjW-ciO2JcLTXapiIrs",
-  authDomain: "the-lalit-d7472.firebaseapp.com",
-  projectId: "the-lalit-d7472",
-  appId: "1:479237084229:web:31078825739b3c5712ff2c"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
 
+<script src="firebase-config.js"></script>
+
+<script>
 let ctSign = "", prSign = "";
 function loadSign(input, type) { if (input.files && input.files[0]) { let r = new FileReader(); r.onload = e => { if(type==='ct') ctSign = e.target.result; else prSign = e.target.result; }; r.readAsDataURL(input.files[0]); } }
 
@@ -135,7 +126,6 @@ async function generateBulk() {
             let d = doc.data(); 
             let sID = d.uID || d.studentID; 
             if(!allMarks[sID]) allMarks[sID] = {}; 
-            // Mapping exactly to how it's saved in Marks Entry Page
             allMarks[sID][`${d.subject}_${d.exam}`] = d; 
         });
 
@@ -167,7 +157,6 @@ async function generateBulk() {
             students.push(sData);
         });
 
-        // Rank Calculation
         students.sort((a,b) => b.tempTotal - a.tempTotal);
         students.forEach((s, index) => s.rank = index + 1);
         students.sort((a,b) => a.uniqueID - b.uniqueID);
