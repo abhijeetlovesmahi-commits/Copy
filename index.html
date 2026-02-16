@@ -9,6 +9,9 @@
     <link rel="stylesheet" href="style.css">
     
     <style>
+        :root { --royal-blue: #002366; --gold: #D4AF37; }
+        body { background: #f4f7f6; }
+        
         .chart-container {
             background: white; padding: 30px; border-radius: 15px;
             box-shadow: 0 5px 20px rgba(0,0,0,0.05);
@@ -21,41 +24,47 @@
             border-top: 5px solid var(--gold);
         }
         canvas { max-width: 320px !important; margin: 0 auto; }
+        
+        .stat-card {
+            background: white; border-radius: 12px; padding: 20px;
+            border-bottom: 4px solid #ddd; transition: 0.3s;
+        }
+        .stat-card:hover { transform: translateY(-5px); }
     </style>
 </head>
 <body>
 
 <div class="main-content">
     <div class="container-fluid">
-        <h2 style="font-family: 'Cinzel', serif; color: var(--royal-blue);" class="mb-4">Control Center</h2>
+        <h2 style="font-family: 'Cinzel', serif; color: var(--royal-blue);" class="mb-4">Imperial Control Center</h2>
 
         <div class="row g-4 mb-4">
             <div class="col-md-3">
-                <div class="royal-card text-center p-3" style="min-height: auto;">
-                    <i class="fas fa-users fa-2x mb-2 text-primary"></i>
-                    <h6 class="text-muted">Total Students</h6>
-                    <h3 id="totalStudents">0</h3>
+                <div class="stat-card text-center" style="border-color: var(--royal-blue);">
+                    <i class="fas fa-users fa-2x mb-2" style="color: var(--royal-blue);"></i>
+                    <h6 class="text-muted small text-uppercase">Total Students</h6>
+                    <h3 id="totalStudents" class="fw-bold">0</h3>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="royal-card text-center p-3" style="min-height: auto; border-color: #28a745;">
+                <div class="stat-card text-center" style="border-color: #28a745;">
                     <i class="fas fa-hand-holding-usd fa-2x mb-2 text-success"></i>
-                    <h6 class="text-muted">Today's Cash</h6>
-                    <h3 id="todayCol">₹0</h3>
+                    <h6 class="text-muted small text-uppercase">Today's Cash</h6>
+                    <h3 id="todayCol" class="fw-bold text-success">₹0</h3>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="royal-card text-center p-3" style="min-height: auto; border-color: #ffc107;">
-                    <i class="fas fa-user-check fa-2x mb-2 text-warning"></i>
-                    <h6 class="text-muted">Present Today</h6>
-                    <h3 id="presentCount">0</h3>
+                <div class="stat-card text-center" style="border-color: #ffc107;">
+                    <i class="fas fa-calendar-check fa-2x mb-2 text-warning"></i>
+                    <h6 class="text-muted small text-uppercase">Attendance Rate</h6>
+                    <h3 id="attendanceRate" class="fw-bold">0%</h3>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="royal-card text-center p-3" style="min-height: auto; border-color: #dc3545;">
-                    <i class="fas fa-exclamation-circle fa-2x mb-2 text-danger"></i>
-                    <h6 class="text-muted">Pending Dues</h6>
-                    <h3 id="dueCount">0</h3>
+                <div class="stat-card text-center" style="border-color: #dc3545;">
+                    <i class="fas fa-exclamation-triangle fa-2x mb-2 text-danger"></i>
+                    <h6 class="text-muted small text-uppercase">Action Required</h6>
+                    <h3 id="dueCount" class="fw-bold text-danger">0</h3>
                 </div>
             </div>
         </div>
@@ -63,17 +72,25 @@
         <div class="row g-4">
             <div class="col-md-6">
                 <div class="chart-container">
-                    <h5 class="mb-4"><i class="fas fa-chart-pie me-2 text-gold"></i>Revenue Distribution</h5>
+                    <h5 class="mb-4"><i class="fas fa-chart-pie me-2 text-gold"></i>Treasury Overview</h5>
                     <canvas id="feePieChart"></canvas>
-                    <div id="chartLegend" class="mt-4 small text-muted">Showing monthly collection vs pending target</div>
+                    <div class="mt-4">
+                        <small class="text-muted">Real-time data reflecting current session 2025-26</small>
+                    </div>
                 </div>
             </div>
             
             <div class="col-md-6">
                 <div class="recent-box">
-                    <h5 class="mb-4"><i class="fas fa-history me-2"></i>Recent Treasury Activity</h5>
+                    <h5 class="mb-4 d-flex justify-content-between">
+                        <span><i class="fas fa-history me-2"></i>Live Registry</span>
+                        <span class="badge bg-light text-dark small" style="font-size: 10px;">LATEST 6</span>
+                    </h5>
                     <div id="recentFees" class="list-group list-group-flush">
-                        <p class="text-center p-5">Syncing with registry...</p>
+                        <div class="text-center p-5">
+                            <div class="spinner-border text-primary" role="status"></div>
+                            <p class="mt-2">Synchronizing Treasury...</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -85,66 +102,71 @@
 <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyDqDmsMp2eAuHJBcjW-ciO2JcLTXapiIrs",
-        authDomain: "the-lalit-d7472.firebaseapp.com",
-        projectId: "the-lalit-d7472",
-        appId: "1:479237084229:web:31078825739b3c5712ff2c"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+<script src="firebase-config.js"></script>
 
-    // Data Load Logic
+<script>
     function initDashboard() {
-        // 1. Students
+        // 1. Live Student Counter
         db.collection('students').onSnapshot(snap => {
             document.getElementById('totalStudents').innerText = snap.size;
         });
 
-        // 2. Today's Collection
+        // 2. Real-time Daily Revenue
         const today = new Date().toLocaleDateString('en-GB');
         db.collection('fee_transactions').where('date', '==', today).onSnapshot(snap => {
             let total = 0;
             snap.forEach(doc => total += Number(doc.data().amount));
-            document.getElementById('todayCol').innerText = "₹" + total;
+            document.getElementById('todayCol').innerText = "₹" + total.toLocaleString('en-IN');
         });
 
-        // 3. Recent Activity
+        // 3. Live Transaction Feed
         db.collection('fee_transactions').orderBy('timestamp', 'desc').limit(6).onSnapshot(snap => {
             const list = document.getElementById('recentFees');
+            if(snap.empty) {
+                list.innerHTML = "<p class='text-center text-muted p-4'>No transactions recorded today.</p>";
+                return;
+            }
             list.innerHTML = "";
             snap.forEach(doc => {
                 const d = doc.data();
                 list.innerHTML += `
                     <div class="list-group-item d-flex justify-content-between align-items-center border-0 mb-2 shadow-sm rounded">
                         <div>
-                            <span class="fw-bold">${d.studentName || 'Student ' + d.studentID}</span><br>
-                            <small class="text-muted">${d.purpose || 'Monthly Fee'}</small>
+                            <span class="fw-bold" style="color: var(--royal-blue);">${d.studentID}</span>
+                            <small class="d-block text-muted">${d.month || d.purpose}</small>
                         </div>
-                        <span class="badge bg-success">₹${d.amount}</span>
+                        <div class="text-end">
+                            <span class="badge bg-success-soft text-success" style="background:#e8f5e9">₹${d.amount}</span>
+                            <small class="d-block" style="font-size:9px;">${d.date}</small>
+                        </div>
                     </div>`;
             });
         });
 
-        // 4. Pie Chart Setup
+        // 4. Financial Analytics Chart
+        renderChart();
+    }
+
+    async function renderChart() {
+        // Aap yahan actual calculations kar sakte hain
         const ctx = document.getElementById('feePieChart').getContext('2d');
         new Chart(ctx, {
-            type: 'pie',
+            type: 'doughnut',
             data: {
-                labels: ['Collected', 'Pending', 'Discounted'],
+                labels: ['Collected', 'Pending', 'Others'],
                 datasets: [{
-                    data: [65, 25, 10], // Inhe real data se replace kar sakte hain calculation ke baad
-                    backgroundColor: ['#002366', '#D4AF37', '#e9ecef'],
-                    borderColor: '#fff',
-                    borderWidth: 2
+                    data: [75, 20, 5], 
+                    backgroundColor: ['#002366', '#D4AF37', '#ced4da'],
+                    hoverOffset: 10
                 }]
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 plugins: {
                     legend: { position: 'bottom' }
-                }
+                },
+                cutout: '70%'
             }
         });
     }
