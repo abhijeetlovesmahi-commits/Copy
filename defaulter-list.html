@@ -28,8 +28,11 @@
         
         @media print { .btn-remind, .no-print { display: none; } }
     </style>
+    
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
+
+    <script src="firebase-config.js"></script>
 </head>
 <body>
 
@@ -68,15 +71,6 @@
 </div>
 
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyDqDmsMp2eAuHJBcjW-ciO2JcLTXapiIrs",
-  authDomain: "the-lalit-d7472.firebaseapp.com",
-  projectId: "the-lalit-d7472",
-  appId: "1:479237084229:web:31078825739b3c5712ff2c"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
 async function generateDefaulterList() {
     try {
         const [masterSnap, studentSnap, transSnap] = await Promise.all([
@@ -150,6 +144,7 @@ function sendWhatsApp(phone, name, amount) {
     window.open(url, '_blank');
 }
 
+// Logic start
 generateDefaulterList();
 </script>
 <script src="menu.js"></script>
