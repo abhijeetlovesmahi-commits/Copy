@@ -25,7 +25,7 @@ function loadMenu() {
         <div id="mySidebar" class="sidebar">
             <div class="sidebar-header">
                 <img src="logo.png" class="menu-logo" onerror="this.src='https://via.placeholder.com/65'">
-                <h4 class="school-name">THE LALIT</h4>
+                <h4 class="school-name">THE LALIT INTERNATIONAL SCHOOL</h4>
             </div>
             
             <nav class="nav-links">
