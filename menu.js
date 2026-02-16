@@ -47,6 +47,10 @@ function loadMenu() {
                 <a href="master-ledger.html"><i class="fas fa-book"></i> Master Ledger</a>
                 <a href="defaulter-list.html"><i class="fas fa-exclamation-triangle"></i> Defaulter List</a>
 
+<div class="menu-divider">Administration</div>
+<a href="manage-users.html"><i class="fas fa-user-shield"></i> Staff & Roles</a>
+<a href="web-control.html"><i class="fas fa-globe"></i> Website Manager</a>
+
                 <div class="menu-divider">Security</div>
                 <a href="#" onclick="handleLogout()" class="logout-link"><i class="fas fa-sign-out-alt"></i> Logout Registry</a>
             </nav>
