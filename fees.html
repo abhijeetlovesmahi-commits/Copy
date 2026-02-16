@@ -27,13 +27,9 @@
             background: #f8f9fa; border-left: 4px solid var(--royal-blue);
             padding: 15px; margin-bottom: 20px;
         }
-        .text-gold { color: var(--gold); }
         .text-velvet { color: var(--royal-blue); font-weight: bold; }
+        .border-gold { border: 1px solid var(--gold) !important; }
     </style>
-
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
 </head>
 <body>
 
@@ -63,11 +59,20 @@
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="fw-bold">Amount to Collect (₹)</label>
-                    <input type="number" id="fAmount" class="form-control" placeholder="Enter Amount">
+                    <input type="number" id="fAmount" class="form-control border-gold" placeholder="Enter Amount">
                 </div>
                 <div class="col-md-6">
-                    <label class="fw-bold">Payment Purpose</label>
-                    <input type="text" id="fMonth" class="form-control" placeholder="e.g. Feb Tuition + Bus">
+                    <label class="fw-bold">Payment Purpose / Month</label>
+                    <select id="fMonth" class="form-select border-gold">
+                        <option value="">-- Select Purpose --</option>
+                        <option value="Admission">Admission Fee</option>
+                        <option value="Annual">Annual Charges</option>
+                        <script>
+                            const fMonths = ["April", "May", "June", "July", "August", "September", "October", "November", "December", "January", "February", "March"];
+                            fMonths.forEach(m => document.write(`<option value="${m}">${m} Fee</option>`));
+                        </script>
+                        <option value="Miscellaneous">Miscellaneous</option>
+                    </select>
                 </div>
             </div>
             
@@ -78,40 +83,36 @@
     </div>
 </div>
 
-<script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyDqDmsMp2eAuHJBcjW-ciO2JcLTXapiIrs",
-      authDomain: "the-lalit-d7472.firebaseapp.com",
-      projectId: "the-lalit-d7472",
-      appId: "1:479237084229:web:31078825739b3c5712ff2c"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
 
+<script src="firebase-config.js"></script>
+
+<script>
     async function findStudent() {
         const id = document.getElementById('feeRoll').value;
         if(!id) return alert("Please enter Student ID!");
 
-        // 1. Find Student
         const sSnap = await db.collection('students').where('uniqueID', '==', Number(id)).get();
         
         if(!sSnap.empty) {
             const s = sSnap.docs[0].data();
-            document.getElementById('sNameDisplay').innerText = s.name;
+            document.getElementById('sNameDisplay').innerText = s.name.toUpperCase();
             document.getElementById('sDetailsDisplay').innerText = `Class: ${s.class} | Father: ${s.father} | Transport: ${s.transport}`;
             
-            // 2. Fetch Fee Master for this class
+            // Fetch Academic Fee
             const mDoc = await db.collection('fee_master').doc(s.class).get();
             let academicMonthly = 0;
             if(mDoc.exists) {
                 academicMonthly = mDoc.data().tuition || 0;
-                document.getElementById('expAcademic').innerText = "₹" + academicMonthly;
             }
+            document.getElementById('expAcademic').innerText = "₹" + academicMonthly;
 
-            // 3. Fetch Transport Master if applicable
+            // Fetch Transport Fee (Distance based)
             let transportMonthly = 0;
-            if(s.transport === 'Yes' && s.distance) {
-                const tDoc = await db.collection('transport_master').doc(s.distance).get();
+            if(s.transport === 'Yes') {
+                const bSlab = (s.transportDistance || "").trim();
+                const tDoc = await db.collection('transport_master').doc(bSlab).get();
                 if(tDoc.exists) {
                     transportMonthly = tDoc.data().amount || 0;
                 }
@@ -130,13 +131,13 @@
         const amount = document.getElementById('fAmount').value;
         const purpose = document.getElementById('fMonth').value;
 
-        if(!amount || !purpose) return alert("Please enter amount and purpose!");
+        if(!amount || !purpose) return alert("Please enter amount and select purpose!");
 
         try {
             await db.collection('fee_transactions').add({
                 studentID: Number(id),
                 amount: Number(amount),
-                purpose: purpose,
+                month: purpose, // Storing as 'month' to match Ledger logic
                 date: new Date().toLocaleDateString('en-GB'),
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
@@ -151,4 +152,3 @@
 <script src="menu.js"></script>
 </body>
 </html>
-
