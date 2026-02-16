@@ -12,14 +12,12 @@
         :root { --royal-blue: #002366; --gold-foil: #a67c00; --soft-gold: #f4e4bc; }
         body { background: #cfd3d6; font-family: 'Montserrat', sans-serif; margin: 0; }
 
-        /* Admin UI matching Logo Theme */
         .admin-panel { 
             max-width: 1000px; margin: 20px auto; background: #fff; padding: 25px; 
             border-radius: 15px; border-top: 6px solid var(--royal-blue);
             box-shadow: 0 10px 40px rgba(0,0,0,0.3);
         }
         
-        /* SLIP DESIGN - Secure & Professional */
         .slip-card {
             background: #fff; width: 210mm; height: 148.5mm; 
             padding: 30px 45px; position: relative; overflow: hidden;
@@ -27,7 +25,6 @@
             border-bottom: 2px dashed #000;
         }
 
-        /* 1. SECURITY WATERMARK - Micro Text */
         .slip-card::before {
             content: "THE LALIT INTERNATIONAL SCHOOL OFFICIAL DOCUMENT THE LALIT INTERNATIONAL SCHOOL OFFICIAL DOCUMENT ";
             position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
@@ -35,7 +32,6 @@
             transform: rotate(-25deg); pointer-events: none; z-index: 0;
         }
 
-        /* 2. CENTRAL EMBOSSED LOGO WATERMARK */
         .central-stamp {
             position: absolute; top: 55%; left: 50%; transform: translate(-50%, -50%);
             width: 300px; height: 300px; background: url('logo.png') no-repeat center;
@@ -49,7 +45,6 @@
         }
         .school-name { font-family: 'Cinzel', serif; color: var(--royal-blue); font-size: 24px; margin: 0; }
         
-        /* Golden Ornate Frame for Photo */
         .photo-frame {
             width: 85px; height: 105px; padding: 4px;
             background: linear-gradient(45deg, #bf953f, #fcf6ba, #b38728, #aa771c);
@@ -64,7 +59,6 @@
         .fee-table th { background: var(--royal-blue); color: #fff; padding: 8px; border: 1px solid #000; font-size: 11px; text-transform: uppercase; }
         .fee-table td { padding: 6px; border: 1px solid #000; font-size: 10px; font-weight: 700; color: #111; }
 
-        /* Professional Balance Banner */
         .total-banner { 
             background: var(--royal-blue); color: #fff; 
             padding: 12px 25px; margin-top: auto; display: flex; justify-content: space-between;
@@ -133,16 +127,9 @@
 <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
 
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyDqDmsMp2eAuHJBcjW-ciO2JcLTXapiIrs",
-  authDomain: "the-lalit-d7472.firebaseapp.com",
-  projectId: "the-lalit-d7472",
-  appId: "1:479237084229:web:31078825739b3c5712ff2c"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+<script src="firebase-config.js"></script>
 
+<script>
 async function fetchAndGenerate() {
     const area = document.getElementById('printArea');
     const targetMonth = document.getElementById('monthSelect').value;
