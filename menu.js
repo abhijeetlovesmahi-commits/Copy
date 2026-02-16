@@ -1,9 +1,9 @@
-/* THE LALIT INTERNATIONAL SCHOOL - UPDATED MENU */
+/* THE LALIT INTERNATIONAL SCHOOL - MODULAR MENU WITH AUTH */
 
 function loadMenu() {
     if (document.getElementById('sidebar-wrapper')) return;
 
-    // Har page par Icons lane ke liye Font Awesome ko inject karna
+    // Font Awesome Inject
     if (!document.getElementById('fa-icons-link')) {
         const fa = document.createElement('link');
         fa.id = 'fa-icons-link';
@@ -33,14 +33,22 @@ function loadMenu() {
                 <a href="view-students.html"><i class="fas fa-users"></i> Student Registry</a>
                 <a href="add-student.html"><i class="fas fa-user-plus"></i> Admission</a>
                 <a href="fee-master.html"><i class="fas fa-cog"></i> Fee Structure</a>
-                <a href="exam-master.html"><i class="fas fa-book-open"></i> Exam Master</a>
-                <a href="exam-marks-entry.html"><i class="fas fa-book-open"></i> Exam Marks Entry</a>
-                <a href="exam-repot-card.html"><i class="fas fa-book-open"></i> Exam Report Card</a>
-                <a href="collect-fees.html"><i class="fas fa-money-bill-wave"></i> Collect Fees</a>
+                
+                <div class="menu-divider">Academic & Exams</div>
+                <a href="exam-master.html"><i class="fas fa-layer-group"></i> Exam Master</a>
+                <a href="exam-marks-entry.html"><i class="fas fa-pen-nib"></i> Marks Entry</a>
+                <a href="exam-repot-card.html"><i class="fas fa-file-alt"></i> Report Card</a>
+                <a href="attendance.html"><i class="fas fa-calendar-check"></i> Attendance</a>
+
+                <div class="menu-divider">Treasury & Accounts</div>
+                <a href="collect-fees.html"><i class="fas fa-vault"></i> Collect Fees</a>
                 <a href="fee-history.html"><i class="fas fa-history"></i> Fee History</a>
                 <a href="fee-demand-slip.html"><i class="fas fa-file-invoice"></i> Demand Slips</a>
-                <a href="attendance.html"><i class="fas fa-calendar-check"></i> Attendance</a>
+                <a href="master-ledger.html"><i class="fas fa-book"></i> Master Ledger</a>
                 <a href="defaulter-list.html"><i class="fas fa-exclamation-triangle"></i> Defaulter List</a>
+
+                <div class="menu-divider">Security</div>
+                <a href="#" onclick="handleLogout()" class="logout-link"><i class="fas fa-sign-out-alt"></i> Logout Registry</a>
             </nav>
         </div>
 
@@ -76,35 +84,34 @@ function loadMenu() {
 
             .sidebar-header { padding: 40px 20px; text-align: center; border-bottom: 1px solid rgba(212,175,55,0.2); }
             
-            /* Circular Logo Frame Style */
             .menu-logo { 
-                width: 80px; 
-                height: 80px; 
-                object-fit: contain;
-                background: white; 
-                border-radius: 50%; 
-                padding: 5px; 
-                border: 3px solid #D4AF37; 
-                box-shadow: 0 0 10px rgba(0,0,0,0.2);
+                width: 80px; height: 80px; object-fit: contain;
+                background: white; border-radius: 50%; padding: 5px; 
+                border: 3px solid #D4AF37; box-shadow: 0 0 10px rgba(0,0,0,0.2);
             }
 
-            .school-name { color: #D4AF37; font-family: 'Cinzel', serif; margin-top:10px; font-size: 1.2rem; }
+            .school-name { color: #D4AF37; font-family: 'Cinzel', serif; margin-top:10px; font-size: 1.1rem; }
             
             .nav-links { padding: 20px 10px; }
+            .menu-divider { 
+                color: rgba(255,255,255,0.4); font-size: 11px; 
+                text-transform: uppercase; letter-spacing: 1.5px; 
+                padding: 15px 20px 5px; font-weight: bold;
+            }
             .nav-links a {
                 color: #ffffff; display: flex; align-items: center; padding: 12px 20px;
-                text-decoration: none; font-size: 15px; transition: 0.3s;
-                border-radius: 8px; margin-bottom: 5px;
+                text-decoration: none; font-size: 14px; transition: 0.3s;
+                border-radius: 8px; margin-bottom: 2px;
             }
             .nav-links a i { 
-                margin-right: 15px; 
-                width: 25px; 
-                text-align: center; 
-                color: #D4AF37; 
-                font-size: 18px;
+                margin-right: 15px; width: 20px; text-align: center; 
+                color: #D4AF37; font-size: 16px;
             }
             .nav-links a:hover { background: rgba(212,175,55,0.15); color: #D4AF37; }
             
+            .logout-link:hover { background: rgba(220, 53, 69, 0.2) !important; color: #ff6b6b !important; }
+            .logout-link i { color: #ff6b6b !important; }
+
             .main-content { padding-top: 60px !important; }
         </style>
     </div>
@@ -132,6 +139,17 @@ function toggleMenu(isOpen) {
         sidebar.classList.remove('open');
         overlay.style.display = 'none';
         trigger.classList.remove('change');
+    }
+}
+
+// Global Logout Function
+function handleLogout() {
+    if(confirm("Are you sure you want to exit the Imperial Registry?")) {
+        firebase.auth().signOut().then(() => {
+            window.location.href = "login.html";
+        }).catch((error) => {
+            alert("Error logging out: " + error.message);
+        });
     }
 }
 
