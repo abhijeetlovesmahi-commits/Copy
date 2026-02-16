@@ -11,11 +11,11 @@
         body { 
             background: linear-gradient(135deg, var(--royal-blue) 0%, #001a4d 100%); 
             height: 100vh; display: flex; align-items: center; justify-content: center; 
-            font-family: 'Georgia', serif;
+            font-family: 'Georgia', serif; margin: 0;
         }
 
         .login-card { 
-            background: white; padding: 50px 40px; border-radius: 4px; 
+            background: white; padding: 50px 40px; border-radius: 8px; 
             box-shadow: 0 20px 50px rgba(0,0,0,0.5); width: 100%; 
             max-width: 420px; text-align: center; border: 2px solid var(--gold);
         }
@@ -26,7 +26,7 @@
         
         .form-control { 
             border: none; border-bottom: 2px solid #eee; border-radius: 0; padding: 12px;
-            transition: 0.3s;
+            transition: 0.3s; text-align: center;
         }
 
         .form-control:focus { 
@@ -36,11 +36,12 @@
         .btn-royal { 
             background: var(--royal-blue); color: var(--gold); border: 1px solid var(--gold);
             padding: 12px; font-weight: bold; letter-spacing: 1px; transition: 0.3s;
+            margin-top: 20px;
         }
 
         .btn-royal:hover { background: var(--gold); color: var(--royal-blue); }
         
-        #msg { height: 20px; font-weight: bold; }
+        #msg { height: 25px; margin-top: 15px; font-weight: bold; font-size: 0.85rem; }
     </style>
 </head>
 <body>
@@ -57,25 +58,22 @@
         <input type="password" id="pass" class="form-control" placeholder="Security Key">
     </div>
     
-    <button class="btn btn-royal w-100 mb-3" id="loginBtn" onclick="signIn()">AUTHENTICATE</button>
-    <div id="msg" class="text-danger small"></div>
+    <button class="btn btn-royal w-100 mb-2" id="loginBtn" onclick="signIn()">AUTHENTICATE</button>
+    <div id="msg" class="text-danger"></div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
 
-<script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyDqDmsMp2eAuHJBcjW-ciO2JcLTXapiIrs",
-        authDomain: "the-lalit-d7472.firebaseapp.com",
-        projectId: "the-lalit-d7472",
-        appId: "1:479237084229:web:31078825739b3c5712ff2c"
-    };
-    firebase.initializeApp(firebaseConfig);
+<script src="firebase-config.js"></script>
 
-    // Agar pehle se login hai toh dashboard pe bhejo
-    firebase.auth().onAuthStateChanged((user) => {
-        if (user) { window.location.href = "index.html"; }
+<script>
+    // Security Guard: Check if user is already logged in
+    auth.onAuthStateChanged((user) => {
+        if (user) { 
+            // Redirect to Dashboard if already authenticated
+            window.location.href = "index.html"; 
+        }
     });
 
     function signIn() {
@@ -85,21 +83,24 @@
         const msg = document.getElementById('msg');
 
         if(!email || !pass) {
-            msg.innerText = "Please provide all credentials.";
+            msg.innerText = "Security Alert: Provide all credentials.";
             return;
         }
 
         btn.innerText = "VERIFYING...";
         btn.disabled = true;
+        msg.innerText = "";
         
-        firebase.auth().signInWithEmailAndPassword(email, pass)
+        // Using 'auth' object from central config
+        auth.signInWithEmailAndPassword(email, pass)
         .then(() => {
-            // Success - Redirect handled by onAuthStateChanged
+            // Success: onAuthStateChanged will handle redirect
         })
         .catch((error) => {
             btn.innerText = "AUTHENTICATE";
             btn.disabled = false;
-            msg.innerText = "Access Denied: Invalid Credentials.";
+            msg.innerText = "Access Denied: Invalid Security Key.";
+            console.error(error.message);
         });
     }
 </script>
