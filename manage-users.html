@@ -8,31 +8,27 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --royal-blue: #002366; --gold: #D4AF37; }
-        body { background: #f4f7f6; font-family: 'Poppins', sans-serif; }
+        body { background: #f4f7f6; font-family: 'Poppins', sans-serif; overflow-x: hidden; }
         .user-card { background: white; border-radius: 12px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-top: 5px solid var(--royal-blue); }
-        .perm-box { background: #fff9e6; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #ffeeba; }
-        .role-badge { font-size: 0.75rem; padding: 4px 10px; border-radius: 20px; font-weight: bold; text-transform: uppercase; }
-        .role-staff { background: #e3f2fd; color: #1565c0; }
-        .section-title { font-size: 12px; font-weight: bold; color: var(--royal-blue); text-transform: uppercase; margin-top: 10px; display: block; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .perm-box { background: #fff9e6; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #ffeeba; max-height: 400px; overflow-y: auto; }
+        .section-title { font-size: 11px; font-weight: bold; color: var(--royal-blue); text-transform: uppercase; margin: 15px 0 8px; display: block; border-bottom: 2px solid rgba(0,35,102,0.1); padding-bottom: 3px; }
+        .form-check-label { font-size: 13px; cursor: pointer; }
+        .role-badge { font-size: 0.75rem; padding: 4px 10px; border-radius: 20px; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="container-fluid py-4">
     <div class="row g-4">
-        <div class="col-md-5">
+        <div class="col-lg-5 col-md-12">
             <div class="user-card">
-                <h5 class="fw-bold mb-4" style="color: var(--royal-blue);"><i class="fas fa-user-shield me-2"></i>CREATE STAFF & ACCESS</h5>
+                <h5 class="fw-bold mb-4" style="color: var(--royal-blue); border-left: 4px solid var(--gold); padding-left: 10px;">
+                    STAFF PERMISSION ENGINE
+                </h5>
                 
                 <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="small fw-bold">Staff Name</label>
-                        <input type="text" id="uName" class="form-control" placeholder="Full Name">
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="small fw-bold">Official Email</label>
-                        <input type="email" id="uEmail" class="form-control" placeholder="email@thelalit.com">
-                    </div>
+                    <div class="col-md-6 mb-3"><label class="small fw-bold">Name</label><input type="text" id="uName" class="form-control" placeholder="Staff Name"></div>
+                    <div class="col-md-6 mb-3"><label class="small fw-bold">Email</label><input type="email" id="uEmail" class="form-control" placeholder="staff@thelalit.com"></div>
                 </div>
 
                 <div class="row">
@@ -44,56 +40,42 @@
                             <option value="admin">Administrator</option>
                         </select>
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="small fw-bold">Password</label>
-                        <input type="text" id="uPass" class="form-control" value="Lalit@123">
-                    </div>
+                    <div class="col-md-6 mb-3"><label class="small fw-bold">Password</label><input type="text" id="uPass" class="form-control" value="Lalit@123"></div>
                 </div>
 
                 <div class="perm-box">
-                    <label class="fw-bold mb-3"><i class="fas fa-sliders-h me-2"></i>Essential Access Switches</label>
+                    <p class="text-center small fw-bold text-muted mb-3"><i class="fas fa-toggle-on me-1"></i> SELECT PAGE ACCESS</p>
                     
-                    <span class="section-title">Academics</span>
-                    <div class="form-check form-switch mb-2">
-                        <input class="form-check-input perm-check" type="checkbox" id="p_attendance" checked>
-                        <label class="form-check-label small">Student Attendance</label>
-                    </div>
-                    <div class="form-check form-switch mb-2">
-                        <input class="form-check-input perm-check" type="checkbox" id="p_marks">
-                        <label class="form-check-label small">Marks Entry (Exam)</label>
-                    </div>
+                    <span class="section-title">Admission & Registry</span>
+                    <div class="form-check form-switch mb-2"><input class="form-check-input perm-check" type="checkbox" id="view_students" checked><label class="form-check-label">Student Registry (view-students)</label></div>
+                    <div class="form-check form-switch mb-2"><input class="form-check-input perm-check" type="checkbox" id="add_student"><label class="form-check-label">New Admission (add-student)</label></div>
+                    <div class="form-check form-switch mb-2"><input class="form-check-input perm-check" type="checkbox" id="edit_student"><label class="form-check-label">Edit Student Data (edit-student)</label></div>
 
-                    <span class="section-title">Treasury & Records</span>
-                    <div class="form-check form-switch mb-2">
-                        <input class="form-check-input perm-check" type="checkbox" id="p_fees">
-                        <label class="form-check-label small">Fee Collection & History</label>
-                    </div>
-                    <div class="form-check form-switch mb-2">
-                        <input class="form-check-input perm-check" type="checkbox" id="p_students">
-                        <label class="form-check-label small">View Student Registry</label>
-                    </div>
+                    <span class="section-title">Academic & Exams</span>
+                    <div class="form-check form-switch mb-2"><input class="form-check-input perm-check" type="checkbox" id="attendance" checked><label class="form-check-label">Attendance Record</label></div>
+                    <div class="form-check form-switch mb-2"><input class="form-check-input perm-check" type="checkbox" id="exam_master"><label class="form-check-label">Exam Setup (exam-master)</label></div>
+                    <div class="form-check form-switch mb-2"><input class="form-check-input perm-check" type="checkbox" id="marks_entry"><label class="form-check-label">Marks Entry</label></div>
+                    <div class="form-check form-switch mb-2"><input class="form-check-input perm-check" type="checkbox" id="report_card"><label class="form-check-label">Report Card Generation</label></div>
+
+                    <span class="section-title">Treasury (Accountant)</span>
+                    <div class="form-check form-switch mb-2"><input class="form-check-input perm-check" type="checkbox" id="fee_master"><label class="form-check-label">Fee Structure (fee-master)</label></div>
+                    <div class="form-check form-switch mb-2"><input class="form-check-input perm-check" type="checkbox" id="collect_fees"><label class="form-check-label">Collect Fees</label></div>
+                    <div class="form-check form-switch mb-2"><input class="form-check-input perm-check" type="checkbox" id="fee_history"><label class="form-check-label">Fee History</label></div>
+                    <div class="form-check form-switch mb-2"><input class="form-check-input perm-check" type="checkbox" id="demand_slip"><label class="form-check-label">Demand Slips</label></div>
+                    <div class="form-check form-switch mb-2"><input class="form-check-input perm-check" type="checkbox" id="master_ledger"><label class="form-check-label">Master Ledger</label></div>
+                    <div class="form-check form-switch mb-2"><input class="form-check-input perm-check" type="checkbox" id="defaulter_list"><label class="form-check-label">Defaulter List</label></div>
                 </div>
 
-                <button class="btn btn-primary w-100 mt-4" id="createBtn" onclick="createNewStaff()">AUTHORIZE STAFF MEMBER</button>
+                <button class="btn btn-primary w-100 mt-4 py-2 fw-bold" id="createBtn" onclick="createNewStaff()">CREATE STAFF ACCOUNT</button>
             </div>
         </div>
 
-        <div class="col-md-7">
+        <div class="col-lg-7 col-md-12">
             <div class="user-card">
-                <h5 class="fw-bold mb-4 d-flex justify-content-between">
-                    <span><i class="fas fa-list-ul me-2"></i>STAFF REGISTRY</span>
-                    <span id="staffCount" class="badge bg-secondary">0</span>
-                </h5>
+                <h6 class="fw-bold mb-4"><i class="fas fa-users-cog me-2"></i>AUTHORIZED STAFF LIST</h6>
                 <div class="table-responsive">
                     <table class="table align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Name</th>
-                                <th>Role</th>
-                                <th>Access</th>
-                                <th class="text-end">Action</th>
-                            </tr>
-                        </thead>
+                        <thead class="table-light"><tr><th>Staff Member</th><th>Role</th><th>Access Count</th><th>Action</th></tr></thead>
                         <tbody id="staffList"></tbody>
                     </table>
                 </div>
@@ -120,9 +102,11 @@
             permissions[check.id] = check.checked;
         });
 
-        if(!name || !email) return alert("Please fill basic details!");
+        if(!name || !email) return alert("Missing Info!");
 
         btn.disabled = true;
+        btn.innerText = "Provisioning...";
+
         try {
             const secondaryApp = firebase.initializeApp(firebaseConfig, "Secondary");
             const userCredential = await secondaryApp.auth().createUserWithEmailAndPassword(email, pass);
@@ -140,36 +124,28 @@
     }
 
     function loadStaff() {
-        db.collection('users').onSnapshot(snap => {
+        db.collection('users').orderBy('createdAt', 'desc').onSnapshot(snap => {
             const list = document.getElementById('staffList');
-            document.getElementById('staffCount').innerText = snap.size;
             list.innerHTML = "";
             snap.forEach(doc => {
                 const u = doc.data();
                 const p = u.permissions || {};
-                let accessTags = "";
-                if(u.role === 'admin') accessTags = '<span class="badge bg-dark">FULL</span>';
-                else {
-                    if(p.p_attendance) accessTags += '<span class="badge bg-info me-1">Att</span>';
-                    if(p.p_marks) accessTags += '<span class="badge bg-info me-1">Marks</span>';
-                    if(p.p_fees) accessTags += '<span class="badge bg-info me-1">Fees</span>';
-                }
+                const count = Object.values(p).filter(v => v === true).length;
 
                 list.innerHTML += `<tr>
-                    <td><b>${u.name}</b><br><small>${u.email}</small></td>
-                    <td><span class="role-badge role-staff">${u.role}</span></td>
-                    <td>${accessTags}</td>
-                    <td class="text-end"><button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${doc.id}')"><i class="fas fa-trash"></i></button></td>
+                    <td><b>${u.name}</b><br><small class="text-muted">${u.email}</small></td>
+                    <td><span class="badge bg-primary">${u.role}</span></td>
+                    <td><span class="badge bg-success">${u.role === 'admin' ? 'Unlimited' : count + ' Pages'}</span></td>
+                    <td><button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${doc.id}')"><i class="fas fa-trash"></i></button></td>
                 </tr>`;
             });
         });
     }
 
     async function deleteUser(id) {
-        if(confirm("Remove this user?")) await db.collection('users').doc(id).delete();
+        if(confirm("Confirm Deletion?")) await db.collection('users').doc(id).delete();
     }
     window.onload = loadStaff;
 </script>
-<script src="menu.js"></script>
 </body>
 </html>
