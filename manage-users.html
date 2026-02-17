@@ -9,103 +9,92 @@
     <style>
         :root { --royal-blue: #002366; --gold: #D4AF37; }
         body { background: #f4f7f6; font-family: 'Poppins', sans-serif; }
-        .user-card { 
-            background: white; border-radius: 12px; padding: 25px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-top: 5px solid var(--royal-blue);
-        }
-        .perm-box { 
-            background: #fff9e6; padding: 15px; border-radius: 8px; 
-            margin-top: 15px; border: 1px solid #ffeeba;
-        }
+        .user-card { background: white; border-radius: 12px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-top: 5px solid var(--royal-blue); }
+        .perm-box { background: #fff9e6; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #ffeeba; }
         .role-badge { font-size: 0.75rem; padding: 4px 10px; border-radius: 20px; font-weight: bold; text-transform: uppercase; }
-        .role-admin { background: #ffebee; color: #c62828; }
         .role-staff { background: #e3f2fd; color: #1565c0; }
+        .section-title { font-size: 12px; font-weight: bold; color: var(--royal-blue); text-transform: uppercase; margin-top: 10px; display: block; border-bottom: 1px solid #eee; padding-bottom: 5px; }
     </style>
 </head>
 <body>
 
 <div class="container-fluid py-4">
     <div class="row g-4">
-        <div class="col-md-4">
+        <div class="col-md-5">
             <div class="user-card">
-                <h5 class="fw-bold mb-4" style="color: var(--royal-blue);">
-                    <i class="fas fa-user-shield me-2"></i>CREATE STAFF IDENTITY
-                </h5>
+                <h5 class="fw-bold mb-4" style="color: var(--royal-blue);"><i class="fas fa-user-shield me-2"></i>CREATE STAFF & ACCESS</h5>
                 
-                <div class="mb-3">
-                    <label class="small fw-bold">Full Name</label>
-                    <input type="text" id="uName" class="form-control" placeholder="e.g. Rahul Sharma">
-                </div>
-                
-                <div class="mb-3">
-                    <label class="small fw-bold">Official Email</label>
-                    <input type="email" id="uEmail" class="form-control" placeholder="staff@thelalit.com">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="small fw-bold">Staff Name</label>
+                        <input type="text" id="uName" class="form-control" placeholder="Full Name">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="small fw-bold">Official Email</label>
+                        <input type="email" id="uEmail" class="form-control" placeholder="email@thelalit.com">
+                    </div>
                 </div>
 
-                <div class="mb-3">
-                    <label class="small fw-bold">Assign Primary Role</label>
-                    <select id="uRole" class="form-select">
-                        <option value="teacher">Teacher</option>
-                        <option value="accountant">Accountant</option>
-                        <option value="admin">Administrator</option>
-                    </select>
-                </div>
-
-                <div class="mb-3">
-                    <label class="small fw-bold">Login Password</label>
-                    <input type="text" id="uPass" class="form-control" value="Lalit@123">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="small fw-bold">Primary Role</label>
+                        <select id="uRole" class="form-select">
+                            <option value="teacher">Teacher</option>
+                            <option value="accountant">Accountant</option>
+                            <option value="admin">Administrator</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="small fw-bold">Password</label>
+                        <input type="text" id="uPass" class="form-control" value="Lalit@123">
+                    </div>
                 </div>
 
                 <div class="perm-box">
-                    <label class="fw-bold small mb-3 text-dark text-uppercase"><i class="fas fa-key me-1"></i> Page Access Control</label>
+                    <label class="fw-bold mb-3"><i class="fas fa-sliders-h me-2"></i>Essential Access Switches</label>
                     
+                    <span class="section-title">Academics</span>
                     <div class="form-check form-switch mb-2">
                         <input class="form-check-input perm-check" type="checkbox" id="p_attendance" checked>
-                        <label class="form-check-label small">Attendance Access</label>
+                        <label class="form-check-label small">Student Attendance</label>
                     </div>
-                    
                     <div class="form-check form-switch mb-2">
-                        <input class="form-check-input perm-check" type="checkbox" id="p_marks" checked>
-                        <label class="form-check-label small">Marks Entry Access</label>
+                        <input class="form-check-input perm-check" type="checkbox" id="p_marks">
+                        <label class="form-check-label small">Marks Entry (Exam)</label>
                     </div>
 
+                    <span class="section-title">Treasury & Records</span>
                     <div class="form-check form-switch mb-2">
                         <input class="form-check-input perm-check" type="checkbox" id="p_fees">
-                        <label class="form-check-label small">Fees Collection Access</label>
+                        <label class="form-check-label small">Fee Collection & History</label>
                     </div>
-
                     <div class="form-check form-switch mb-2">
-                        <input class="form-check-input perm-check" type="checkbox" id="p_registry">
-                        <label class="form-check-label small">Student Registry Access</label>
+                        <input class="form-check-input perm-check" type="checkbox" id="p_students">
+                        <label class="form-check-label small">View Student Registry</label>
                     </div>
-                    <small class="text-muted" style="font-size: 10px;">*Admin always has full access.</small>
                 </div>
 
-                <button class="btn btn-primary w-100 mt-4" id="createBtn" style="background: var(--royal-blue);" onclick="createNewStaff()">
-                    AUTHORIZE STAFF
-                </button>
+                <button class="btn btn-primary w-100 mt-4" id="createBtn" onclick="createNewStaff()">AUTHORIZE STAFF MEMBER</button>
             </div>
         </div>
 
-        <div class="col-md-8">
+        <div class="col-md-7">
             <div class="user-card">
                 <h5 class="fw-bold mb-4 d-flex justify-content-between">
-                    <span><i class="fas fa-users-cog me-2"></i>ACTIVE STAFF REGISTRY</span>
-                    <span id="staffCount" class="badge bg-secondary">0 Members</span>
+                    <span><i class="fas fa-list-ul me-2"></i>STAFF REGISTRY</span>
+                    <span id="staffCount" class="badge bg-secondary">0</span>
                 </h5>
                 <div class="table-responsive">
                     <table class="table align-middle">
                         <thead class="table-light">
                             <tr>
-                                <th>Staff Name</th>
+                                <th>Name</th>
                                 <th>Role</th>
-                                <th>Active Access</th>
-                                <th class="text-end">Actions</th>
+                                <th>Access</th>
+                                <th class="text-end">Action</th>
                             </tr>
                         </thead>
-                        <tbody id="staffList">
-                            <tr><td colspan="4" class="text-center">Syncing with Registry...</td></tr>
-                        </tbody>
+                        <tbody id="staffList"></tbody>
                     </table>
                 </div>
             </div>
@@ -119,7 +108,6 @@
 <script src="firebase-config.js"></script>
 
 <script>
-    // 1. Create Staff with Individual Permissions
     async function createNewStaff() {
         const name = document.getElementById('uName').value;
         const email = document.getElementById('uEmail').value;
@@ -127,85 +115,59 @@
         const pass = document.getElementById('uPass').value;
         const btn = document.getElementById('createBtn');
 
-        // Sabhi switches ki state ek object mein save karein
         let permissions = {};
         document.querySelectorAll('.perm-check').forEach(check => {
             permissions[check.id] = check.checked;
         });
 
-        if(!name || !email) return alert("Fill Name and Email!");
+        if(!name || !email) return alert("Please fill basic details!");
 
         btn.disabled = true;
-        btn.innerText = "Processing...";
-
         try {
-            // Secondary App to prevent Admin logout
             const secondaryApp = firebase.initializeApp(firebaseConfig, "Secondary");
             const userCredential = await secondaryApp.auth().createUserWithEmailAndPassword(email, pass);
-            const uid = userCredential.user.uid;
-
-            // Firestore mein user document create karein
-            await db.collection('users').doc(uid).set({
-                name: name,
-                email: email.toLowerCase(),
-                role: role,
-                permissions: permissions, // Ye switches data hai
+            await db.collection('users').doc(userCredential.user.uid).set({
+                name, email: email.toLowerCase(), role, permissions,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
-
             await secondaryApp.delete();
-            alert("Success: Staff account created with custom permissions!");
+            alert("Staff Authorized Successfully!");
             location.reload();
         } catch (e) {
-            alert("Error: " + e.message);
+            alert(e.message);
             btn.disabled = false;
-            btn.innerText = "AUTHORIZE STAFF";
         }
     }
 
-    // 2. Load Staff List
     function loadStaff() {
-        db.collection('users').orderBy('createdAt', 'desc').onSnapshot(snap => {
+        db.collection('users').onSnapshot(snap => {
             const list = document.getElementById('staffList');
-            document.getElementById('staffCount').innerText = `${snap.size} Members`;
+            document.getElementById('staffCount').innerText = snap.size;
             list.innerHTML = "";
-            
             snap.forEach(doc => {
                 const u = doc.data();
                 const p = u.permissions || {};
-                
-                // Permission badges dikhane ke liye
-                let permsText = "";
-                if(p.p_attendance) permsText += '<span class="badge bg-success me-1">Attendance</span>';
-                if(p.p_marks) permsText += '<span class="badge bg-success me-1">Marks</span>';
-                if(p.p_fees) permsText += '<span class="badge bg-success me-1">Fees</span>';
-                if(p.p_registry) permsText += '<span class="badge bg-success me-1">Registry</span>';
-                if(u.role === 'admin') permsText = '<span class="badge bg-dark">All Access</span>';
+                let accessTags = "";
+                if(u.role === 'admin') accessTags = '<span class="badge bg-dark">FULL</span>';
+                else {
+                    if(p.p_attendance) accessTags += '<span class="badge bg-info me-1">Att</span>';
+                    if(p.p_marks) accessTags += '<span class="badge bg-info me-1">Marks</span>';
+                    if(p.p_fees) accessTags += '<span class="badge bg-info me-1">Fees</span>';
+                }
 
-                list.innerHTML += `
-                    <tr>
-                        <td>
-                            <div class="fw-bold">${u.name}</div>
-                            <div class="small text-muted">${u.email}</div>
-                        </td>
-                        <td><span class="role-badge role-staff">${u.role}</span></td>
-                        <td>${permsText || '<small class="text-danger">No Access</small>'}</td>
-                        <td class="text-end">
-                            <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${doc.id}')">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>`;
+                list.innerHTML += `<tr>
+                    <td><b>${u.name}</b><br><small>${u.email}</small></td>
+                    <td><span class="role-badge role-staff">${u.role}</span></td>
+                    <td>${accessTags}</td>
+                    <td class="text-end"><button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${doc.id}')"><i class="fas fa-trash"></i></button></td>
+                </tr>`;
             });
         });
     }
 
     async function deleteUser(id) {
-        if(confirm("Permanently remove this staff member from database?")) {
-            await db.collection('users').doc(id).delete();
-        }
+        if(confirm("Remove this user?")) await db.collection('users').doc(id).delete();
     }
-
     window.onload = loadStaff;
 </script>
 <script src="menu.js"></script>
