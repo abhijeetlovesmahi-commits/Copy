@@ -1,4 +1,4 @@
-/* THE LALIT INTERNATIONAL SCHOOL - MODULAR MENU WITH AUTH */
+/* THE LALIT INTERNATIONAL SCHOOL - DYNAMIC PERMISSIONS MENU */
 
 function loadMenu() {
     if (document.getElementById('sidebar-wrapper')) return;
@@ -12,6 +12,7 @@ function loadMenu() {
         document.head.appendChild(fa);
     }
 
+    // Pehle HTML ka structure banate hain (Empty Nav)
     const menuHTML = `
     <div id="sidebar-wrapper">
         <div id="sidebar-overlay" onclick="toggleMenu(false)"></div>
@@ -28,31 +29,8 @@ function loadMenu() {
                 <h4 class="school-name">THE LALIT INTERNATIONAL SCHOOL</h4>
             </div>
             
-            <nav class="nav-links">
-                <a href="index.html"><i class="fas fa-home"></i> Dashboard</a>
-                <a href="view-students.html"><i class="fas fa-users"></i> Student Registry</a>
-                <a href="add-student.html"><i class="fas fa-user-plus"></i> Admission</a>
-                <a href="fee-master.html"><i class="fas fa-cog"></i> Fee Structure</a>
-                
-                <div class="menu-divider">Academic & Exams</div>
-                <a href="exam-master.html"><i class="fas fa-layer-group"></i> Exam Master</a>
-                <a href="exam-marks-entry.html"><i class="fas fa-pen-nib"></i> Marks Entry</a>
-                <a href="exam-repot-card.html"><i class="fas fa-file-alt"></i> Report Card</a>
-                <a href="attendance.html"><i class="fas fa-calendar-check"></i> Attendance</a>
-
-                <div class="menu-divider">Treasury & Accounts</div>
-                <a href="collect-fees.html"><i class="fas fa-vault"></i> Collect Fees</a>
-                <a href="fee-history.html"><i class="fas fa-history"></i> Fee History</a>
-                <a href="fee-demand-slip.html"><i class="fas fa-file-invoice"></i> Demand Slips</a>
-                <a href="master-ledger.html"><i class="fas fa-book"></i> Master Ledger</a>
-                <a href="defaulter-list.html"><i class="fas fa-exclamation-triangle"></i> Defaulter List</a>
-
-<div class="menu-divider">Administration</div>
-<a href="manage-users.html"><i class="fas fa-user-shield"></i> Staff & Roles</a>
-<a href="web-control.html"><i class="fas fa-globe"></i> Website Manager</a>
-
-                <div class="menu-divider">Security</div>
-                <a href="#" onclick="handleLogout()" class="logout-link"><i class="fas fa-sign-out-alt"></i> Logout Registry</a>
+            <nav class="nav-links" id="dynamic-nav-links">
+                <p style="color:white; padding:20px; font-size:12px;">Syncing Permissions...</p>
             </nav>
         </div>
 
@@ -121,6 +99,73 @@ function loadMenu() {
     </div>
     `;
     document.body.insertAdjacentHTML('afterbegin', menuHTML);
+    
+    // Auth status check karke links render karna
+    renderDynamicLinks();
+}
+
+async function renderDynamicLinks() {
+    firebase.auth().onAuthStateChanged(async (user) => {
+        if (!user) {
+            window.location.href = "login.html";
+            return;
+        }
+
+        const nav = document.getElementById('dynamic-nav-links');
+        const doc = await firebase.firestore().collection('users').doc(user.uid).get();
+        
+        if (!doc.exists) {
+            nav.innerHTML = `<p style="color:red; padding:20px;">Profile Not Found</p>`;
+            return;
+        }
+
+        const data = doc.data();
+        const role = data.role;
+        const perms = data.permissions || {}; // Switches data
+
+        let html = `<a href="index.html"><i class="fas fa-home"></i> Dashboard</a>`;
+
+        // 1. General & Admission (Individual Check)
+        if (perms.p_attendance || role === 'admin') {
+             html += `<a href="view-students.html"><i class="fas fa-users"></i> Student Registry</a>`;
+        }
+        if (role === 'admin') {
+             html += `<a href="add-student.html"><i class="fas fa-user-plus"></i> Admission</a>`;
+             html += `<a href="fee-master.html"><i class="fas fa-cog"></i> Fee Structure</a>`;
+        }
+
+        // 2. Academic Section
+        html += `<div class="menu-divider">Academic & Exams</div>`;
+        if (role === 'admin') html += `<a href="exam-master.html"><i class="fas fa-layer-group"></i> Exam Master</a>`;
+        if (perms.p_marks || role === 'admin') html += `<a href="exam-marks-entry.html"><i class="fas fa-pen-nib"></i> Marks Entry</a>`;
+        html += `<a href="exam-repot-card.html"><i class="fas fa-file-alt"></i> Report Card</a>`;
+        if (perms.p_attendance || role === 'admin') html += `<a href="attendance.html"><i class="fas fa-calendar-check"></i> Attendance</a>`;
+
+        // 3. Treasury Section
+        html += `<div class="menu-divider">Treasury & Accounts</div>`;
+        if (perms.p_fees || role === 'admin') {
+            html += `<a href="collect-fees.html"><i class="fas fa-vault"></i> Collect Fees</a>`;
+            html += `<a href="fee-history.html"><i class="fas fa-history"></i> Fee History</a>`;
+            html += `<a href="fee-demand-slip.html"><i class="fas fa-file-invoice"></i> Demand Slips</a>`;
+        }
+        if (role === 'admin') {
+            html += `<a href="master-ledger.html"><i class="fas fa-book"></i> Master Ledger</a>`;
+            html += `<a href="defaulter-list.html"><i class="fas fa-exclamation-triangle"></i> Defaulter List</a>`;
+        }
+
+        // 4. Administration Section (Only Admin)
+        if (role === 'admin') {
+            html += `<div class="menu-divider">Administration</div>`;
+            html += `<a href="manage-users.html"><i class="fas fa-user-shield"></i> Staff & Roles</a>`;
+            html += `<a href="web-control.html"><i class="fas fa-globe"></i> Website Manager</a>`;
+        }
+
+        // 5. Logout
+        html += `<div class="menu-divider">Security</div>`;
+        html += `<a href="#" onclick="handleLogout()" class="logout-link"><i class="fas fa-sign-out-alt"></i> Logout Registry</a>`;
+
+        nav.innerHTML = html;
+    });
 }
 
 function handleMenuClick(e) {
@@ -146,7 +191,6 @@ function toggleMenu(isOpen) {
     }
 }
 
-// Global Logout Function
 function handleLogout() {
     if(confirm("Are you sure you want to exit the Imperial Registry?")) {
         firebase.auth().signOut().then(() => {
