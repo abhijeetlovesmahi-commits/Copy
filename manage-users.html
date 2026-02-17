@@ -6,7 +6,6 @@
     <title>Staff Management - The Lalit Intl.</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
     <style>
         :root { --royal-blue: #002366; --gold: #D4AF37; }
         body { background: #f4f7f6; font-family: 'Poppins', sans-serif; }
@@ -48,11 +47,11 @@
                     <div class="mb-4">
                         <label class="small fw-bold">Initial Password</label>
                         <input type="text" id="uPass" class="form-control" value="Lalit@123">
-                        <small class="text-muted">Staff can change this later.</small>
                     </div>
-                    <button class="btn btn-dark w-100" style="background: var(--royal-blue);" onclick="createUser()">
+                    <button class="btn btn-dark w-100" id="createBtn" style="background: var(--royal-blue);" onclick="createNewStaff()">
                         <i class="fas fa-plus-circle me-1"></i> AUTHORIZE STAFF
                     </button>
+                    <p id="statusMsg" class="small mt-2"></p>
                 </div>
             </div>
 
@@ -89,7 +88,7 @@
 <script src="firebase-config.js"></script>
 
 <script>
-    // 1. Load All Staff Members
+    // 1. Load Staff List
     function loadStaff() {
         db.collection('users').onSnapshot(snap => {
             const list = document.getElementById('staffList');
@@ -120,42 +119,62 @@
         });
     }
 
-    // 2. Create User in Firebase Auth & Firestore
-    async function createUser() {
+    // 2. Create User in Auth and Firestore
+    async function createNewStaff() {
         const name = document.getElementById('uName').value;
         const email = document.getElementById('uEmail').value;
         const role = document.getElementById('uRole').value;
         const pass = document.getElementById('uPass').value;
+        const btn = document.getElementById('createBtn');
+        const msg = document.getElementById('statusMsg');
 
-        if(!name || !email) return alert("Fill all fields!");
+        if(!name || !email || !pass) return alert("Fill all fields!");
+
+        btn.disabled = true;
+        msg.innerText = "Creating account... Please wait.";
 
         try {
-            // Note: Creating user in Auth requires special handling if you're already logged in as Admin.
-            // For now, we save details in Firestore. Manual Auth entry may be needed or Firebase Functions.
-            await db.collection('users').add({
+            // Hum ek secondary app initialize karenge taaki admin logout na ho
+            const secondaryApp = firebase.initializeApp(firebaseConfig, "Secondary");
+            
+            // Is secondary app se user banayenge
+            const userCredential = await secondaryApp.auth().createUserWithEmailAndPassword(email, pass);
+            const uid = userCredential.user.uid;
+
+            // Database mein entry karenge
+            await db.collection('users').doc(uid).set({
                 name: name,
-                email: email,
+                email: email.toLowerCase(),
                 role: role,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
+
+            // Secondary app ko delete karenge taaki memory saaf rahe
+            await secondaryApp.delete();
+
+            alert("SUCCESS: Staff " + name + " created and authorized!");
             
-            alert("Staff " + name + " has been registered as " + role);
             // Form Reset
             document.getElementById('uName').value = "";
             document.getElementById('uEmail').value = "";
+            msg.innerText = "";
+
         } catch (e) {
+            console.error(e);
             alert("Error: " + e.message);
+            msg.innerText = "Failed: " + e.message;
+        } finally {
+            btn.disabled = false;
         }
     }
 
     async function deleteUser(id) {
-        if(confirm("Remove this staff member from the Registry?")) {
+        if(confirm("Note: This will only remove user from Database. To block login, delete from Firebase Auth Console manually.")) {
             await db.collection('users').doc(id).delete();
         }
     }
 
     window.onload = loadStaff;
 </script>
-<script src="menu.js"></script>
 </body>
 </html>
