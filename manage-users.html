@@ -1,201 +1,72 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Staff Management | The Lalit Intl.</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        :root { --royal-blue: #002366; --gold: #D4AF37; }
-        body { background: #f4f7f6; font-family: 'Poppins', sans-serif; }
-        .user-card { background: white; border-radius: 12px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-top: 5px solid var(--royal-blue); }
-        .perm-box { background: #fff9e6; padding: 15px; border-radius: 8px; margin-top: 10px; border: 1px solid #ffeeba; max-height: 350px; overflow-y: auto; }
-        .section-title { font-size: 10px; font-weight: bold; color: var(--royal-blue); text-transform: uppercase; margin: 12px 0 5px; display: block; border-bottom: 1px solid rgba(0,35,102,0.1); }
-        .role-badge { font-size: 0.7rem; padding: 3px 8px; border-radius: 10px; background: #e3f2fd; color: #1565c0; font-weight: 600; }
-    </style>
-</head>
-<body>
-
-<div class="container-fluid py-4">
-    <div class="row g-4">
-        <div class="col-lg-4">
-            <div class="user-card">
-                <h5 class="fw-bold mb-4" style="color: var(--royal-blue);"><i class="fas fa-user-plus me-2"></i>New Staff Identity</h5>
-                <input type="text" id="uName" class="form-control mb-3" placeholder="Full Name">
-                <input type="email" id="uEmail" class="form-control mb-3" placeholder="Email Address">
-                <select id="uRole" class="form-select mb-3">
-                    <option value="teacher">Teacher</option>
-                    <option value="accountant">Accountant</option>
-                    <option value="admin">Administrator</option>
-                </select>
-                <input type="text" id="uPass" class="form-control mb-3" value="Lalit@123">
-
-                <div class="perm-box" id="new_perms">
-                    <span class="section-title">Access Control</span>
-                    <div class="form-check form-switch mb-1"><input class="form-check-input" type="checkbox" id="p_view_students" checked><label class="small">Registry</label></div>
-                    <div class="form-check form-switch mb-1"><input class="form-check-input" type="checkbox" id="p_attendance" checked><label class="small">Attendance</label></div>
-                    <div class="form-check form-switch mb-1"><input class="form-check-input" type="checkbox" id="p_marks_entry"><label class="small">Marks Entry</label></div>
-                    <div class="form-check form-switch mb-1"><input class="form-check-input" type="checkbox" id="p_collect_fees"><label class="small">Fee Collection</label></div>
-                </div>
-                <button class="btn btn-primary w-100 mt-3 fw-bold" onclick="createNewStaff()">AUTHORIZE</button>
-            </div>
-        </div>
-
-        <div class="col-lg-8">
-            <div class="user-card">
-                <h5 class="fw-bold mb-4"><i class="fas fa-shield-alt me-2"></i>Authorized Staff Registry</h5>
-                <div class="table-responsive">
-                    <table class="table align-middle">
-                        <thead class="table-light text-secondary small">
-                            <tr><th>Member</th><th>Role</th><th>Access</th><th class="text-end">Actions</th></tr>
-                        </thead>
-                        <tbody id="staffList"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="editModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header border-0">
-                <h5 class="modal-title fw-bold" id="editTitle">Edit Permissions</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <input type="hidden" id="editUid">
-                <div class="perm-box bg-light" id="edit_perms_list">
-                    </div>
-            </div>
-            <div class="modal-footer border-0">
-                <button class="btn btn-primary w-100 fw-bold" onclick="savePermissions()">UPDATE ACCESS</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
-<script src="firebase-config.js"></script>
-
-<script>
-    const permKeys = {
+// --- 1. MASTER PAGE LIST (GENUINE ACCESS) ---
+const masterPages = {
+    "Admission & Registry": {
         view_students: "Student Registry",
-        add_student: "Admission",
-        edit_student: "Edit Student",
-        attendance: "Attendance",
-        exam_master: "Exam Master",
-        marks_entry: "Marks Entry",
-        report_card: "Report Card",
-        fee_master: "Fee Master",
-        collect_fees: "Collect Fees",
-        fee_history: "Fee History",
-        master_ledger: "Ledger",
-        defaulter_list: "Defaulters"
-    };
-
-    // 1. Create Staff
-    async function createNewStaff() {
-        const name = document.getElementById('uName').value;
-        const email = document.getElementById('uEmail').value;
-        const role = document.getElementById('uRole').value;
-        const pass = document.getElementById('uPass').value;
-
-        let permissions = {};
-        // Note: Individual IDs matching your menu logic
-        permissions.view_students = document.getElementById('p_view_students').checked;
-        permissions.attendance = document.getElementById('p_attendance').checked;
-        permissions.marks_entry = document.getElementById('p_marks_entry').checked;
-        permissions.collect_fees = document.getElementById('p_collect_fees').checked;
-
-        if(!name || !email) return alert("Fill Name & Email!");
-
-        try {
-            const secondaryApp = firebase.initializeApp(firebaseConfig, "Secondary");
-            const userCred = await secondaryApp.auth().createUserWithEmailAndPassword(email, pass);
-            await db.collection('users').doc(userCred.user.uid).set({
-                name, email: email.toLowerCase(), role, permissions,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-            await secondaryApp.delete();
-            location.reload();
-        } catch (e) { alert(e.message); }
+        add_student: "New Admission",
+        edit_student: "Edit Student Data"
+    },
+    "Academic & Exams": {
+        attendance: "Daily Attendance",
+        exam_master: "Exam Master Setup",
+        marks_entry: "Exam Marks Entry",
+        report_card: "Report Card Print"
+    },
+    "Treasury & Accounts": {
+        fee_master: "Fee Structure Setup",
+        collect_fees: "Collect Student Fees",
+        fee_history: "Daily Fee History",
+        demand_slip: "Demand Slip Generator",
+        master_ledger: "School Master Ledger",
+        defaulter_list: "Fee Defaulter List"
+    },
+    "Administration": {
+        manage_users: "Staff & Role Manager",
+        web_control: "Website Manager"
     }
+};
 
-    // 2. Load Staff with Edit Button
-    function loadStaff() {
-        db.collection('users').orderBy('createdAt', 'desc').onSnapshot(snap => {
-            const list = document.getElementById('staffList');
-            list.innerHTML = "";
-            snap.forEach(doc => {
-                const u = doc.data();
-                const p = u.permissions || {};
-                const activeCount = Object.values(p).filter(v => v === true).length;
+// --- 2. COMMON HTML GENERATOR ---
+// Ye function naya user banate waqt aur edit karte waqt same list dikhayega
+function generatePermList(containerId, currentPerms = {}, isEdit = false) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+    const prefix = isEdit ? "edit_" : "new_";
 
-                list.innerHTML += `
-                <tr>
-                    <td><div class="fw-bold">${u.name}</div><div class="small text-muted">${u.email}</div></td>
-                    <td><span class="role-badge">${u.role}</span></td>
-                    <td><span class="badge bg-success-subtle text-success border border-success-subtle">${activeCount} Pages</span></td>
-                    <td class="text-end">
-                        <button class="btn btn-sm btn-light text-primary me-2" onclick="openEditModal('${doc.id}', '${u.name}')"><i class="fas fa-edit"></i></button>
-                        <button class="btn btn-sm btn-light text-danger" onclick="deleteUser('${doc.id}')"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>`;
-            });
-        });
-    }
-
-    // 3. Open Edit Modal
-    async function openEditModal(uid, name) {
-        document.getElementById('editUid').value = uid;
-        document.getElementById('editTitle').innerText = "Edit: " + name;
-        
-        const userDoc = await db.collection('users').doc(uid).get();
-        const currentPerms = userDoc.data().permissions || {};
-        
-        const permsList = document.getElementById('edit_perms_list');
-        permsList.innerHTML = "";
-
-        Object.keys(permKeys).forEach(key => {
-            const checked = currentPerms[key] ? 'checked' : '';
-            permsList.innerHTML += `
-                <div class="form-check form-switch mb-2">
-                    <input class="form-check-input edit-perm-check" type="checkbox" id="edit_${key}" ${checked}>
-                    <label class="form-check-label small">${permKeys[key]}</label>
+    for (const [category, pages] of Object.entries(masterPages)) {
+        let html = `<span class="section-title text-primary fw-bold small mt-3 d-block">${category}</span>`;
+        for (const [id, label] of Object.entries(pages)) {
+            const isChecked = currentPerms[id] ? "checked" : "";
+            html += `
+                <div class="form-check form-switch mb-1">
+                    <input class="form-check-input perm-switch" type="checkbox" id="${prefix}${id}" ${isChecked} data-key="${id}">
+                    <label class="form-check-label small" for="${prefix}${id}">${label}</label>
                 </div>`;
-        });
-
-        new bootstrap.Modal(document.getElementById('editModal')).show();
+        }
+        container.insertAdjacentHTML('beforeend', html);
     }
+}
 
-    // 4. Save Updated Permissions
-    async function savePermissions() {
-        const uid = document.getElementById('editUid').value;
-        let updatedPerms = {};
-        
-        document.querySelectorAll('.edit-perm-check').forEach(check => {
-            const key = check.id.replace('edit_', '');
-            updatedPerms[key] = check.checked;
-        });
+// --- 3. SAVE LOGIC (FOR BOTH) ---
+function getSelectedPerms(selector) {
+    let perms = {};
+    document.querySelectorAll(selector).forEach(checkbox => {
+        const key = checkbox.getAttribute('data-key');
+        perms[key] = checkbox.checked;
+    });
+    return perms;
+}
 
-        try {
-            await db.collection('users').doc(uid).update({ permissions: updatedPerms });
-            alert("Permissions Updated!");
-            bootstrap.Modal.getInstance(document.getElementById('editModal')).hide();
-        } catch (e) { alert(e.message); }
-    }
+// --- 4. USAGE ---
+// Window Load par naye user ke liye list generate karein
+window.onload = () => {
+    generatePermList("new_staff_perms_container"); 
+    loadStaffTable(); // Aapka table load karne wala function
+};
 
-    async function deleteUser(id) {
-        if(confirm("Permanently remove?")) await db.collection('users').doc(id).delete();
-    }
-
-    window.onload = loadStaff;
-</script>
-</body>
-</html>
+// Edit button click par
+async function openEditModal(uid, name) {
+    const doc = await db.collection('users').doc(uid).get();
+    const currentPerms = doc.data().permissions || {};
+    generatePermList("edit_staff_perms_container", currentPerms, true);
+    // Modal show karne ka code...
+}
