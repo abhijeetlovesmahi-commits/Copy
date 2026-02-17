@@ -8,23 +8,23 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --royal-blue: #002366; --gold: #D4AF37; }
-        body { background: linear-gradient(135deg, var(--royal-blue) 0%, #001a4d 100%); height: 100vh; display: flex; align-items: center; justify-content: center; font-family: sans-serif; }
-        .login-card { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 20px 50px rgba(0,0,0,0.4); width: 100%; max-width: 400px; text-align: center; }
-        .form-control { margin-bottom: 20px; padding: 12px; border-radius: 8px; }
-        .btn-login { background: var(--royal-blue); color: var(--gold); font-weight: bold; width: 100%; padding: 12px; border: 1px solid var(--gold); cursor: pointer; }
-        #statusMsg { font-size: 0.85rem; margin-top: 15px; font-weight: bold; }
+        body { background: #001a4d; height: 100vh; display: flex; align-items: center; justify-content: center; font-family: sans-serif; }
+        .login-card { background: white; padding: 40px; border-radius: 12px; width: 100%; max-width: 380px; text-align: center; border-top: 5px solid var(--gold); }
+        .form-control { margin-bottom: 15px; border-radius: 5px; }
+        .btn-login { background: var(--royal-blue); color: var(--gold); font-weight: bold; width: 100%; padding: 12px; border: none; cursor: pointer; }
+        #statusMsg { font-size: 0.8rem; margin-top: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="login-card">
-    <h3 class="fw-bold mb-4" style="color: var(--royal-blue);">STAFF PORTAL</h3>
+    <h4 class="fw-bold mb-4" style="color: var(--royal-blue);">STAFF LOGIN</h4>
     <input type="email" id="email" class="form-control" placeholder="Email Address">
     <input type="password" id="pass" class="form-control" placeholder="Password">
-    <button class="btn btn-login" id="loginBtn">AUTHENTICATE SYSTEM</button>
+    <button class="btn btn-login" id="loginBtn">AUTHENTICATE</button>
     <div id="statusMsg"></div>
     <hr>
-    <a href="index.html" class="text-decoration-none text-muted small"><i class="fas fa-arrow-left"></i> Back to School Website</a>
+    <a href="index.html" class="text-muted small text-decoration-none">Back to Website</a>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
@@ -37,11 +37,13 @@
     // System Initialize Check
     let auth, db;
     try {
+        // Ise initialize karne ki koshish karein
         auth = firebase.auth();
         db = firebase.firestore();
-        console.log("Firebase System Online");
+        console.log("Firebase initialized successfully");
     } catch (e) {
-        document.getElementById('statusMsg').innerHTML = "<span class='text-danger'>Firebase Config Missing!</span>";
+        console.error("Firebase init error:", e);
+        document.getElementById('statusMsg').innerHTML = "<span class='text-danger'>Config File Error! Check firebase-config.js</span>";
     }
 
     // Login Function
@@ -60,14 +62,16 @@
         btn.innerText = "VERIFYING...";
 
         try {
-            const userCredential = await auth.signInWithEmailAndPassword(email, pass);
-            msg.innerHTML = "<span class='text-success'>Success! Redirecting...</span>";
+            // Auth check
+            await auth.signInWithEmailAndPassword(email, pass);
+            msg.innerHTML = "<span class='text-success'>Access Granted! Redirecting...</span>";
 
-            // Role Check
+            // Firestore Role Check
             const snap = await db.collection('users').where('email', '==', email.toLowerCase()).get();
 
             if (!snap.empty) {
                 const role = snap.docs[0].data().role;
+                // Sahi page par bhejein
                 if (role === 'admin') window.location.href = "dashboard.html";
                 else if (role === 'accountant') window.location.href = "collect-fees.html";
                 else if (role === 'teacher') window.location.href = "attendance.html";
@@ -78,13 +82,13 @@
             }
         } catch (error) {
             btn.disabled = false;
-            btn.innerText = "AUTHENTICATE SYSTEM";
+            btn.innerText = "AUTHENTICATE";
             msg.innerHTML = "<span class='text-danger'>" + error.message + "</span>";
-            console.error(error);
+            console.error("Login Error:", error);
         }
     }
 
-    // Button Click Listener (Isse button dead nahi hoga)
+    // Button par click listener lagayein
     document.getElementById('loginBtn').addEventListener('click', processLogin);
 </script>
 </body>
