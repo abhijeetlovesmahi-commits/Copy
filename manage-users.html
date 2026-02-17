@@ -3,79 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Staff Management - The Lalit Intl.</title>
+    <title>Staff Management | The Lalit Intl.</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --royal-blue: #002366; --gold: #D4AF37; }
         body { background: #f4f7f6; font-family: 'Poppins', sans-serif; }
-        .main-content { padding: 30px; margin-top: 40px; }
         .user-card { 
             background: white; border-radius: 12px; padding: 25px; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-top: 5px solid var(--royal-blue);
         }
+        .perm-box { 
+            background: #fff9e6; padding: 15px; border-radius: 8px; 
+            margin-top: 15px; border: 1px solid #ffeeba;
+        }
         .role-badge { font-size: 0.75rem; padding: 4px 10px; border-radius: 20px; font-weight: bold; text-transform: uppercase; }
         .role-admin { background: #ffebee; color: #c62828; }
-        .role-teacher { background: #e3f2fd; color: #1565c0; }
-        .role-accountant { background: #e8f5e9; color: #2e7d32; }
+        .role-staff { background: #e3f2fd; color: #1565c0; }
     </style>
 </head>
 <body>
 
-<div class="main-content">
-    <div class="container-fluid">
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="user-card">
-                    <h5 class="mb-4 text-royal"><i class="fas fa-user-shield me-2"></i>Create Staff Identity</h5>
-                    <div class="mb-3">
-                        <label class="small fw-bold">Full Name</label>
-                        <input type="text" id="uName" class="form-control" placeholder="e.g. Rahul Sharma">
-                    </div>
-                    <div class="mb-3">
-                        <label class="small fw-bold">Official Email</label>
-                        <input type="email" id="uEmail" class="form-control" placeholder="staff@thelalit.com">
-                    </div>
-                    <div class="mb-3">
-                        <label class="small fw-bold">Assign Role</label>
-                        <select id="uRole" class="form-select">
-                            <option value="teacher">Teacher (Attendance/Marks)</option>
-                            <option value="accountant">Accountant (Fees/Ledger)</option>
-                            <option value="admin">Administrator (Full Access)</option>
-                        </select>
-                    </div>
-                    <div class="mb-4">
-                        <label class="small fw-bold">Initial Password</label>
-                        <input type="text" id="uPass" class="form-control" value="Lalit@123">
-                    </div>
-                    <button class="btn btn-dark w-100" id="createBtn" style="background: var(--royal-blue);" onclick="createNewStaff()">
-                        <i class="fas fa-plus-circle me-1"></i> AUTHORIZE STAFF
-                    </button>
-                    <p id="statusMsg" class="small mt-2"></p>
+<div class="container-fluid py-4">
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="user-card">
+                <h5 class="fw-bold mb-4" style="color: var(--royal-blue);">
+                    <i class="fas fa-user-shield me-2"></i>CREATE STAFF IDENTITY
+                </h5>
+                
+                <div class="mb-3">
+                    <label class="small fw-bold">Full Name</label>
+                    <input type="text" id="uName" class="form-control" placeholder="e.g. Rahul Sharma">
                 </div>
-            </div>
+                
+                <div class="mb-3">
+                    <label class="small fw-bold">Official Email</label>
+                    <input type="email" id="uEmail" class="form-control" placeholder="staff@thelalit.com">
+                </div>
 
-            <div class="col-md-8">
-                <div class="user-card">
-                    <h5 class="mb-4 d-flex justify-content-between">
-                        <span><i class="fas fa-users-cog me-2"></i>Active Staff Registry</span>
-                        <span id="staffCount" class="badge bg-secondary">0 Members</span>
-                    </h5>
-                    <div class="table-responsive">
-                        <table class="table align-middle">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Staff Name</th>
-                                    <th>Role</th>
-                                    <th>Permissions</th>
-                                    <th class="text-end">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="staffList">
-                                <tr><td colspan="4" class="text-center p-4">Syncing with Cloud Registry...</td></tr>
-                            </tbody>
-                        </table>
+                <div class="mb-3">
+                    <label class="small fw-bold">Assign Primary Role</label>
+                    <select id="uRole" class="form-select">
+                        <option value="teacher">Teacher</option>
+                        <option value="accountant">Accountant</option>
+                        <option value="admin">Administrator</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="small fw-bold">Login Password</label>
+                    <input type="text" id="uPass" class="form-control" value="Lalit@123">
+                </div>
+
+                <div class="perm-box">
+                    <label class="fw-bold small mb-3 text-dark text-uppercase"><i class="fas fa-key me-1"></i> Page Access Control</label>
+                    
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input perm-check" type="checkbox" id="p_attendance" checked>
+                        <label class="form-check-label small">Attendance Access</label>
                     </div>
+                    
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input perm-check" type="checkbox" id="p_marks" checked>
+                        <label class="form-check-label small">Marks Entry Access</label>
+                    </div>
+
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input perm-check" type="checkbox" id="p_fees">
+                        <label class="form-check-label small">Fees Collection Access</label>
+                    </div>
+
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input perm-check" type="checkbox" id="p_registry">
+                        <label class="form-check-label small">Student Registry Access</label>
+                    </div>
+                    <small class="text-muted" style="font-size: 10px;">*Admin always has full access.</small>
+                </div>
+
+                <button class="btn btn-primary w-100 mt-4" id="createBtn" style="background: var(--royal-blue);" onclick="createNewStaff()">
+                    AUTHORIZE STAFF
+                </button>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="user-card">
+                <h5 class="fw-bold mb-4 d-flex justify-content-between">
+                    <span><i class="fas fa-users-cog me-2"></i>ACTIVE STAFF REGISTRY</span>
+                    <span id="staffCount" class="badge bg-secondary">0 Members</span>
+                </h5>
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Staff Name</th>
+                                <th>Role</th>
+                                <th>Active Access</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="staffList">
+                            <tr><td colspan="4" class="text-center">Syncing with Registry...</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -88,18 +119,68 @@
 <script src="firebase-config.js"></script>
 
 <script>
-    // 1. Load Staff List
+    // 1. Create Staff with Individual Permissions
+    async function createNewStaff() {
+        const name = document.getElementById('uName').value;
+        const email = document.getElementById('uEmail').value;
+        const role = document.getElementById('uRole').value;
+        const pass = document.getElementById('uPass').value;
+        const btn = document.getElementById('createBtn');
+
+        // Sabhi switches ki state ek object mein save karein
+        let permissions = {};
+        document.querySelectorAll('.perm-check').forEach(check => {
+            permissions[check.id] = check.checked;
+        });
+
+        if(!name || !email) return alert("Fill Name and Email!");
+
+        btn.disabled = true;
+        btn.innerText = "Processing...";
+
+        try {
+            // Secondary App to prevent Admin logout
+            const secondaryApp = firebase.initializeApp(firebaseConfig, "Secondary");
+            const userCredential = await secondaryApp.auth().createUserWithEmailAndPassword(email, pass);
+            const uid = userCredential.user.uid;
+
+            // Firestore mein user document create karein
+            await db.collection('users').doc(uid).set({
+                name: name,
+                email: email.toLowerCase(),
+                role: role,
+                permissions: permissions, // Ye switches data hai
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            await secondaryApp.delete();
+            alert("Success: Staff account created with custom permissions!");
+            location.reload();
+        } catch (e) {
+            alert("Error: " + e.message);
+            btn.disabled = false;
+            btn.innerText = "AUTHORIZE STAFF";
+        }
+    }
+
+    // 2. Load Staff List
     function loadStaff() {
-        db.collection('users').onSnapshot(snap => {
+        db.collection('users').orderBy('createdAt', 'desc').onSnapshot(snap => {
             const list = document.getElementById('staffList');
             document.getElementById('staffCount').innerText = `${snap.size} Members`;
             list.innerHTML = "";
             
             snap.forEach(doc => {
                 const u = doc.data();
-                const roleClass = `role-${u.role}`;
-                const permissions = u.role === 'admin' ? 'All Access' : 
-                                  (u.role === 'teacher' ? 'Attendance, Marks' : 'Fees, Expenses');
+                const p = u.permissions || {};
+                
+                // Permission badges dikhane ke liye
+                let permsText = "";
+                if(p.p_attendance) permsText += '<span class="badge bg-success me-1">Attendance</span>';
+                if(p.p_marks) permsText += '<span class="badge bg-success me-1">Marks</span>';
+                if(p.p_fees) permsText += '<span class="badge bg-success me-1">Fees</span>';
+                if(p.p_registry) permsText += '<span class="badge bg-success me-1">Registry</span>';
+                if(u.role === 'admin') permsText = '<span class="badge bg-dark">All Access</span>';
 
                 list.innerHTML += `
                     <tr>
@@ -107,8 +188,8 @@
                             <div class="fw-bold">${u.name}</div>
                             <div class="small text-muted">${u.email}</div>
                         </td>
-                        <td><span class="role-badge ${roleClass}">${u.role}</span></td>
-                        <td><small class="text-muted">${permissions}</small></td>
+                        <td><span class="role-badge role-staff">${u.role}</span></td>
+                        <td>${permsText || '<small class="text-danger">No Access</small>'}</td>
                         <td class="text-end">
                             <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${doc.id}')">
                                 <i class="fas fa-trash"></i>
@@ -119,62 +200,14 @@
         });
     }
 
-    // 2. Create User in Auth and Firestore
-    async function createNewStaff() {
-        const name = document.getElementById('uName').value;
-        const email = document.getElementById('uEmail').value;
-        const role = document.getElementById('uRole').value;
-        const pass = document.getElementById('uPass').value;
-        const btn = document.getElementById('createBtn');
-        const msg = document.getElementById('statusMsg');
-
-        if(!name || !email || !pass) return alert("Fill all fields!");
-
-        btn.disabled = true;
-        msg.innerText = "Creating account... Please wait.";
-
-        try {
-            // Hum ek secondary app initialize karenge taaki admin logout na ho
-            const secondaryApp = firebase.initializeApp(firebaseConfig, "Secondary");
-            
-            // Is secondary app se user banayenge
-            const userCredential = await secondaryApp.auth().createUserWithEmailAndPassword(email, pass);
-            const uid = userCredential.user.uid;
-
-            // Database mein entry karenge
-            await db.collection('users').doc(uid).set({
-                name: name,
-                email: email.toLowerCase(),
-                role: role,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-
-            // Secondary app ko delete karenge taaki memory saaf rahe
-            await secondaryApp.delete();
-
-            alert("SUCCESS: Staff " + name + " created and authorized!");
-            
-            // Form Reset
-            document.getElementById('uName').value = "";
-            document.getElementById('uEmail').value = "";
-            msg.innerText = "";
-
-        } catch (e) {
-            console.error(e);
-            alert("Error: " + e.message);
-            msg.innerText = "Failed: " + e.message;
-        } finally {
-            btn.disabled = false;
-        }
-    }
-
     async function deleteUser(id) {
-        if(confirm("Note: This will only remove user from Database. To block login, delete from Firebase Auth Console manually.")) {
+        if(confirm("Permanently remove this staff member from database?")) {
             await db.collection('users').doc(id).delete();
         }
     }
 
     window.onload = loadStaff;
 </script>
+<script src="menu.js"></script>
 </body>
 </html>
