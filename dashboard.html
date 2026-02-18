@@ -9,13 +9,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script src="firebase-config.js"></script>
+    <script src="auth-guard.js"></script> <script src="brand.js"></script>
+
     <style>
-        /* Sirf Dashboard specific styles jo style.css me nahi hain */
         .stat-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -23,13 +24,15 @@
             margin-bottom: 30px;
         }
         .stat-card {
-            background: white; border-radius: 8px; padding: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            background: white; border-radius: 12px; padding: 20px;
+            box-shadow: var(--shadow-md);
             border-bottom: 4px solid var(--royal-blue);
             text-align: center;
+            transition: 0.3s;
         }
-        .stat-card h6 { margin: 0; color: #666; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; }
-        .stat-card h3 { margin: 10px 0 0; font-size: 1.8rem; color: var(--royal-blue); }
+        .stat-card:hover { transform: translateY(-5px); }
+        .stat-card h6 { margin: 0; color: #666; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; font-weight: bold; }
+        .stat-card h3 { margin: 10px 0 0; font-size: 1.8rem; color: var(--royal-blue); font-family: 'Cinzel', serif; }
         
         .chart-container-grid {
             display: grid;
@@ -37,63 +40,71 @@
             gap: 20px;
         }
         .chart-box {
-            background: white; border-radius: 10px; padding: 20px;
-            border: 1px solid #e0d0b0; height: 350px;
+            background: white; border-radius: 12px; padding: 20px;
+            border: 1px solid var(--gold); height: 350px;
             display: flex; flex-direction: column; align-items: center;
+            box-shadow: var(--shadow-sm);
         }
         canvas { max-width: 100% !important; max-height: 250px !important; }
+
+        /* Access Denied Overlay for Charts */
+        .no-access {
+            display: flex; align-items: center; justify-content: center;
+            height: 100%; color: #ccc; font-style: italic; font-size: 0.9rem;
+            text-align: center; padding: 20px;
+        }
     </style>
 </head>
 <body>
 
-<input type="checkbox" id="menu-checkbox">
-<label for="menu-checkbox" class="menu-toggle">
-    <span></span><span></span><span></span>
-</label>
-
-<div class="sidebar" id="sidebar-nav">
-    </div>
+<div id="menu-container"></div>
 
 <div class="main-content">
     <div class="royal-card">
-        <div id="brand-header-container"></div>
+        <div class="header" id="brand-header-container">
+            </div>
 
-        <h2 class="text-royal mb-4 fw-bold"><i class="fas fa-tachometer-alt me-2"></i>IMPERIAL CONTROL TOWER</h2>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="brand-font" style="color: var(--royal-blue); margin: 0;">
+                <i class="fas fa-tachometer-alt me-2"></i>Control Tower
+            </h2>
+            <div id="userWelcome" class="small fw-bold text-muted"></div>
+        </div>
 
         <div class="stat-grid">
-            <div class="stat-card">
-                <h6>Total Souls</h6>
+            <div class="stat-card" id="stat_students">
+                <h6>Total Students</h6>
                 <h3 id="countStudents">0</h3>
             </div>
-            <div class="stat-card">
-                <h6>Today's Cash</h6>
+            <div class="stat-card" id="stat_revenue">
+                <h6>Today's Collection</h6>
                 <h3 id="countCash" style="color: #198754;">₹0</h3>
             </div>
-            <div class="stat-card">
-                <h6>Attendance</h6>
-                <h3 id="countAttend" style="color: #D4AF37;">0%</h3>
+            <div class="stat-card" id="stat_attendance">
+                <h6>Today's Attendance</h6>
+                <h3 id="countAttend" style="color: var(--gold);">0%</h3>
             </div>
-            <div class="stat-card">
-                <h6>New Adm.</h6>
+            <div class="stat-card" id="stat_new">
+                <h6>New Admissions</h6>
                 <h3 id="countNew" style="color: #0d6efd;">0</h3>
             </div>
         </div>
 
-        <div class="chart-container-grid">
-            <div class="chart-box">
-                <h6 class="mb-3"><i class="fas fa-user-plus me-2"></i>Admissions</h6>
+        <div class="chart-container-grid" id="chartsGrid">
+            <div class="chart-box" id="box_admission">
+                <h6 class="mb-3"><i class="fas fa-user-plus me-2"></i>ADMISSION TREND</h6>
                 <canvas id="admissionChart"></canvas>
             </div>
-            <div class="chart-box">
-                <h6 class="mb-3"><i class="fas fa-calendar-check me-2"></i>Attendance</h6>
+            <div class="chart-box" id="box_attendance">
+                <h6 class="mb-3"><i class="fas fa-calendar-check me-2"></i>ATTENDANCE OVERVIEW</h6>
                 <canvas id="attendanceChart"></canvas>
             </div>
-            <div class="chart-box">
-                <h6 class="mb-3"><i class="fas fa-vault me-2"></i>Revenue</h6>
+            <div class="chart-box" id="box_fee">
+                <h6 class="mb-3"><i class="fas fa-vault me-2"></i>FEE COLLECTION</h6>
                 <canvas id="feeChart"></canvas>
             </div>
-            <div class="chart-box">
-                <h6 class="mb-3"><i class="fas fa-wallet me-2"></i>Expenses</h6>
+            <div class="chart-box" id="box_expense">
+                <h6 class="mb-3"><i class="fas fa-wallet me-2"></i>EXPENSE ANALYSIS</h6>
                 <canvas id="expenseChart"></canvas>
             </div>
         </div>
@@ -101,21 +112,70 @@
 </div>
 
 <script>
-    // Global Chart Instances (Original Logic)
-    let charts = { adm: null, att: null, fee: null, exp: null };
+    let charts = { admission: null, attendance: null, fee: null, expense: null };
 
-    function createChart(id, type, labels, data, colors) {
+    // Function to initialize Dashboard after Auth Check
+    async function startDashboard(userData) {
+        document.getElementById('userWelcome').innerText = `Welcome, ${userData.name} (${userData.role.toUpperCase()})`;
+
+        // 1. ADMISSIONS LOGIC (Visible to Admin & view_students permission)
+        if(userData.role === 'admin' || (userData.permissions && userData.permissions.view_students)) {
+            db.collection('students').onSnapshot(snap => {
+                let total = snap.size;
+                let newAdm = snap.docs.filter(d => d.data().isNew === true).length;
+                document.getElementById('countStudents').innerText = total;
+                document.getElementById('countNew').innerText = newAdm;
+                renderChart('admission', 'doughnut', ['Existing', 'New'], [total - newAdm, newAdm], ['#002366', '#D4AF37']);
+            });
+        } else {
+            document.getElementById('box_admission').innerHTML = `<div class="no-access">Admission data restricted</div>`;
+        }
+
+        // 2. FEE/REVENUE LOGIC (Visible to Admin & collect_fees permission)
+        if(userData.role === 'admin' || (userData.permissions && userData.permissions.collect_fees)) {
+            const today = new Date().toLocaleDateString('en-GB');
+            db.collection('fee_transactions').onSnapshot(snap => {
+                let todayTotal = 0;
+                let monthTotal = 0;
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    if(d.date === today) todayTotal += Number(d.amount);
+                    monthTotal += Number(d.amount);
+                });
+                document.getElementById('countCash').innerText = "₹" + todayTotal.toLocaleString('en-IN');
+                renderChart('fee', 'doughnut', ['Collected', 'Dues'], [monthTotal, 50000], ['#198754', '#f8f9fa']);
+            });
+        } else {
+            document.getElementById('box_fee').innerHTML = `<div class="no-access">Financial data restricted</div>`;
+            document.getElementById('countCash').innerText = "Locked";
+        }
+
+        // 3. ATTENDANCE LOGIC
+        if(userData.role === 'admin' || (userData.permissions && userData.permissions.attendance)) {
+             // Sample Data for demonstration
+             document.getElementById('countAttend').innerText = "92%";
+             renderChart('attendance', 'pie', ['Present', 'Absent'], [92, 8], ['#D4AF37', '#eee']);
+        } else {
+            document.getElementById('box_attendance').innerHTML = `<div class="no-access">Attendance data restricted</div>`;
+        }
+
+        // 4. EXPENSES (Admin Only)
+        if(userData.role === 'admin') {
+            renderChart('expense', 'bar', ['Salary', 'Bills', 'Misc'], [45000, 15000, 8000], ['#002366', '#D4AF37', '#6c757d']);
+        } else {
+            document.getElementById('box_expense').innerHTML = `<div class="no-access">Admin-only analytics</div>`;
+        }
+    }
+
+    function renderChart(id, type, labels, data, colors) {
+        const canvas = document.getElementById(id + 'Chart');
+        if(!canvas) return;
         if (charts[id]) charts[id].destroy(); 
-        const ctx = document.getElementById(id + 'Chart').getContext('2d');
-        charts[id] = new Chart(ctx, {
+        charts[id] = new Chart(canvas.getContext('2d'), {
             type: type,
             data: {
                 labels: labels,
-                datasets: [{
-                    data: data,
-                    backgroundColor: colors,
-                    borderWidth: 0
-                }]
+                datasets: [{ data: data, backgroundColor: colors, borderWidth: 0 }]
             },
             options: {
                 responsive: true,
@@ -125,43 +185,15 @@
         });
     }
 
-    function initDashboard() {
-        // 1. Admissions Data (Real-time from 'students' collection)
-        db.collection('students').onSnapshot(snap => {
-            let total = snap.size;
-            let newAdm = snap.docs.filter(d => d.data().isNew).length;
-            document.getElementById('countStudents').innerText = total;
-            document.getElementById('countNew').innerText = newAdm;
-            createChart('admission', 'doughnut', ['Old', 'New'], [total - newAdm, newAdm], ['#002366', '#D4AF37']);
-        });
-
-        // 2. Attendance (Sample - Replace with real logic)
-        createChart('attendance', 'pie', ['Present', 'Absent'], [85, 15], ['#D4AF37', '#eee']);
-        document.getElementById('countAttend').innerText = "85%";
-
-        // 3. Fee Logic (Real-time Today)
-        const today = new Date().toLocaleDateString('en-GB');
-        db.collection('fee_transactions').onSnapshot(snap => {
-            let todayTotal = 0;
-            let monthTotal = 0;
-            snap.forEach(doc => {
-                const d = doc.data();
-                if(d.date === today) todayTotal += Number(d.amount);
-                monthTotal += Number(d.amount);
-            });
-            document.getElementById('countCash').innerText = "₹" + todayTotal;
-            createChart('fee', 'doughnut', ['Collected', 'Pending'], [monthTotal, 50000], ['#198754', '#e9ecef']);
-        });
-
-        // 4. Expense Logic
-        createChart('expense', 'bar', ['Salary', 'Bills', 'Misc'], [40000, 12000, 5000], ['#dc3545', '#6c757d', '#343a40']);
-    }
-
-    window.onload = initDashboard;
+    // Auth Listening to trigger Dashboard
+    firebase.auth().onAuthStateChanged(async (user) => {
+        if (user) {
+            const doc = await db.collection('users').doc(user.uid).get();
+            if(doc.exists) startDashboard(doc.data());
+        }
+    });
 </script>
 
-<script src="brand.js"></script>
 <script src="menu.js"></script>
-
 </body>
 </html>
