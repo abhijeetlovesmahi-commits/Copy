@@ -1,5 +1,43 @@
-/* THE LALIT INTERNATIONAL SCHOOL - FINAL COMPLETED SECURE MENU */
+/* THE LALIT INTERNATIONAL SCHOOL - FINAL COMPLETED SECURE MENU 
+   FIXED: Firebase Initialization & Script Loading
+*/
 
+// --- 1. SETTING UP FIREBASE LIBRARIES ---
+function loadFirebaseSDKs(callback) {
+    const scripts = [
+        "https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js",
+        "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js",
+        "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"
+    ];
+
+    let loadedCount = 0;
+    scripts.forEach(src => {
+        const script = document.createElement('script');
+        script.src = src;
+        script.onload = () => {
+            loadedCount++;
+            if (loadedCount === scripts.length) callback();
+        };
+        document.head.appendChild(script);
+    });
+}
+
+// --- 2. CONFIG & INITIALIZATION ---
+const firebaseConfig = {
+  apiKey: "AIzaSyDqDmsMp2eAuHJBcjW-ciO2JcLTXapiIrs",
+  authDomain: "the-lalit-d7472.firebaseapp.com",
+  projectId: "the-lalit-d7472",
+  appId: "1:479237084229:web:31078825739b3c5712ff2c"
+};
+
+function initializeApp() {
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    loadMenu(); // Firebase initialize hone ke baad menu load hoga
+}
+
+// --- 3. MENU UI DESIGN ---
 function loadMenu() {
     if (document.getElementById('sidebar-wrapper')) return;
 
@@ -52,6 +90,7 @@ function loadMenu() {
     renderDynamicLinks();
 }
 
+// --- 4. RENDER LINKS FROM FIRESTORE ---
 async function renderDynamicLinks() {
     firebase.auth().onAuthStateChanged(async (user) => {
         const nav = document.getElementById('dynamic-nav-links');
@@ -71,6 +110,7 @@ async function renderDynamicLinks() {
 
             let html = `<a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a>`;
 
+            // Menu structure same as your request
             if (role === 'admin') {
                 html += `
                 <div class="menu-divider">Registry</div>
@@ -118,11 +158,14 @@ async function renderDynamicLinks() {
             }
             html += `<a href="#" onclick="handleLogout()" class="nav-links logout-link"><i class="fas fa-sign-out-alt"></i> Logout Registry</a>`;
             nav.innerHTML = html;
-        } catch (e) { console.error(e); }
+        } catch (e) { 
+            console.error(e); 
+            nav.innerHTML = `<p style="color:red; padding:20px;">Sync Error. Check Admin Settings.</p>`;
+        }
     });
 }
 
-// --- ESSENTIAL TOGGLE FUNCTIONS ---
+// --- 5. ESSENTIAL TOGGLE FUNCTIONS ---
 function handleMenuClick(e) {
     e.stopPropagation();
     const sidebar = document.getElementById('mySidebar');
@@ -133,6 +176,8 @@ function toggleMenu(isOpen) {
     const sidebar = document.getElementById('mySidebar');
     const overlay = document.getElementById('sidebar-overlay');
     const trigger = document.getElementById('menu-trigger');
+    if (!sidebar || !overlay || !trigger) return;
+
     if (isOpen) {
         sidebar.classList.add('open');
         overlay.style.display = 'block';
@@ -150,6 +195,8 @@ function handleLogout() {
     }
 }
 
-// Initialization
-if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadMenu);
-else loadMenu();
+// --- 6. START EVERYTHING ---
+loadFirebaseSDKs(() => {
+    initializeApp();
+});
+
