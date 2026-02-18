@@ -1,23 +1,6 @@
-/* THE LALIT INTERNATIONAL SCHOOL - FINAL STABLE MENU */
+/* THE LALIT INTERNATIONAL SCHOOL - FINAL STABLE & FAST MENU */
 
-// --- 1. FIREBASE SDK LOADERS ---
-function loadFirebaseSDKs(callback) {
-    if (window.firebase) return callback();
-    const scripts = [
-        "https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js",
-        "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js",
-        "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"
-    ];
-    let loaded = 0;
-    scripts.forEach(src => {
-        const s = document.createElement('script');
-        s.src = src;
-        s.onload = () => { if (++loaded === scripts.length) callback(); };
-        document.head.appendChild(s);
-    });
-}
-
-// --- 2. INITIALIZE ---
+// --- 1. CONFIG ---
 const firebaseConfig = {
   apiKey: "AIzaSyDqDmsMp2eAuHJBcjW-ciO2JcLTXapiIrs",
   authDomain: "the-lalit-d7472.firebaseapp.com",
@@ -25,16 +8,11 @@ const firebaseConfig = {
   appId: "1:479237084229:web:31078825739b3c5712ff2c"
 };
 
-function startApp() {
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-    loadMenu();
-}
-
-// --- 3. MENU HTML & CSS ---
+// --- 2. FAST UI LOAD (Toggle button turant dikhega) ---
 function loadMenu() {
     if (document.getElementById('sidebar-wrapper')) return;
 
-    // FontAwesome link check
+    // FontAwesome load
     if (!document.getElementById('fa-icons-link')) {
         const fa = document.createElement('link');
         fa.id = 'fa-icons-link';
@@ -46,7 +24,7 @@ function loadMenu() {
     const menuHTML = `
     <div id="sidebar-wrapper">
         <div id="sidebar-overlay" onclick="toggleMenu(false)"></div>
-        <div id="menu-trigger" onclick="handleMenuClick(event)">
+        <div id="menu-trigger" onclick="handleMenuClick(event)" style="position: fixed; top: 20px; left: 20px; z-index: 999999; cursor: pointer; padding: 10px;">
             <div class="bar1"></div><div class="bar2"></div><div class="bar3"></div>
         </div>
         <div id="mySidebar" class="sidebar">
@@ -55,19 +33,15 @@ function loadMenu() {
                 <h4 class="school-name">THE LALIT INTERNATIONAL SCHOOL</h4>
             </div>
             <nav class="nav-links" id="dynamic-nav-links">
-                <p style="color:#D4AF37; padding:20px; font-size:12px;"><i class="fas fa-spinner fa-spin me-2"></i>Link Syncing...</p>
+                <p style="color:#D4AF37; padding:20px; font-size:12px;"><i class="fas fa-spinner fa-spin me-2"></i>Verifying Access...</p>
             </nav>
         </div>
         <style>
             @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Poppins:wght@400;500&display=swap');
-            
-            /* Toggle Button Fix */
-            #menu-trigger { position: fixed; top: 20px; left: 20px; z-index: 99999 !important; cursor: pointer; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; }
             .bar1, .bar2, .bar3 { width: 30px; height: 3px; background-color: #002366; margin: 6px 0; transition: 0.4s; border-radius: 2px; }
             .change .bar1 { transform: rotate(-45deg) translate(-9px, 6px); background-color: #D4AF37; }
             .change .bar2 { opacity: 0; }
             .change .bar3 { transform: rotate(45deg) translate(-8px, -8px); background-color: #D4AF37; }
-
             .sidebar { width: 280px; background: #002366; height: 100vh; position: fixed; left: -300px; top: 0; transition: 0.4s; z-index: 15000; border-right: 4px solid #D4AF37; overflow-y: auto; font-family: 'Poppins', sans-serif; }
             .sidebar.open { left: 0; }
             #sidebar-overlay { position: fixed; display: none; width: 100%; height: 100%; top: 0; left: 0; background-color: rgba(0,0,0,0.5); z-index: 10000; }
@@ -84,7 +58,30 @@ function loadMenu() {
     </div>
     `;
     document.body.insertAdjacentHTML('afterbegin', menuHTML);
-    renderDynamicLinks();
+    // UI aane ke baad Firebase load shuru hoga
+    loadFirebaseAndData();
+}
+
+// --- 3. BACKEND LOAD ---
+function loadFirebaseAndData() {
+    const scripts = [
+        "https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js",
+        "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js",
+        "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"
+    ];
+
+    let loaded = 0;
+    scripts.forEach(src => {
+        const s = document.createElement('script');
+        s.src = src;
+        s.onload = () => {
+            if (++loaded === scripts.length) {
+                if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+                renderDynamicLinks();
+            }
+        };
+        document.head.appendChild(s);
+    });
 }
 
 // --- 4. DATA RENDER ---
@@ -119,16 +116,13 @@ async function renderDynamicLinks() {
                 <div class="menu-divider">Administration</div>
                 <a href="manage-users.html"><i class="fas fa-user-shield"></i> Staff & Roles</a>`;
             } else {
-                if (p.attendance) {
-                    html += `<div class="menu-divider">Academic</div>
-                             <a href="attendance.html"><i class="fas fa-calendar-check"></i> Attendance</a>`;
-                }
+                if (p.attendance) html += `<a href="attendance.html"><i class="fas fa-calendar-check"></i> Attendance</a>`;
             }
 
             html += `<a href="#" onclick="handleLogout()" class="nav-links logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a>`;
             nav.innerHTML = html;
         } catch (e) {
-            nav.innerHTML = `<p style="color:red; padding:20px;">Error Loading Menu</p>`;
+            nav.innerHTML = `<p style="color:red; padding:20px;">Error Syncing Registry.</p>`;
         }
     });
 }
@@ -137,7 +131,7 @@ async function renderDynamicLinks() {
 function handleMenuClick(e) {
     e.stopPropagation();
     const sidebar = document.getElementById('mySidebar');
-    toggleMenu(!sidebar.classList.contains('open'));
+    if(sidebar) toggleMenu(!sidebar.classList.contains('open'));
 }
 
 function toggleMenu(isOpen) {
@@ -161,5 +155,6 @@ function handleLogout() {
     }
 }
 
-// --- 6. EXECUTE ---
-loadFirebaseSDKs(startApp);
+// --- INITIAL LOAD ---
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadMenu);
+else loadMenu();
