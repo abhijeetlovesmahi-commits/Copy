@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Attendance - TLIS</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <style>
+        body { font-family: 'Poppins', sans-serif; background: #f4f7f6; margin: 0; padding: 20px; padding-top: 80px; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { color: #002366; border-left: 5px solid #D4AF37; padding-left: 15px; }
+        .staff-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee; }
+        .status-btn { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .present { background: #2ecc71; color: white; }
+        .absent { background: #e74c3c; color: white; }
+        .save-btn { width: 100%; background: #002366; color: #D4AF37; padding: 15px; border: none; border-radius: 8px; font-size: 16px; margin-top: 20px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2><i class="fas fa-user-check"></i> Staff Attendance</h2>
+        <p id="current-date"></p>
+        <hr>
+        <div id="staff-list">
+            <p>Loading staff registry...</p>
+        </div>
+        <button class="save-btn" onclick="saveAttendance()">Submit Attendance</button>
+    </div>
+
+    <script src="menu.js"></script> 
+    <script>
+        document.getElementById('current-date').innerText = "Date: " + new Date().toLocaleDateString();
+        // Attendance logic yahan aayega
+    </script>
+</body>
+</html>
