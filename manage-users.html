@@ -12,7 +12,7 @@
     <style>
         .user-card { 
             background: white; border-radius: 15px; padding: 25px; 
-            box-shadow: var(--shadow-md); border-top: 5px solid var(--royal-blue); 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-top: 5px solid var(--royal-blue); 
             height: 100%; 
         }
         .perm-box { 
@@ -36,8 +36,7 @@
 
 <div class="main-content">
     <div class="royal-card">
-        <div class="header" id="brand-header-container">
-            </div>
+        <div id="brand-header-container"></div>
 
         <div class="container-fluid py-4">
             <div class="row g-4">
@@ -49,7 +48,7 @@
                         
                         <div class="mb-3">
                             <label class="small fw-bold text-muted">Full Name</label>
-                            <input type="text" id="uName" class="form-control form-control-sm" placeholder="e.g. Rahul Kumar">
+                            <input type="text" id="uName" class="form-control form-control-sm" placeholder="Rahul Kumar">
                         </div>
                         <div class="mb-3">
                             <label class="small fw-bold text-muted">Email Address</label>
@@ -69,10 +68,9 @@
                             </div>
                         </div>
 
-                        <div class="perm-box" id="new_staff_perms_container">
-                            </div>
+                        <div class="perm-box" id="new_staff_perms_container"></div>
 
-                        <button class="royal-btn btn-block mt-4" id="createBtn" onclick="createNewStaff()">CREATE ACCOUNT</button>
+                        <button class="royal-btn w-100 mt-4" id="createBtn" onclick="createNewStaff()">CREATE ACCOUNT</button>
                     </div>
                 </div>
 
@@ -93,7 +91,7 @@
                                     </tr>
                                 </thead>
                                 <tbody id="staffList">
-                                    <tr><td colspan="4" class="text-center py-5">Checking Authorization...</td></tr>
+                                    <tr><td colspan="4" class="text-center py-5">Loading Staff Data...</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -116,7 +114,7 @@
                 <div class="perm-box" id="edit_staff_perms_container"></div>
             </div>
             <div class="modal-footer border-0">
-                <button class="royal-btn btn-block" onclick="savePermissions()">SAVE UPDATED ACCESS</button>
+                <button class="royal-btn w-100" onclick="savePermissions()">SAVE UPDATED ACCESS</button>
             </div>
         </div>
     </div>
@@ -132,47 +130,53 @@
 <script src="menu.js"></script>
 
 <script>
-    // 1. Master Page Configuration (Keys Dashboard IDs se match hone chahiye)
+    // 1. SYNCED MASTER PAGES (Matching your GitHub filenames and menu.js IDs)
     const masterPages = {
         "Student Records": {
-            add_student: "Admission Form",
-            view_students: "Student Registry"
+            admission: "Add Student Form",
+            registry: "View Registry",
+            edit_student: "Edit Student Data",
+            attendance: "Student Attendance"
+        },
+        "Finance & Treasury": {
+            fees: "Collect Fees",
+            ledger: "Fee History/Ledger",
+            defaulter: "Defaulter List",
+            master: "Fee Master Control",
+            demand: "Fee Demand Slips"
         },
         "Academic & Exams": {
+            exam_master: "Exam Master",
             marks_entry: "Marks Entry",
             report_card: "Report Card Generator"
         },
-        "Accounts": {
-            collect_fees: "Fee Collection",
-            fee_history: "Fee Ledger/History"
-        },
-        "System Admin": {
-            manage_staff: "Manage Staff",
-            web_control: "Website Manager"
+        "Administrative": {
+            staff: "Manage Users",
+            staff_attendance: "Staff Attendance",
+            profile: "My Profile"
         }
     };
 
-    // 2. Auth & Admin Security Guard
+    // 2. Auth & Security Check
     firebase.auth().onAuthStateChanged(async user => {
         if (!user) {
             window.location.href = "login.html";
         } else {
             const doc = await db.collection('users').doc(user.uid).get();
             if (!doc.exists || doc.data().role !== 'admin') {
-                alert("Security Alert: Unauthorized Access Attempt!");
-                window.location.href = "dashboard.html";
+                alert("Restricted Access!");
+                window.location.href = "index.html"; 
             } else {
-                // Agar Admin hai tabhi data load hoga
                 loadStaff();
                 generatePermList("new_staff_perms_container");
             }
         }
     });
 
-    // 3. Generate Permission Switches
+    // 3. UI Generator for Permissions
     function generatePermList(containerId, currentPerms = {}, isEdit = false) {
         const container = document.getElementById(containerId);
-        container.innerHTML = `<p class="text-center small fw-bold text-muted mb-2"><i class="fas fa-lock me-1"></i> SELECT PAGE ACCESS</p>`;
+        container.innerHTML = `<p class="text-center small fw-bold text-muted mb-2"><i class="fas fa-lock me-1"></i> SET PAGE ACCESS</p>`;
         const prefix = isEdit ? "edit_" : "new_";
 
         for (const [category, pages] of Object.entries(masterPages)) {
@@ -188,7 +192,7 @@
         }
     }
 
-    // 4. Create Staff with Secondary Firebase App (Session Protection)
+    // 4. Create User Logic
     async function createNewStaff() {
         const name = document.getElementById('uName').value;
         const email = document.getElementById('uEmail').value;
@@ -201,9 +205,9 @@
             perms[cb.getAttribute('data-key')] = cb.checked;
         });
 
-        if(!name || !email) return alert("Please fill Name and Email!");
+        if(!name || !email) return alert("Fill Name and Email!");
 
-        btn.disabled = true; btn.innerText = "Processing...";
+        btn.disabled = true; btn.innerText = "Creating...";
         try {
             const secondaryApp = firebase.initializeApp(firebaseConfig, "Secondary");
             const cred = await secondaryApp.auth().createUserWithEmailAndPassword(email, pass);
@@ -212,11 +216,11 @@
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
             await secondaryApp.delete();
-            alert("Staff Authorized Successfully!"); location.reload();
+            alert("Staff Registered!"); location.reload();
         } catch (e) { alert(e.message); btn.disabled = false; btn.innerText = "CREATE ACCOUNT"; }
     }
 
-    // 5. Load Staff Table
+    // 5. Data Table Loader
     function loadStaff() {
         db.collection('users').orderBy('createdAt', 'desc').onSnapshot(snap => {
             const list = document.getElementById('staffList');
@@ -231,15 +235,15 @@
                     <td><span class="role-badge">${u.role}</span></td>
                     <td><span class="badge bg-light text-dark border">${u.role==='admin'?'Full Access':pCount+' Pages'}</span></td>
                     <td class="text-end">
-                        <button class="btn btn-sm btn-outline-primary me-1" onclick="openEditModal('${doc.id}', '${u.name}')"><i class="fas fa-key"></i></button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${doc.id}')"><i class="fas fa-trash"></i></button>
+                        <button class="btn btn-sm btn-outline-primary" onclick="openEditModal('${doc.id}', '${u.name}')"><i class="fas fa-key"></i></button>
+                        <button class="btn btn-sm btn-outline-danger ms-1" onclick="deleteUser('${doc.id}')"><i class="fas fa-trash"></i></button>
                     </td>
                 </tr>`;
             });
         });
     }
 
-    // 6. Edit Logic
+    // 6. Edit & Save Functions
     async function openEditModal(uid, name) {
         document.getElementById('editUid').value = uid;
         document.getElementById('editTitle').innerText = "Update Access: " + name;
@@ -254,16 +258,15 @@
         document.querySelectorAll('#edit_staff_perms_container input').forEach(cb => {
             perms[cb.getAttribute('data-key')] = cb.checked;
         });
-
         try {
             await db.collection('users').doc(uid).update({ permissions: perms });
-            alert("Permissions Updated!");
+            alert("Access Updated!");
             bootstrap.Modal.getInstance(document.getElementById('editModal')).hide();
         } catch (e) { alert(e.message); }
     }
 
     async function deleteUser(id) {
-        if(confirm("Permanently remove this staff from system?")) {
+        if(confirm("Are you sure? This only deletes database record, not Auth login.")) {
             await db.collection('users').doc(id).delete();
         }
     }
