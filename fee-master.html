@@ -3,152 +3,164 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Lalit - Master Finance Control</title>
+    <title>Fee Master Control | The Lalit Intl.</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
+    
+    <script src="firebase-config.js"></script>
+    <script src="auth-guard.js"></script>
+    <script src="brand.js"></script>
+
     <style>
         :root {
             --royal-blue: #002366; --gold: #D4AF37; --deep-gold: #aa8a2e;
             --light-gold: #FDFBF0; --white: #ffffff; --accent-purple: #8e44ad;
-            --danger-red: #e74c3c;
         }
 
-        body { background: var(--light-gold); margin: 0; padding: 20px; font-family: 'Georgia', serif; color: var(--royal-blue); }
-        .container { max-width: 1300px; margin: 0 auto; background: var(--white); padding: 30px; border: 1px solid var(--gold); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        
-        .header { text-align: center; border-bottom: 3px double var(--gold); margin-bottom: 30px; padding-bottom: 10px; }
-        .logo-img { max-width: 120px; margin-bottom: 10px; }
+        body { background: #f4f7f6; color: var(--royal-blue); }
 
-        .form-section { margin-bottom: 25px; border: 1px solid #ddd; padding: 20px; border-radius: 5px; position: relative; background: #fcfcfc; }
-        .transport-section { border: 2px solid var(--accent-purple); background: #f9f4ff; }
+        .form-section { 
+            margin-bottom: 30px; border: 1.5px solid var(--gold); 
+            padding: 25px; border-radius: 12px; position: relative; 
+            background: var(--white); box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
         
-        .section-title { position: absolute; top: -12px; left: 15px; background: white; padding: 0 10px; font-weight: bold; color: var(--deep-gold); text-transform: uppercase; font-size: 0.8rem; }
+        .transport-section { border-color: var(--accent-purple); }
+        .section-title { 
+            position: absolute; top: -14px; left: 20px; background: var(--royal-blue); 
+            padding: 2px 15px; color: var(--gold); border-radius: 20px;
+            font-weight: bold; text-transform: uppercase; font-size: 0.75rem; 
+            letter-spacing: 1px;
+        }
 
-        .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
-        .field-group { display: flex; flex-direction: column; }
-        label { font-size: 0.7rem; margin-bottom: 5px; color: #555; font-weight: bold; }
+        .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px; }
+        
+        input, select { 
+            width: 100%; padding: 10px; border: 1px solid #ddd; 
+            border-bottom: 2px solid var(--gold); border-radius: 4px; outline: none; 
+        }
 
-        input, select { padding: 10px; border: 1px solid #ccc; border-bottom: 2px solid var(--gold); font-size: 0.85rem; outline: none; }
+        .tag-mo { color: #2ecc71; font-weight: bold; } /* Monthly */
+        .tag-an { color: #e67e22; font-weight: bold; } /* Annual */
         
-        .main-btn { width: 100%; padding: 15px; background: var(--royal-blue); color: var(--gold); border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; margin-top: 15px; transition: 0.3s; }
-        .trans-btn { background: var(--accent-purple); color: white; }
-        .main-btn:hover { filter: brightness(1.2); }
-
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.8rem; background: white; }
-        th { background: var(--royal-blue); color: var(--gold); padding: 10px; border: 1px solid var(--gold); }
-        td { padding: 8px; border: 1px solid #ddd; text-align: center; }
+        .master-table { font-size: 0.85rem; border-radius: 8px; overflow: hidden; }
+        .master-table th { background: var(--royal-blue); color: var(--gold); text-transform: uppercase; border: none; }
         
-        .tag-mo { color: #2ecc71; font-weight: bold; }
-        .tag-an { color: #e67e22; font-weight: bold; }
-        
-        .edit-btn { background: var(--gold); color: white; border: none; padding: 4px 8px; cursor: pointer; border-radius: 3px; margin-right: 2px; }
-        .del-btn { background: var(--danger-red); color: white; border: none; padding: 4px 8px; cursor: pointer; border-radius: 3px; }
-        
-        tr:nth-child(even) { background: #f9f9f9; }
+        .btn-royal { background: var(--royal-blue); color: var(--gold); font-weight: bold; border: none; padding: 12px; width: 100%; border-radius: 6px; }
+        .btn-purple { background: var(--accent-purple); color: white; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="header">
-        <img src="logo.png" alt="Logo" class="logo-img">
-        <h1>Master Fee Controller</h1>
-        <p>THE LALIT INTERNATIONAL SCHOOL - CONFIGURATION PANEL</p>
-    </div>
+<div id="menu-container"></div>
 
-    <section class="form-section" id="academic-form">
-        <span class="section-title">Academic Fee Structure (Class-wise)</span>
-        <div class="input-grid">
-            <div class="field-group">
-                <label>Target Class</label>
-                <select id="mClass">
-                    <option value="">-- Select --</option>
-                    <option value="Pre-Nursery">Pre-Nursery</option>
-                    <option value="Nursery">Nursery</option>
-                    <option value="LKG">LKG</option>
-                    <option value="UKG">UKG</option>
-                    <script>for(let i=1; i<=12; i++) document.write(`<option value="${i}">${i}</option>`);</script>
-                </select>
-            </div>
-            <div class="field-group"><label>Admission (An)</label><input type="number" id="mAdmission"></div>
-            <div class="field-group"><label>Tuition (Mo)</label><input type="number" id="mTuition"></div>
-            <div class="field-group"><label>Development (An)</label><input type="number" id="mDev"></div>
-            <div class="field-group"><label>Exam Fee (An)</label><input type="number" id="mExam"></div>
-            <div class="field-group"><label>Hostel (Mo)</label><input type="number" id="mHostel"></div>
-            <div class="field-group"><label>Book Cost (An)</label><input type="number" id="mBooks"></div>
-            <div class="field-group"><label>Miscellaneous</label><input type="number" id="mMisc"></div>
-        </div>
-        <button onclick="saveFeeMaster()" class="main-btn" id="saveBtn">Update Academic Structure</button>
-    </section>
+<div class="main-content container py-4">
+    <div id="brand-header-container" class="mb-4"></div>
 
-    <section class="form-section transport-section" id="transport-form">
-        <span class="section-title" style="color: var(--accent-purple);">Transport Logistics (Slab-wise)</span>
-        <div class="input-grid">
-            <div class="field-group">
-                <label>Distance Slab</label>
-                <select id="tSlab">
-                    <option value="">-- Select Distance --</option>
-                    <option value="0 - 3 km">0 - 3 km</option>
-                    <option value="3 - 6 km">3 - 6 km</option>
-                    <option value="6 - 9 km">6 - 9 km</option>
-                    <option value="9 - 12 km">9 - 12 km</option>
-                    <option value="12 - 15 km">12 - 15 km</option>
-                    <option value="15 - 18 km">15 - 18 km</option>
-                    <option value="Above 18 km">Above 18 km</option>
-                </select>
-            </div>
-            <div class="field-group">
-                <label>Monthly Rate</label>
-                <input type="number" id="tAmount" placeholder="₹ Amount">
-            </div>
-        </div>
-        <button onclick="saveTransportFee()" class="main-btn trans-btn" id="saveTransBtn">Update Transport Policy</button>
-    </section>
-
-    <div style="display: grid; grid-template-columns: 1fr; gap: 40px; margin-top: 30px;">
-        <div>
-            <h3 style="color: var(--royal-blue); border-left: 5px solid var(--gold); padding-left: 10px;">Academic Rate Card</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Class</th>
-                        <th>Admission</th>
-                        <th>Tuition</th>
-                        <th>Dev.</th>
-                        <th>Exam</th>
-                        <th>Hostel</th>
-                        <th>Books</th>
-                        <th>Misc.</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="masterFeeBody"></tbody>
-            </table>
+    <div class="row">
+        <div class="col-12">
+            <section class="form-section" id="academic-form">
+                <span class="section-title">Academic Fee Structure (Annual & Monthly)</span>
+                <div class="input-grid">
+                    <div>
+                        <label class="small fw-bold">Target Class</label>
+                        <select id="mClass">
+                            <option value="">-- Select --</option>
+                            <option value="Pre-Nursery">Pre-Nursery</option>
+                            <option value="Nursery">Nursery</option>
+                            <option value="LKG">LKG</option>
+                            <option value="UKG">UKG</option>
+                            <script>for(let i=1; i<=12; i++) document.write(`<option value="${i}">${i}</option>`);</script>
+                        </select>
+                    </div>
+                    <div><label class="small fw-bold">Admission (An)</label><input type="number" id="mAdmission" placeholder="0"></div>
+                    <div><label class="small fw-bold">Tuition (Mo)</label><input type="number" id="mTuition" placeholder="0"></div>
+                    <div><label class="small fw-bold">Dev. Fee (An)</label><input type="number" id="mDev" placeholder="0"></div>
+                    <div><label class="small fw-bold">Exam Fee (An)</label><input type="number" id="mExam" placeholder="0"></div>
+                    <div><label class="small fw-bold">Hostel (Mo)</label><input type="number" id="mHostel" placeholder="0"></div>
+                    <div><label class="small fw-bold">Books (An)</label><input type="number" id="mBooks" placeholder="0"></div>
+                    <div><label class="small fw-bold">Misc. (An)</label><input type="number" id="mMisc" placeholder="0"></div>
+                </div>
+                <button onclick="saveFeeMaster()" class="btn-royal mt-3 shadow-sm">
+                    <i class="fas fa-save me-2"></i> UPDATE ACADEMIC RATE CARD
+                </button>
+            </section>
         </div>
 
-        <div style="max-width: 600px;">
-            <h3 style="color: var(--accent-purple); border-left: 5px solid var(--accent-purple); padding-left: 10px;">Transport Rate Card</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Distance Slab</th>
-                        <th>Monthly Fee</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="transportFeeBody"></tbody>
-            </table>
+        <div class="col-md-5">
+            <section class="form-section transport-section" id="transport-form">
+                <span class="section-title" style="background: var(--accent-purple); color: white;">Transport Slab Control</span>
+                <div class="d-flex gap-2">
+                    <div class="flex-grow-1">
+                        <label class="small fw-bold">Distance Slab</label>
+                        <select id="tSlab">
+                            <option value="">-- Distance --</option>
+                            <option value="0 - 3 km">0 - 3 km</option>
+                            <option value="3 - 6 km">3 - 6 km</option>
+                            <option value="6 - 9 km">6 - 9 km</option>
+                            <option value="9 - 12 km">9 - 12 km</option>
+                            <option value="12 - 15 km">12 - 15 km</option>
+                            <option value="Above 15 km">Above 15 km</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="small fw-bold">Rate (Mo)</label>
+                        <input type="number" id="tAmount" placeholder="₹">
+                    </div>
+                </div>
+                <button onclick="saveTransportFee()" class="btn-royal btn-purple mt-3 shadow-sm">
+                    <i class="fas fa-bus me-2"></i> SET SLAB RATE
+                </button>
+            </section>
+        </div>
+
+        <div class="col-md-7">
+             <div class="royal-card p-3 mb-4">
+                <h5 class="brand-font mb-3" style="color: var(--accent-purple);"><i class="fas fa-route me-2"></i>Transport Rate Table</h5>
+                <table class="table table-sm master-table">
+                    <thead>
+                        <tr><th>Slab</th><th>Rate</th><th>Action</th></tr>
+                    </thead>
+                    <tbody id="transportFeeBody"></tbody>
+                </table>
+             </div>
+        </div>
+
+        <div class="col-12">
+            <div class="royal-card p-4">
+                <h5 class="brand-font mb-3"><i class="fas fa-list-ol me-2"></i>Academic Master Rate Card</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover master-table align-middle">
+                        <thead>
+                            <tr>
+                                <th>Class</th>
+                                <th>Adm. (A)</th>
+                                <th>Tui. (M)</th>
+                                <th>Dev. (A)</th>
+                                <th>Exam (A)</th>
+                                <th>Hostel (M)</th>
+                                <th>Books (A)</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="masterFeeBody"></tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
-
-<script src="firebase-config.js"></script>
-
 <script>
 async function saveFeeMaster() {
     const cls = document.getElementById('mClass').value;
-    if(!cls) return alert("Select Class!");
+    if(!cls) return alert("Please select a Class!");
     
     const data = {
         admission: Number(document.getElementById('mAdmission').value) || 0,
@@ -160,26 +172,71 @@ async function saveFeeMaster() {
         misc: Number(document.getElementById('mMisc').value) || 0
     };
 
-    await db.collection('fee_master').doc(cls).set(data);
-    alert("Updated Structure for " + cls);
-    loadData();
-}
-
-async function deleteAcademic(id) {
-    if(confirm("Delete fee structure for " + id + "?")) {
-        await db.collection('fee_master').doc(id).delete();
+    try {
+        await db.collection('fee_master').doc(cls).set(data);
+        alert("Success: Fee structure updated for Class " + cls);
         loadData();
-    }
+        clearFields('academic');
+    } catch(e) { alert("Error: " + e.message); }
 }
 
 async function saveTransportFee() {
     const slab = document.getElementById('tSlab').value;
     const amt = document.getElementById('tAmount').value;
-    if(!slab || !amt) return alert("Fill all transport fields!");
+    if(!slab || !amt) return alert("Fill both transport fields!");
 
-    await db.collection('transport_master').doc(slab).set({ amount: Number(amt) });
-    alert("Transport Policy Updated!");
-    loadData();
+    try {
+        await db.collection('transport_master').doc(slab).set({ amount: Number(amt) });
+        alert("Success: Transport slab updated!");
+        loadData();
+        clearFields('transport');
+    } catch(e) { alert("Error: " + e.message); }
+}
+
+async function loadData() {
+    // Load Academic
+    const aSnap = await db.collection('fee_master').get();
+    const aBody = document.getElementById('masterFeeBody');
+    aBody.innerHTML = "";
+    aSnap.forEach(doc => {
+        const d = doc.data();
+        aBody.innerHTML += `<tr>
+            <td class="fw-bold">${doc.id}</td>
+            <td class="tag-an">₹${d.admission}</td>
+            <td class="tag-mo">₹${d.tuition}</td>
+            <td>₹${d.development}</td>
+            <td>₹${d.exam}</td>
+            <td class="tag-mo">₹${d.hostel}</td>
+            <td>₹${d.books || 0}</td>
+            <td>
+                <button class="btn btn-sm btn-warning me-1" onclick="editA('${doc.id}', ${JSON.stringify(d)})"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-sm btn-danger" onclick="deleteAcademic('${doc.id}')"><i class="fas fa-trash"></i></button>
+            </td>
+        </tr>`;
+    });
+
+    // Load Transport
+    const tSnap = await db.collection('transport_master').get();
+    const tBody = document.getElementById('transportFeeBody');
+    tBody.innerHTML = "";
+    tSnap.forEach(doc => {
+        const d = doc.data();
+        tBody.innerHTML += `<tr>
+            <td class="fw-bold">${doc.id}</td>
+            <td class="tag-mo">₹${d.amount}</td>
+            <td>
+                <button class="btn btn-sm btn-warning me-1" onclick="editT('${doc.id}', ${d.amount})"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-sm btn-danger" onclick="deleteTransport('${doc.id}')"><i class="fas fa-trash"></i></button>
+            </td>
+        </tr>`;
+    });
+}
+
+async function deleteAcademic(id) {
+    if(confirm("Permanently delete fee structure for " + id + "?")) {
+        await db.collection('fee_master').doc(id).delete();
+        loadData();
+    }
 }
 
 async function deleteTransport(id) {
@@ -189,64 +246,35 @@ async function deleteTransport(id) {
     }
 }
 
-async function loadData() {
-    const aSnap = await db.collection('fee_master').get();
-    const aBody = document.getElementById('masterFeeBody');
-    aBody.innerHTML = "";
-    aSnap.forEach(doc => {
-        const d = doc.data();
-        aBody.innerHTML += `<tr>
-            <td><b>${doc.id}</b></td>
-            <td class="tag-an">₹${d.admission}</td>
-            <td class="tag-mo">₹${d.tuition}</td>
-            <td>₹${d.development}</td>
-            <td>₹${d.exam}</td>
-            <td class="tag-mo">₹${d.hostel}</td>
-            <td>₹${d.books || 0}</td>
-            <td>₹${d.misc || 0}</td>
-            <td>
-                <button class="edit-btn" onclick="editA('${doc.id}', ${d.admission}, ${d.tuition}, ${d.development}, ${d.exam}, ${d.hostel}, ${d.books || 0}, ${d.misc || 0})">Edit</button>
-                <button class="del-btn" onclick="deleteAcademic('${doc.id}')">Del</button>
-            </td>
-        </tr>`;
-    });
-
-    const tSnap = await db.collection('transport_master').get();
-    const tBody = document.getElementById('transportFeeBody');
-    tBody.innerHTML = "";
-    tSnap.forEach(doc => {
-        const d = doc.data();
-        tBody.innerHTML += `<tr>
-            <td><b>${doc.id}</b></td>
-            <td class="tag-mo">₹${d.amount}</td>
-            <td>
-                <button class="edit-btn" onclick="editT('${doc.id}', ${d.amount})">Edit</button>
-                <button class="del-btn" onclick="deleteTransport('${doc.id}')">Del</button>
-            </td>
-        </tr>`;
-    });
-}
-
-function editA(cls, adm, tui, dev, exm, hos, bks, msc) {
+function editA(cls, d) {
     document.getElementById('mClass').value = cls;
-    document.getElementById('mAdmission').value = adm;
-    document.getElementById('mTuition').value = tui;
-    document.getElementById('mDev').value = dev;
-    document.getElementById('mExam').value = exm;
-    document.getElementById('mHostel').value = hos;
-    document.getElementById('mBooks').value = bks;
-    document.getElementById('mMisc').value = msc;
-    document.getElementById('academic-form').scrollIntoView({behavior: 'smooth'});
+    document.getElementById('mAdmission').value = d.admission;
+    document.getElementById('mTuition').value = d.tuition;
+    document.getElementById('mDev').value = d.development;
+    document.getElementById('mExam').value = d.exam;
+    document.getElementById('mHostel').value = d.hostel;
+    document.getElementById('mBooks').value = d.books;
+    document.getElementById('mMisc').value = d.misc;
+    window.scrollTo(0, 0);
 }
 
 function editT(slab, amt) {
     document.getElementById('tSlab').value = slab;
     document.getElementById('tAmount').value = amt;
-    document.getElementById('transport-form').scrollIntoView({behavior: 'smooth'});
+}
+
+function clearFields(type) {
+    if(type === 'academic') {
+        document.getElementById('academic-form').querySelectorAll('input, select').forEach(i => i.value = "");
+    } else {
+        document.getElementById('tSlab').value = "";
+        document.getElementById('tAmount').value = "";
+    }
 }
 
 window.onload = loadData;
 </script>
+
+<script src="menu.js"></script>
 </body>
 </html>
-
