@@ -43,7 +43,7 @@
                 <div class="col-lg-4 col-md-5">
                     <div class="user-card">
                         <h5 class="brand-font mb-4" style="color: var(--royal-blue);">
-                            <i class="fas fa-user-shield me-2"></i>Authorize New Staff
+                            <i class="fas fa-user-plus me-2"></i>Add Staff Member
                         </h5>
                         
                         <div class="mb-3">
@@ -63,21 +63,22 @@
                                 </select>
                             </div>
                             <div class="col-6 mb-3">
-                                <label class="small fw-bold text-muted">Initial Password</label>
+                                <label class="small fw-bold text-muted">Password</label>
                                 <input type="text" id="uPass" class="form-control form-control-sm" value="Lalit@2026">
                             </div>
                         </div>
 
-                        <div class="perm-box" id="new_staff_perms_container"></div>
+                        <div class="perm-box" id="new_staff_perms_container">
+                            </div>
 
-                        <button class="royal-btn w-100 mt-4" id="createBtn" onclick="createNewStaff()">CREATE ACCOUNT</button>
+                        <button class="royal-btn w-100 mt-4" id="createBtn" onclick="createNewStaff()">SAVE TO DATABASE</button>
                     </div>
                 </div>
 
                 <div class="col-lg-8 col-md-7">
                     <div class="user-card">
                         <h5 class="brand-font mb-4 d-flex justify-content-between">
-                            <span><i class="fas fa-list-ul me-2"></i>Staff Registry</span>
+                            <span><i class="fas fa-users-cog me-2"></i>Staff Directory</span>
                             <span id="staffCount" class="badge bg-dark">0</span>
                         </h5>
                         <div class="table-responsive">
@@ -91,7 +92,7 @@
                                     </tr>
                                 </thead>
                                 <tbody id="staffList">
-                                    <tr><td colspan="4" class="text-center py-5">Loading Staff Data...</td></tr>
+                                    <tr><td colspan="4" class="text-center py-5">Connecting to Cloud...</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -104,7 +105,7 @@
 
 <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content shadow-lg border-0" style="border-radius:15px; border-top: 5px solid var(--gold) !important;">
+        <div class="modal-content shadow-lg border-0" style="border-radius:15px;">
             <div class="modal-header">
                 <h5 class="modal-title brand-font" id="editTitle">Edit Permissions</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -114,7 +115,7 @@
                 <div class="perm-box" id="edit_staff_perms_container"></div>
             </div>
             <div class="modal-footer border-0">
-                <button class="royal-btn w-100" onclick="savePermissions()">SAVE UPDATED ACCESS</button>
+                <button class="royal-btn w-100" onclick="savePermissions()">UPDATE ACCESS</button>
             </div>
         </div>
     </div>
@@ -122,7 +123,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
 
 <script src="firebase-config.js"></script>
@@ -130,53 +130,24 @@
 <script src="menu.js"></script>
 
 <script>
-    // 1. SYNCED MASTER PAGES (Matching your GitHub filenames and menu.js IDs)
+    // Master Pages Mapping
     const masterPages = {
-        "Student Records": {
-            admission: "Add Student Form",
-            registry: "View Registry",
-            edit_student: "Edit Student Data",
-            attendance: "Student Attendance"
-        },
-        "Finance & Treasury": {
-            fees: "Collect Fees",
-            ledger: "Fee History/Ledger",
-            defaulter: "Defaulter List",
-            master: "Fee Master Control",
-            demand: "Fee Demand Slips"
-        },
-        "Academic & Exams": {
-            exam_master: "Exam Master",
-            marks_entry: "Marks Entry",
-            report_card: "Report Card Generator"
-        },
-        "Administrative": {
-            staff: "Manage Users",
-            staff_attendance: "Staff Attendance",
-            profile: "My Profile"
-        }
+        "Student Records": { admission: "Add Student", registry: "Registry", edit_student: "Edit Student", attendance: "Attendance" },
+        "Finance": { fees: "Collect Fees", ledger: "Ledger", defaulter: "Defaulters", master: "Fee Master", demand: "Demand Slips" },
+        "Academic": { exam_master: "Exam Master", marks_entry: "Marks Entry", report_card: "Report Cards" },
+        "Admin": { staff: "Manage Users", staff_attendance: "Staff Attendance", profile: "Profile" }
     };
 
-    // 2. Auth & Security Check
-    firebase.auth().onAuthStateChanged(async user => {
-        if (!user) {
-            window.location.href = "login.html";
-        } else {
-            const doc = await db.collection('users').doc(user.uid).get();
-            if (!doc.exists || doc.data().role !== 'admin') {
-                alert("Restricted Access!");
-                window.location.href = "index.html"; 
-            } else {
-                loadStaff();
-                generatePermList("new_staff_perms_container");
-            }
-        }
-    });
+    // Initialize Page (No Auth Check)
+    window.onload = () => {
+        loadStaff();
+        generatePermList("new_staff_perms_container");
+    };
 
-    // 3. UI Generator for Permissions
+    // UI Generator for Permissions
     function generatePermList(containerId, currentPerms = {}, isEdit = false) {
         const container = document.getElementById(containerId);
-        container.innerHTML = `<p class="text-center small fw-bold text-muted mb-2"><i class="fas fa-lock me-1"></i> SET PAGE ACCESS</p>`;
+        container.innerHTML = `<p class="text-center small fw-bold text-muted mb-2"><i class="fas fa-shield-alt me-1"></i> ACCESS RIGHTS</p>`;
         const prefix = isEdit ? "edit_" : "new_";
 
         for (const [category, pages] of Object.entries(masterPages)) {
@@ -192,40 +163,50 @@
         }
     }
 
-    // 4. Create User Logic
+    // Database Only Creation (No Auth)
     async function createNewStaff() {
         const name = document.getElementById('uName').value;
         const email = document.getElementById('uEmail').value;
         const role = document.getElementById('uRole').value;
-        const pass = document.getElementById('uPass').value;
         const btn = document.getElementById('createBtn');
+
+        if(!name || !email) return alert("Please enter Name and Email!");
 
         let perms = {};
         document.querySelectorAll('#new_staff_perms_container input').forEach(cb => {
             perms[cb.getAttribute('data-key')] = cb.checked;
         });
 
-        if(!name || !email) return alert("Fill Name and Email!");
-
-        btn.disabled = true; btn.innerText = "Creating...";
+        btn.disabled = true; 
         try {
-            const secondaryApp = firebase.initializeApp(firebaseConfig, "Secondary");
-            const cred = await secondaryApp.auth().createUserWithEmailAndPassword(email, pass);
-            await db.collection('users').doc(cred.user.uid).set({
-                name, email: email.toLowerCase(), role, permissions: perms,
+            // Note: This only saves to Firestore, it doesn't create a 'Login' account
+            await db.collection('users').add({
+                name, 
+                email: email.toLowerCase(), 
+                role, 
+                permissions: perms,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
-            await secondaryApp.delete();
-            alert("Staff Registered!"); location.reload();
-        } catch (e) { alert(e.message); btn.disabled = false; btn.innerText = "CREATE ACCOUNT"; }
+            alert("Staff saved successfully!");
+            location.reload();
+        } catch (e) { 
+            alert("Error: " + e.message); 
+            btn.disabled = false; 
+        }
     }
 
-    // 5. Data Table Loader
+    // Load Data from Firestore
     function loadStaff() {
         db.collection('users').orderBy('createdAt', 'desc').onSnapshot(snap => {
             const list = document.getElementById('staffList');
             document.getElementById('staffCount').innerText = snap.size;
             list.innerHTML = "";
+            
+            if(snap.empty) {
+                list.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-muted">No staff found.</td></tr>`;
+                return;
+            }
+
             snap.forEach(doc => {
                 const u = doc.data();
                 const pCount = Object.values(u.permissions || {}).filter(v => v === true).length;
@@ -233,20 +214,22 @@
                 <tr>
                     <td><b>${u.name}</b><br><small class="text-muted">${u.email}</small></td>
                     <td><span class="role-badge">${u.role}</span></td>
-                    <td><span class="badge bg-light text-dark border">${u.role==='admin'?'Full Access':pCount+' Pages'}</span></td>
+                    <td><span class="badge bg-light text-dark border">${u.role==='admin'?'Full':pCount+' Pages'}</span></td>
                     <td class="text-end">
-                        <button class="btn btn-sm btn-outline-primary" onclick="openEditModal('${doc.id}', '${u.name}')"><i class="fas fa-key"></i></button>
+                        <button class="btn btn-sm btn-outline-primary" onclick="openEditModal('${doc.id}', '${u.name}')"><i class="fas fa-edit"></i></button>
                         <button class="btn btn-sm btn-outline-danger ms-1" onclick="deleteUser('${doc.id}')"><i class="fas fa-trash"></i></button>
                     </td>
                 </tr>`;
             });
+        }, err => {
+            console.error("Firestore Error:", err);
+            document.getElementById('staffList').innerHTML = `<tr><td colspan="4" class="text-center text-danger">Check Firebase Permissions.</td></tr>`;
         });
     }
 
-    // 6. Edit & Save Functions
     async function openEditModal(uid, name) {
         document.getElementById('editUid').value = uid;
-        document.getElementById('editTitle').innerText = "Update Access: " + name;
+        document.getElementById('editTitle').innerText = "Edit: " + name;
         const doc = await db.collection('users').doc(uid).get();
         generatePermList("edit_staff_perms_container", doc.data().permissions || {}, true);
         new bootstrap.Modal(document.getElementById('editModal')).show();
@@ -260,13 +243,13 @@
         });
         try {
             await db.collection('users').doc(uid).update({ permissions: perms });
-            alert("Access Updated!");
+            alert("Updated!");
             bootstrap.Modal.getInstance(document.getElementById('editModal')).hide();
         } catch (e) { alert(e.message); }
     }
 
     async function deleteUser(id) {
-        if(confirm("Are you sure? This only deletes database record, not Auth login.")) {
+        if(confirm("Permanently delete this staff record?")) {
             await db.collection('users').doc(id).delete();
         }
     }
