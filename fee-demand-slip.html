@@ -7,8 +7,9 @@
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css"> 
     
-    <link rel="stylesheet" href="style.css"> <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
     <script src="firebase-config.js"></script>
@@ -16,24 +17,22 @@
     <script src="brand.js"></script>
 
     <style>
-        /* Slip Specific Overrides - Taaki print sahi aaye */
         .slip-card {
             background: #fff; width: 210mm; height: 140mm; 
             padding: 20px 35px; position: relative; overflow: hidden;
             box-sizing: border-box; display: flex; flex-direction: column;
-            border: 1px solid #eee; border-bottom: 2px dashed #002366; 
+            border: 1px solid #eee; border-bottom: 2px dashed var(--royal-blue); 
             margin: 20px auto; background-image: url('https://www.transparenttextures.com/patterns/cream-paper.png');
         }
 
-        /* Logo and Watermark Control */
+        /* Seedha Watermark Fix */
         .watermark {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg);
-            width: 400px; opacity: 0.04; pointer-events: none; z-index: 0;
+            position: absolute; top: 50%; left: 50%; 
+            transform: translate(-50%, -50%); /* Rotation hata di gayi hai */
+            width: 320px; opacity: 0.05; pointer-events: none; z-index: 0;
         }
 
-        .slip-header-logo {
-            height: 65px; width: auto; object-fit: contain; z-index: 2;
-        }
+        .slip-header-logo { height: 65px; width: auto; object-fit: contain; z-index: 2; }
 
         .header-section { 
             display: flex; justify-content: space-between; align-items: center; 
@@ -65,9 +64,7 @@
 
 <div class="main-content">
     <div class="royal-card no-print mb-4">
-        <div class="header" id="brand-header-container">
-             </div>
-        
+        <div class="header" id="brand-header-container"></div>
         <h2 class="brand-font">FEE DEMAND ADVISORY</h2>
         
         <div class="form-section mt-4">
@@ -87,13 +84,21 @@
                     <label class="section-title">CLASS</label>
                     <select id="classSelect">
                         <option value="">All Classes</option>
+                        <option value="Pre-Nursery">Pre-Nursery</option>
+                        <option value="Nursery">Nursery</option>
+                        <option value="LKG">LKG</option>
+                        <option value="UKG">UKG</option>
                         <script>for(let i=1; i<=12; i++) document.write(`<option value="${i}">${i}</option>`);</script>
                     </select>
                 </div>
                 <div class="col-md-2">
                     <label class="section-title">SECTION</label>
                     <select id="sectionSelect">
-                        <option value="">All</option><option value="A">A</option><option value="B">B</option>
+                        <option value="">All</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                        <option value="D">D</option>
                     </select>
                 </div>
                 <div class="col-md-5 d-flex align-items-end gap-2">
@@ -107,12 +112,10 @@
             </div>
         </div>
     </div>
-
     <div id="printArea" style="width: 100%;"></div>
 </div>
 
 <script>
-// (Sames logic as your script but with updated HTML structure for the slip)
 const months = ["April", "May", "June", "July", "August", "September", "October", "November", "December", "January", "February", "March"];
 
 async function generateSlips() {
@@ -217,7 +220,6 @@ async function generateSlips() {
                 `;
             }
         });
-
         area.innerHTML = html || "<div class='royal-card text-center mt-5'><h3>All dues are clear!</h3></div>";
     } catch (e) {
         alert("Error: " + e.message);
@@ -225,7 +227,6 @@ async function generateSlips() {
     }
 }
 </script>
-
 <script src="menu.js"></script>
 </body>
 </html>
