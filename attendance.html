@@ -3,76 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Lalit - Attendance System</title>
-    <style>
-        :root { --royal-blue: #002366; --gold: #D4AF37; --light-gold: #FDFBF0; --white: #ffffff; }
-        body { background: var(--light-gold); margin: 0; padding: 20px; font-family: 'Georgia', serif; color: var(--royal-blue); }
-        .container { max-width: 1000px; margin: 0 auto; background: var(--white); padding: 30px; border: 1px solid var(--gold); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        
-        .header { text-align: center; border-bottom: 3px double var(--gold); margin-bottom: 20px; padding-bottom: 10px; }
-        h1 { text-transform: uppercase; letter-spacing: 3px; font-size: 1.8rem; margin: 10px 0; }
-
-        .filter-bar { display: flex; gap: 10px; background: #f9f9f9; padding: 15px; border: 1px solid #eee; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; }
-        select, input[type="date"] { padding: 10px; border: 1px solid var(--gold); outline: none; font-family: 'serif'; }
-        
-        .btn-fetch { background: var(--royal-blue); color: var(--gold); padding: 10px 25px; border: 1px solid var(--gold); cursor: pointer; font-weight: bold; }
-        .btn-save { background: #27ae60; color: white; padding: 15px 40px; border: none; cursor: pointer; font-size: 1.1rem; font-weight: bold; width: 100%; margin-top: 20px; border-radius: 4px; }
-
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        th { background: var(--royal-blue); color: var(--gold); text-transform: uppercase; font-size: 0.9rem; }
-        tr:nth-child(even) { background: #fcfcfc; }
-
-        .status-switch { display: flex; gap: 10px; }
-        .radio-label { cursor: pointer; font-size: 0.9rem; font-weight: bold; }
-        .p-text { color: green; }
-        .a-text { color: red; }
-    </style>
+    <title>Daily Attendance - The Lalit Intl.</title>
+    
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
-
+    
     <script src="firebase-config.js"></script>
+    <script src="auth-guard.js"></script> <script src="brand.js"></script>
 </head>
 <body>
 
-<div class="container">
-    <div class="header">
-        <img src="logo.png" alt="Logo" style="width: 80px;">
-        <h1>Student Attendance Record</h1>
-        <p style="color: var(--gold); letter-spacing: 2px;">DAILY REGISTRY</p>
-    </div>
+<div id="menu-container"></div>
 
-    <div class="filter-bar">
-        <input type="date" id="attDate">
-        <select id="attClass">
-            <option value="">Select Class</option>
-            <option value="1">Class 1</option>
-            <option value="2">Class 2</option>
-            <option value="3">Class 3</option>
-            <option value="4">Class 4</option>
-            <option value="5">Class 5</option>
-            </select>
-        <select id="attSection">
-            <option value="A">Section A</option>
-            <option value="B">Section B</option>
-        </select>
-        <button class="btn-fetch" onclick="loadStudentList()">LOAD STUDENTS</button>
-    </div>
+<div class="main-content">
+    <div class="royal-card">
+        <div class="header" id="brand-header-container">
+            </div>
 
-    <div id="attendanceTableWrapper" style="display:none;">
-        <table id="studentTable">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Student Name</th>
-                    <th>Roll No</th>
-                    <th>Status (P / A)</th>
-                </tr>
-            </thead>
-            <tbody id="attListBody"></tbody>
-        </table>
-        <button class="btn-save" onclick="saveAttendance()">SAVE ATTENDANCE</button>
+        <h2 style="text-align: center; margin-top: 0;">STUDENT ATTENDANCE RECORD</h2>
+
+        <div class="form-section">
+            <div class="input-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+                <div>
+                    <label class="small fw-bold">Selection Date</label>
+                    <input type="date" id="attDate" style="width: 100%;">
+                </div>
+                <div>
+                    <label class="small fw-bold">Grade/Class</label>
+                    <select id="attClass">
+                        <option value="">Select Class</option>
+                        <option value="Pre-Nursery">Pre-Nursery</option>
+                        <option value="Nursery">Nursery</option>
+                        <option value="LKG">LKG</option>
+                        <option value="UKG">UKG</option>
+                        <option value="1">Class 1</option>
+                        <option value="2">Class 2</option>
+                        <option value="3">Class 3</option>
+                        <option value="4">Class 4</option>
+                        <option value="5">Class 5</option>
+                        <option value="6">Class 6</option>
+                        <option value="7">Class 7</option>
+                        <option value="8">Class 8</option>
+                        <option value="9">Class 9</option>
+                        <option value="10">Class 10</option>
+                        <option value="11">Class 11</option>
+                        <option value="12">Class 12</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="small fw-bold">Section</label>
+                    <select id="attSection">
+                        <option value="A">Section A</option>
+                        <option value="B">Section B</option>
+                        <option value="C">Section C</option>
+                        <option value="D">Section D</option>
+                    </select>
+                </div>
+                <div style="display: flex; align-items: flex-end;">
+                    <button class="royal-btn btn-block" onclick="loadStudentList()" style="height: 48px;">FETCH LIST</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="attendanceTableWrapper" style="display:none; margin-top: 30px;">
+            <div style="overflow-x: auto;">
+                <table id="studentTable" style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: var(--royal-blue); color: var(--gold);">
+                            <th style="padding: 12px; border: 1px solid var(--gold);">STUDENT ID</th>
+                            <th style="padding: 12px; border: 1px solid var(--gold);">FULL NAME</th>
+                            <th style="padding: 12px; border: 1px solid var(--gold);">STATUS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attListBody"></tbody>
+                </table>
+            </div>
+            
+            <button class="royal-btn btn-block btn-success" id="saveBtn" onclick="saveAttendance()" style="margin-top: 30px; font-size: 1.1rem;">SUBMIT ATTENDANCE</button>
+        </div>
     </div>
 </div>
 
@@ -83,21 +95,37 @@ document.getElementById('attDate').valueAsDate = new Date();
 async function loadStudentList() {
     const cls = document.getElementById('attClass').value;
     const sec = document.getElementById('attSection').value;
+    const date = document.getElementById('attDate').value;
     
     if(!cls) return alert("Please select a class!");
 
     const tbody = document.getElementById('attListBody');
-    tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>Loading Students...</td></tr>";
+    tbody.innerHTML = "<tr><td colspan='3' style='text-align:center; padding: 20px;'>Verifying Records...</td></tr>";
     document.getElementById('attendanceTableWrapper').style.display = "block";
 
     try {
+        // First check if attendance already marked for this date
+        const existingAtt = await db.collection('attendance')
+            .where("date", "==", date)
+            .where("class", "==", cls)
+            .where("section", "==", sec)
+            .limit(1)
+            .get();
+
+        if(!existingAtt.empty) {
+            if(!confirm("Attendance for this class is already marked. Do you want to overwrite it?")) {
+                tbody.innerHTML = "<tr><td colspan='3' style='text-align:center;'>Task Cancelled.</td></tr>";
+                return;
+            }
+        }
+
         const snap = await db.collection('students')
             .where("class", "==", cls)
             .where("section", "==", sec)
             .get();
 
         if(snap.empty) {
-            tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>No students found in this class.</td></tr>";
+            tbody.innerHTML = "<tr><td colspan='3' style='text-align:center; padding: 20px;'>No students found in this section.</td></tr>";
             return;
         }
 
@@ -105,38 +133,50 @@ async function loadStudentList() {
         snap.forEach(doc => {
             const s = doc.data();
             tbody.innerHTML += `
-                <tr data-id="${doc.id}">
-                    <td>${s.uniqueID}</td>
-                    <td><b>${s.name}</b></td>
-                    <td>${s.rollNo || '-'}</td>
-                    <td>
-                        <div class="status-switch">
-                            <label class="radio-label p-text"><input type="radio" name="st_${doc.id}" value="Present" checked> P</label>
-                            <label class="radio-label a-text"><input type="radio" name="st_${doc.id}" value="Absent"> A</label>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 12px; text-align: center;"><b>${s.uniqueID}</b></td>
+                    <td style="padding: 12px;">${s.name}</td>
+                    <td style="padding: 12px; text-align: center;">
+                        <div style="display: flex; gap: 20px; justify-content: center;">
+                            <label style="color: green; font-weight: bold; cursor:pointer;">
+                                <input type="radio" name="st_${doc.id}" value="Present" checked> P
+                            </label>
+                            <label style="color: red; font-weight: bold; cursor:pointer;">
+                                <input type="radio" name="st_${doc.id}" value="Absent"> A
+                            </label>
                         </div>
                     </td>
                 </tr>`;
         });
     } catch (err) {
-        alert("Error: " + err.message);
+        alert("Database Error: " + err.message);
     }
 }
 
 async function saveAttendance() {
     const date = document.getElementById('attDate').value;
+    const cls = document.getElementById('attClass').value;
+    const sec = document.getElementById('attSection').value;
     const rows = document.querySelectorAll('#attListBody tr');
-    const batch = db.batch();
+    const saveBtn = document.getElementById('saveBtn');
 
     if(rows.length === 0) return;
 
+    saveBtn.disabled = true;
+    saveBtn.innerText = "Saving to Ledger...";
+
+    const batch = db.batch();
+
     for(let row of rows) {
-        const studentId = row.getAttribute('data-id');
+        const studentId = row.querySelector('input[type="radio"]').name.replace('st_', '');
         const status = row.querySelector(`input[name="st_${studentId}"]:checked`).value;
         
-        // Attendance collection mein save karna
+        // Attendance key: date_studentId
         const attRef = db.collection('attendance').doc(`${date}_${studentId}`);
         batch.set(attRef, {
             date: date,
+            class: cls,
+            section: sec,
             studentId: studentId,
             status: status,
             timestamp: Date.now()
@@ -145,12 +185,17 @@ async function saveAttendance() {
 
     try {
         await batch.commit();
-        alert("Attendance marked successfully for " + date);
+        alert("Attendance stored successfully in the Royal Registry.");
+        location.reload();
     } catch (err) {
-        alert("Failed to save: " + err.message);
+        alert("Transaction Failed: " + err.message);
+        saveBtn.disabled = false;
+        saveBtn.innerText = "SUBMIT ATTENDANCE";
     }
 }
 </script>
+
 <script src="menu.js"></script>
+
 </body>
 </html>
