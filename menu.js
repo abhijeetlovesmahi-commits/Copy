@@ -1,28 +1,23 @@
-/* THE LALIT INTERNATIONAL SCHOOL - FINAL COMPLETED SECURE MENU 
-   UPDATED: Added Staff Attendance & Fixed Firebase Sync
-*/
+/* THE LALIT INTERNATIONAL SCHOOL - FINAL STABLE MENU */
 
-// --- 1. FIREBASE LIBRARIES AUTO-LOAD ---
+// --- 1. FIREBASE SDK LOADERS ---
 function loadFirebaseSDKs(callback) {
+    if (window.firebase) return callback();
     const scripts = [
         "https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js",
         "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js",
         "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"
     ];
-
-    let loadedCount = 0;
+    let loaded = 0;
     scripts.forEach(src => {
-        const script = document.createElement('script');
-        script.src = src;
-        script.onload = () => {
-            loadedCount++;
-            if (loadedCount === scripts.length) callback();
-        };
-        document.head.appendChild(script);
+        const s = document.createElement('script');
+        s.src = src;
+        s.onload = () => { if (++loaded === scripts.length) callback(); };
+        document.head.appendChild(s);
     });
 }
 
-// --- 2. CONFIG & INITIALIZATION ---
+// --- 2. INITIALIZE ---
 const firebaseConfig = {
   apiKey: "AIzaSyDqDmsMp2eAuHJBcjW-ciO2JcLTXapiIrs",
   authDomain: "the-lalit-d7472.firebaseapp.com",
@@ -30,17 +25,16 @@ const firebaseConfig = {
   appId: "1:479237084229:web:31078825739b3c5712ff2c"
 };
 
-function initializeApp() {
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
-    loadMenu(); 
+function startApp() {
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    loadMenu();
 }
 
-// --- 3. MENU UI DESIGN ---
+// --- 3. MENU HTML & CSS ---
 function loadMenu() {
     if (document.getElementById('sidebar-wrapper')) return;
 
+    // FontAwesome link check
     if (!document.getElementById('fa-icons-link')) {
         const fa = document.createElement('link');
         fa.id = 'fa-icons-link';
@@ -61,16 +55,19 @@ function loadMenu() {
                 <h4 class="school-name">THE LALIT INTERNATIONAL SCHOOL</h4>
             </div>
             <nav class="nav-links" id="dynamic-nav-links">
-                <p style="color:#D4AF37; padding:20px; font-size:12px;"><i class="fas fa-spinner fa-spin me-2"></i>Verifying Registry...</p>
+                <p style="color:#D4AF37; padding:20px; font-size:12px;"><i class="fas fa-spinner fa-spin me-2"></i>Link Syncing...</p>
             </nav>
         </div>
         <style>
             @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Poppins:wght@400;500&display=swap');
-            #menu-trigger { position: fixed; top: 20px; left: 20px; z-index: 20000; cursor: pointer; padding: 5px; }
+            
+            /* Toggle Button Fix */
+            #menu-trigger { position: fixed; top: 20px; left: 20px; z-index: 99999 !important; cursor: pointer; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; }
             .bar1, .bar2, .bar3 { width: 30px; height: 3px; background-color: #002366; margin: 6px 0; transition: 0.4s; border-radius: 2px; }
-            .change .bar1 { transform: rotate(-45deg) translate(-8px, 7px); background-color: #D4AF37; }
+            .change .bar1 { transform: rotate(-45deg) translate(-9px, 6px); background-color: #D4AF37; }
             .change .bar2 { opacity: 0; }
             .change .bar3 { transform: rotate(45deg) translate(-8px, -8px); background-color: #D4AF37; }
+
             .sidebar { width: 280px; background: #002366; height: 100vh; position: fixed; left: -300px; top: 0; transition: 0.4s; z-index: 15000; border-right: 4px solid #D4AF37; overflow-y: auto; font-family: 'Poppins', sans-serif; }
             .sidebar.open { left: 0; }
             #sidebar-overlay { position: fixed; display: none; width: 100%; height: 100%; top: 0; left: 0; background-color: rgba(0,0,0,0.5); z-index: 10000; }
@@ -82,7 +79,7 @@ function loadMenu() {
             .nav-links a { color: #ffffff; display: flex; align-items: center; padding: 12px 20px; text-decoration: none; font-size: 14px; border-radius: 8px; margin-bottom: 2px; transition: 0.3s; }
             .nav-links a i { margin-right: 15px; width: 20px; text-align: center; color: #D4AF37; }
             .nav-links a:hover { background: rgba(212,175,55,0.15); color: #D4AF37; }
-            .logout-link { color: #ff6b6b !important; margin-top: 20px !important; border: 1px solid rgba(255,107,107,0.2) !important; }
+            .logout-link { color: #ff6b6b !important; border: 1px solid rgba(255,107,107,0.2) !important; margin-top: 20px !important; }
         </style>
     </div>
     `;
@@ -90,7 +87,7 @@ function loadMenu() {
     renderDynamicLinks();
 }
 
-// --- 4. RENDER LINKS FROM FIRESTORE ---
+// --- 4. DATA RENDER ---
 async function renderDynamicLinks() {
     firebase.auth().onAuthStateChanged(async (user) => {
         const nav = document.getElementById('dynamic-nav-links');
@@ -98,13 +95,7 @@ async function renderDynamicLinks() {
 
         try {
             const doc = await firebase.firestore().collection('users').doc(user.uid).get();
-            if (!doc.exists) {
-                nav.innerHTML = `<p style="color:red; padding:20px;">Unauthorized. Contact Admin.</p>
-                <a href="#" onclick="handleLogout()" class="nav-links logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a>`;
-                return;
-            }
-
-            const data = doc.data();
+            const data = doc.exists ? doc.data() : { role: 'staff', permissions: {} };
             const p = data.permissions || {};
             const role = data.role || 'staff';
 
@@ -117,50 +108,36 @@ async function renderDynamicLinks() {
                 <a href="add-student.html"><i class="fas fa-user-plus"></i> New Admission</a>
                 <a href="edit-student.html"><i class="fas fa-user-edit"></i> Edit Student</a>
                 <div class="menu-divider">Academic & Exams</div>
+                <a href="attendance.html"><i class="fas fa-calendar-check"></i> Student Attendance</a>
+                <a href="staff-attendance.html"><i class="fas fa-user-tie"></i> Staff Attendance</a>
                 <a href="exam-master.html"><i class="fas fa-layer-group"></i> Exam Master</a>
                 <a href="exam-marks-entry.html"><i class="fas fa-pen-nib"></i> Marks Entry</a>
                 <a href="exam-repot-card.html"><i class="fas fa-file-alt"></i> Report Card</a>
-                <a href="attendance.html"><i class="fas fa-calendar-check"></i> Student Attendance</a>
-                <a href="staff-attendance.html"><i class="fas fa-user-tie"></i> Staff Attendance</a> <div class="menu-divider">Treasury & Accounts</div>
-                <a href="fee-master.html"><i class="fas fa-cog"></i> Fee Structure</a>
+                <div class="menu-divider">Treasury & Accounts</div>
                 <a href="collect-fees.html"><i class="fas fa-vault"></i> Collect Fees</a>
                 <a href="fee-history.html"><i class="fas fa-history"></i> Fee History</a>
-                <a href="fee-demand-slip.html"><i class="fas fa-file-invoice"></i> Demand Slips</a>
-                <a href="master-ledger.html"><i class="fas fa-book"></i> Master Ledger</a>
-                <a href="defaulter-list.html"><i class="fas fa-exclamation-triangle"></i> Defaulter List</a>
                 <div class="menu-divider">Administration</div>
-                <a href="manage-users.html"><i class="fas fa-user-shield"></i> Staff & Roles</a>
-                <a href="web-control.html"><i class="fas fa-globe"></i> Website Manager</a>`;
+                <a href="manage-users.html"><i class="fas fa-user-shield"></i> Staff & Roles</a>`;
             } else {
-                // ... Baki Roles ke liye bhi logic same rahega ...
-                if (p.view_students || p.add_student || p.edit_student) {
-                    html += `<div class="menu-divider">Registry</div>`;
-                    if (p.view_students) html += `<a href="view-students.html"><i class="fas fa-users"></i> Student Registry</a>`;
-                    if (p.add_student) html += `<a href="add-student.html"><i class="fas fa-user-plus"></i> New Admission</a>`;
-                    if (p.edit_student) html += `<a href="edit-student.html"><i class="fas fa-user-edit"></i> Edit Student</a>`;
-                }
-                if (p.attendance || p.marks_entry || p.report_card || p.exam_master) {
-                    html += `<div class="menu-divider">Academic & Exams</div>`;
-                    if (p.exam_master) html += `<a href="exam-master.html"><i class="fas fa-layer-group"></i> Exam Master</a>`;
-                    if (p.marks_entry) html += `<a href="exam-marks-entry.html"><i class="fas fa-pen-nib"></i> Marks Entry</a>`;
-                    if (p.report_card) html += `<a href="exam-repot-card.html"><i class="fas fa-file-alt"></i> Report Card</a>`;
-                    if (p.attendance) html += `<a href="attendance.html"><i class="fas fa-calendar-check"></i> Attendance</a>`;
+                if (p.attendance) {
+                    html += `<div class="menu-divider">Academic</div>
+                             <a href="attendance.html"><i class="fas fa-calendar-check"></i> Attendance</a>`;
                 }
             }
-            html += `<a href="#" onclick="handleLogout()" class="nav-links logout-link"><i class="fas fa-sign-out-alt"></i> Logout Registry</a>`;
+
+            html += `<a href="#" onclick="handleLogout()" class="nav-links logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a>`;
             nav.innerHTML = html;
-        } catch (e) { 
-            console.error(e); 
-            nav.innerHTML = `<p style="color:red; padding:20px;">Sync Error.</p>`;
+        } catch (e) {
+            nav.innerHTML = `<p style="color:red; padding:20px;">Error Loading Menu</p>`;
         }
     });
 }
 
-// --- 5. ESSENTIAL TOGGLE FUNCTIONS ---
+// --- 5. LOGIC ---
 function handleMenuClick(e) {
     e.stopPropagation();
     const sidebar = document.getElementById('mySidebar');
-    if (sidebar) toggleMenu(!sidebar.classList.contains('open'));
+    toggleMenu(!sidebar.classList.contains('open'));
 }
 
 function toggleMenu(isOpen) {
@@ -179,12 +156,10 @@ function toggleMenu(isOpen) {
 }
 
 function handleLogout() {
-    if(confirm("Exit Registry?")) {
+    if(confirm("Logout from Registry?")) {
         firebase.auth().signOut().then(() => window.location.href = "login.html");
     }
 }
 
-// --- START ---
-loadFirebaseSDKs(() => {
-    initializeApp();
-});
+// --- 6. EXECUTE ---
+loadFirebaseSDKs(startApp);
