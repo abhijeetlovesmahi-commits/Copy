@@ -3,89 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Student - The Lalit International</title>
-    <style>
-        :root { --royal-blue: #002366; --gold: #D4AF37; --light-gold: #FDFBF0; --white: #ffffff; }
-        body { background: var(--light-gold); margin: 0; padding: 20px; font-family: 'Georgia', serif; color: var(--royal-blue); }
-        .container { max-width: 800px; margin: 0 auto; background: var(--white); padding: 30px; border: 1px solid var(--gold); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        .header { text-align: center; border-bottom: 3px double var(--gold); margin-bottom: 30px; padding-bottom: 10px; }
-        
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .full-width { grid-column: span 2; }
-        
-        label { font-weight: bold; font-size: 0.9rem; display: block; margin-bottom: 5px; color: #555; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-bottom: 2px solid var(--gold); outline: none; box-sizing: border-box; }
-        input[readonly] { background: #eee; cursor: not-allowed; border-bottom: 2px solid #999; }
-        
-        .btn-group { margin-top: 30px; display: flex; gap: 15px; }
-        .btn-save { background: var(--royal-blue); color: var(--gold); flex: 2; padding: 15px; border: 1px solid var(--gold); cursor: pointer; font-weight: bold; text-transform: uppercase; }
-        .btn-delete { background: #e74c3c; color: white; flex: 1; padding: 15px; border: none; cursor: pointer; font-weight: bold; }
-        .btn-back { display: inline-block; margin-bottom: 20px; color: var(--royal-blue); text-decoration: none; font-weight: bold; }
-    </style>
+    <title>Edit Profile | The Lalit Intl.</title>
+    
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
-
+    
     <script src="firebase-config.js"></script>
+    <script src="auth-guard.js"></script>
+    <script src="brand.js"></script>
+
+    <style>
+        .edit-container { max-width: 850px; margin: 0 auto; }
+        .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .full-span { grid-column: span 1; }
+        @media (min-width: 600px) { .full-span { grid-column: span 2; } }
+
+        label { font-weight: bold; font-size: 0.8rem; color: var(--royal-blue); text-transform: uppercase; letter-spacing: 1px; }
+        
+        input, select { 
+            width: 100%; padding: 12px; border: 1px solid #ddd; 
+            border-radius: 8px; outline: none; transition: 0.3s;
+        }
+        input:focus { border-color: var(--gold); box-shadow: 0 0 5px rgba(212, 175, 55, 0.3); }
+        input[readonly] { background: #f9f9f9; cursor: not-allowed; border-color: #eee; color: #888; }
+
+        .action-zone { 
+            margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; 
+            display: flex; gap: 15px; flex-wrap: wrap;
+        }
+        .btn-update { background: var(--royal-blue); color: var(--gold); flex: 2; min-width: 200px; }
+        .btn-delete { background: #fff; color: #e74c3c; border: 1px solid #e74c3c; flex: 1; min-width: 150px; }
+        .btn-delete:hover { background: #e74c3c; color: white; }
+    </style>
 </head>
 <body>
 
-<div class="container">
-    <a href="management.html" class="btn-back">← Back to Management</a>
-    <div class="header">
-        <h1>Update Student Profile</h1>
-        <p>THE LALIT INTERNATIONAL SCHOOL</p>
+<div id="menu-container"></div>
+
+<div class="main-content">
+    <div class="edit-container">
+        <a href="view-students.html" class="text-decoration-none small fw-bold text-royal mb-3 d-inline-block">
+            <i class="fas fa-arrow-left me-1"></i> BACK TO REGISTRY
+        </a>
+
+        <div class="royal-card">
+            <div class="header" id="brand-header-container"></div>
+
+            <h3 class="brand-font text-center mb-4" style="color: var(--royal-blue);">Update Student Profile</h3>
+
+            <form id="updateForm">
+                <div class="input-grid">
+                    <div class="full-span">
+                        <label>Student Full Name</label>
+                        <input type="text" id="uName" placeholder="Enter Full Name" required>
+                    </div>
+
+                    <div>
+                        <label>Unique Admission ID</label>
+                        <input type="text" id="uID" readonly>
+                    </div>
+
+                    <div>
+                        <label>Roll Number</label>
+                        <input type="text" id="uRoll" placeholder="e.g. 101">
+                    </div>
+
+                    <div>
+                        <label>Grade/Class</label>
+                        <select id="uClass">
+                            <option value="Pre-Nursery">Pre-Nursery</option>
+                            <option value="Nursery">Nursery</option>
+                            <option value="LKG">LKG</option>
+                            <option value="UKG">UKG</option>
+                            <option value="1">Class 1</option>
+                            <option value="2">Class 2</option>
+                            <option value="3">Class 3</option>
+                            <option value="4">Class 4</option>
+                            <option value="5">Class 5</option>
+                            <option value="6">Class 6</option>
+                            <option value="7">Class 7</option>
+                            <option value="8">Class 8</option>
+                            <option value="9">Class 9</option>
+                            <option value="10">Class 10</option>
+                            <option value="11">Class 11</option>
+                            <option value="12">Class 12</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label>Section</label>
+                        <select id="uSec">
+                            <option value="A">Section A</option>
+                            <option value="B">Section B</option>
+                            <option value="C">Section C</option>
+                            <option value="D">Section D</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label>Father's Name</label>
+                        <input type="text" id="uFather" placeholder="Father's Full Name">
+                    </div>
+
+                    <div>
+                        <label>Primary Contact</label>
+                        <input type="tel" id="uPhone" placeholder="10-digit mobile number">
+                    </div>
+                </div>
+
+                <div class="action-zone">
+                    <button type="button" class="royal-btn btn-update" onclick="updateStudent()">
+                        <i class="fas fa-save me-2"></i>SAVE CHANGES
+                    </button>
+                    <button type="button" class="royal-btn btn-delete" onclick="deleteStudent()">
+                        <i class="fas fa-trash-alt me-2"></i>DELETE RECORD
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
-
-    <form id="updateForm">
-        <div class="form-grid">
-            <div class="full-width">
-                <label>Student Full Name</label>
-                <input type="text" id="uName" required>
-            </div>
-            <div>
-                <label>Unique ID (Permanent)</label>
-                <input type="text" id="uID" readonly>
-            </div>
-            <div>
-                <label>Roll Number</label>
-                <input type="text" id="uRoll">
-            </div>
-            <div>
-                <label>Class</label>
-                <select id="uClass">
-                    <option value="Pre-Nursery">Pre-Nursery</option>
-                    <option value="Nursery">Nursery</option>
-                    <option value="LKG">LKG</option>
-                    <option value="UKG">UKG</option>
-                    <script>for(let i=1; i<=12; i++) document.write(`<option value="${i}">${i}</option>`);</script>
-                </select>
-            </div>
-            <div>
-                <label>Section</label>
-                <select id="uSec">
-                    <option value="A">A</option><option value="B">B</option><option value="C">C</option>
-                </select>
-            </div>
-            <div>
-                <label>Father's Name</label>
-                <input type="text" id="uFather">
-            </div>
-            <div>
-                <label>Contact Number</label>
-                <input type="tel" id="uPhone">
-            </div>
-        </div>
-
-        <div class="btn-group">
-            <button type="button" class="btn-save" onclick="updateStudent()">Save All Changes</button>
-            <button type="button" class="btn-delete" onclick="deleteStudent()">Delete Record</button>
-        </div>
-    </form>
 </div>
 
 <script>
-// URL se Document ID nikalna
+// URL se Student Document ID lena
 const urlParams = new URLSearchParams(window.location.search);
 const docId = urlParams.get('id');
 
@@ -99,14 +143,19 @@ if(docId) {
             document.getElementById('uClass').value = s.class || '';
             document.getElementById('uSec').value = s.section || 'A';
             document.getElementById('uFather').value = s.father || '';
-            document.getElementById('uPhone').value = s.contact || '';
+            document.getElementById('uPhone').value = s.contact || s.pContact || '';
         } else {
-            alert("No student found!");
+            alert("Record not found in Royal Archives!");
+            window.location.href = "view-students.html";
         }
-    });
+    }).catch(err => alert("Error fetching data: " + err.message));
 }
 
 async function updateStudent() {
+    const btn = document.querySelector('.btn-update');
+    btn.disabled = true;
+    btn.innerText = "Updating...";
+
     try {
         await db.collection('students').doc(docId).update({
             name: document.getElementById('uName').value,
@@ -115,27 +164,32 @@ async function updateStudent() {
             section: document.getElementById('uSec').value,
             father: document.getElementById('uFather').value,
             contact: document.getElementById('uPhone').value,
-            lastUpdated: new Date()
+            lastModified: firebase.firestore.FieldValue.serverTimestamp()
         });
-        alert("Profile Updated Successfully!");
-        window.location.href = "management.html";
+        alert("Student Profile Synchronized Successfully!");
+        window.location.href = "view-students.html";
     } catch (err) {
-        alert("Update Failed: " + err.message);
+        alert("Failed to Update: " + err.message);
+        btn.disabled = false;
+        btn.innerText = "SAVE CHANGES";
     }
 }
 
 async function deleteStudent() {
-    if(confirm("KYA AAP PAKKA DELETE KARNA CHAHTE HAIN? Ye record wapas nahi aayega!")) {
+    // Extra Security: Sirf admin hi delete kar paye (auth-guard handle karta hai but ye extra safety hai)
+    if(confirm("DANGER: Are you sure you want to permanently erase this student from the records? This action cannot be undone.")) {
         try {
             await db.collection('students').doc(docId).delete();
-            alert("Student Record Erased.");
-            window.location.href = "management.html";
+            alert("Record successfully removed from the system.");
+            window.location.href = "view-students.html";
         } catch (err) {
-            alert("Delete Failed: " + err.message);
+            alert("Unauthorized or Failed: " + err.message);
         }
     }
 }
 </script>
+
 <script src="menu.js"></script>
+
 </body>
 </html>
