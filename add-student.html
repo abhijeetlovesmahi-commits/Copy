@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Lalit - Royal Admission System</title>
+    <title>Admission Portal - The Lalit International</title>
     
     <link rel="stylesheet" href="style.css">
     
@@ -15,125 +15,127 @@
 </head>
 <body>
 
-<div class="container">
-    <div id="menu-container"></div>
+<div id="menu-container"></div>
 
-    <div class="header">
-        <img src="logo.png" alt="Logo" class="school-logo">
-        <h1 id="formTitle">Student Admission Portal</h1>
-        <p style="letter-spacing: 5px; font-size: 0.8rem; color: var(--deep-gold);">OFFICIAL REGISTRATION FORM</p>
-    </div>
-
-    <form id="admissionForm">
-        <input type="hidden" id="editingId">
-        
-        <section class="form-section">
-            <span class="section-title">Photo Upload</span>
-            <div style="text-align: center;">
-                <input type="file" id="studentPhoto" accept="image/*" onchange="processPhoto(this)">
-                <center><img id="imgPreview" style="width:132px; height:170px; border:3px solid var(--gold); margin-top:15px; display:none; object-fit:cover;"></center>
-            </div>
-        </section>
-
-        <section class="form-section">
-            <span class="section-title">Personal Details</span>
-            <div class="input-grid">
-                <input type="text" id="sName" placeholder="Student Name" required>
-                <input type="text" id="sDob" placeholder="DOB" onfocus="(this.type='date')" required>
-                <select id="sGender">
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                </select>
-                <input type="text" id="sBlood" placeholder="Blood Group">
-                <input type="number" id="sAadhar" placeholder="Aadhar Number" oninput="this.value=this.value.slice(0,12)" required>
-            </div>
-        </section>
-
-        <section class="form-section">
-            <span class="section-title">Academic & Facilities</span>
-            <div class="input-grid">
-                <select id="sClass" required>
-                    <option value="">Select Class</option>
-                    <option value="Pre-Nursery">Pre-Nursery</option>
-                    <option value="Nursery">Nursery</option>
-                    <option value="LKG">LKG</option>
-                    <option value="UKG">UKG</option>
-                    <option value="1">Class 1</option>
-                    <option value="2">Class 2</option>
-                    <option value="3">Class 3</option>
-                    <option value="4">Class 4</option>
-                    <option value="5">Class 5</option>
-                    <option value="6">Class 6</option>
-                    <option value="7">Class 7</option>
-                    <option value="8">Class 8</option>
-                    <option value="9">Class 9</option>
-                    <option value="10">Class 10</option>
-                    <option value="11">Class 11</option>
-                    <option value="12">Class 12</option>
-                </select>
-                <select id="sSection" required>
-                    <option value="A">Section A</option>
-                    <option value="B">Section B</option>
-                    <option value="C">Section C</option>
-                    <option value="D">Section D</option>
-                </select>
-                <select id="sHouse">
-                    <option value="House A">House A</option>
-                    <option value="House B">House B</option>
-                    <option value="House C">House C</option>
-                    <option value="House D">House D</option>
-                </select>
-                <select id="sHostel">
-                    <option value="No">Opt for Hostel? (No)</option>
-                    <option value="Yes">Yes (Hosteller)</option>
-                </select>
-                <select id="sTransport" onchange="toggleTransportDistance()">
-                    <option value="No">Use School Transport? (No)</option>
-                    <option value="Yes">Yes (Bus/Van)</option>
-                </select>
-                <select id="sTransportDistance" style="display:none;">
-                    <option value="">Select Distance</option>
-                    <option value="0-3km">0 - 3 km</option>
-                    <option value="3-6km">3 - 6 km</option>
-                    <option value="6-9km">6 - 9 km</option>
-                    <option value="9-12km">9 - 12 km</option>
-                    <option value="12-15km">12 - 15 km</option>
-                    <option value="15-18km">15 - 18 km</option>
-                    <option value="18-21km">18 - 21 km</option>
-                    <option value="21-25km">21 - 25 km</option>
-                    <option value="25km+">Above 25 km</option>
-                </select>
-            </div>
-        </section>
-
-        <section class="form-section">
-            <span class="section-title">Guardian Details</span>
-            <div class="input-grid">
-                <input type="text" id="pFather" placeholder="Father's Name" required>
-                <input type="text" id="pMother" placeholder="Mother's Name" required>
-                <input type="tel" id="pContact" placeholder="Contact No" required>
-            </div>
-        </section>
-
-        <section class="form-section">
-            <span class="section-title">Residential Address</span>
-            <input type="text" id="currAddr" placeholder="Current Address" required style="width:100%; margin-bottom:10px; box-sizing: border-box;">
-            <label style="font-size:0.8rem;"><input type="checkbox" id="sameAddr" onclick="syncAddress()"> Permanent same as current</label>
-            <input type="text" id="permAddr" placeholder="Permanent Address" required style="width:100%; margin-top:10px; box-sizing: border-box;">
-        </section>
-
-        <button type="submit" id="submitBtn" class="main-btn">REGISTER STUDENT</button>
-        <button type="button" id="cancelEdit" class="main-btn" style="display:none; margin-top:10px; background:#666;" onclick="resetForm()">CANCEL EDIT</button>
-    </form>
-
-    <div style="margin-top:50px;">
-        <h2 style="text-align:center; color:var(--gold); font-size: 1.2rem;">REGISTRY LOG</h2>
-        <div class="search-container">
-            <input type="text" id="searchInput" class="search-bar" placeholder="Search by Name or ID...">
-            <button class="search-btn" onclick="searchStudents()">SEARCH</button>
+<div class="main-content">
+    <div class="royal-card">
+        <div class="header">
+            <img src="logo.png" alt="Logo" class="school-logo">
+            <h1 id="formTitle">Student Admission Portal</h1>
+            <p style="letter-spacing: 5px; font-size: 0.8rem; color: var(--deep-gold); margin-top:10px; font-weight:600;">OFFICIAL REGISTRATION FORM</p>
         </div>
-        <div id="recentList" class="profile-grid">
-            <p style="text-align:center; grid-column:1/-1;">Loading students...</p>
+
+        <form id="admissionForm">
+            <input type="hidden" id="editingId">
+            
+            <section class="form-section">
+                <span class="section-title">Step 1: Student Identity</span>
+                <div style="text-align: center;">
+                    <input type="file" id="studentPhoto" accept="image/*" onchange="processPhoto(this)" style="max-width:300px;">
+                    <div style="margin-top:20px;">
+                        <img id="imgPreview" style="width:140px; height:180px; border:3px solid var(--gold); display:none; object-fit:cover; border-radius:8px; box-shadow: var(--shadow-md);">
+                    </div>
+                </div>
+            </section>
+
+            <section class="form-section">
+                <span class="section-title">Step 2: Personal Information</span>
+                <div class="input-grid">
+                    <input type="text" id="sName" placeholder="Student Full Name" required>
+                    <input type="text" id="sDob" placeholder="Date of Birth" onfocus="(this.type='date')" required>
+                    <select id="sGender">
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <input type="text" id="sBlood" placeholder="Blood Group (e.g. O+)">
+                    <input type="number" id="sAadhar" placeholder="12 Digit Aadhar Number" oninput="this.value=this.value.slice(0,12)" required>
+                </div>
+            </section>
+
+            <section class="form-section">
+                <span class="section-title">Step 3: Academic & Facilities</span>
+                <div class="input-grid">
+                    <select id="sClass" required>
+                        <option value="">Select Enrollment Class</option>
+                        <option value="Pre-Nursery">Pre-Nursery</option>
+                        <option value="Nursery">Nursery</option>
+                        <option value="LKG">LKG</option>
+                        <option value="UKG">UKG</option>
+                        <option value="1">Class 1</option><option value="2">Class 2</option>
+                        <option value="3">Class 3</option><option value="4">Class 4</option>
+                        <option value="5">Class 5</option><option value="6">Class 6</option>
+                        <option value="7">Class 7</option><option value="8">Class 8</option>
+                        <option value="9">Class 9</option><option value="10">Class 10</option>
+                        <option value="11">Class 11</option><option value="12">Class 12</option>
+                    </select>
+                    <select id="sSection" required>
+                        <option value="A">Section A</option>
+                        <option value="B">Section B</option>
+                        <option value="C">Section C</option>
+                        <option value="D">Section D</option>
+                    </select>
+                    <select id="sHouse">
+                        <option value="House A">House A</option>
+                        <option value="House B">House B</option>
+                        <option value="House C">House C</option>
+                        <option value="House D">House D</option>
+                    </select>
+                    <select id="sHostel">
+                        <option value="No">Opt for Hostel? (No)</option>
+                        <option value="Yes">Yes (Hosteller)</option>
+                    </select>
+                    <select id="sTransport" onchange="toggleTransportDistance()">
+                        <option value="No">School Transport? (No)</option>
+                        <option value="Yes">Yes (Bus/Van Service)</option>
+                    </select>
+                    <select id="sTransportDistance" style="display:none;">
+                        <option value="">Select Route Distance</option>
+                        <option value="0-3km">0 - 3 km</option>
+                        <option value="3-6km">3 - 6 km</option>
+                        <option value="6-9km">6 - 9 km</option>
+                        <option value="9-12km">9 - 12 km</option>
+                        <option value="12-15km">12 - 15 km</option>
+                        <option value="15-18km">15 - 18 km</option>
+                        <option value="18-21km">18 - 21 km</option>
+                        <option value="21-25km">21 - 25 km</option>
+                        <option value="25km+">Above 25 km</option>
+                    </select>
+                </div>
+            </section>
+
+            <section class="form-section">
+                <span class="section-title">Step 4: Guardian & Residence</span>
+                <div class="input-grid">
+                    <input type="text" id="pFather" placeholder="Father's Name" required>
+                    <input type="text" id="pMother" placeholder="Mother's Name" required>
+                    <input type="tel" id="pContact" placeholder="Primary Contact Number" required>
+                </div>
+                <div style="margin-top:20px;">
+                    <textarea id="currAddr" placeholder="Current Residential Address" rows="2" required></textarea>
+                    <label style="font-size:0.85rem; display:inline-flex; align-items:center; margin:10px 0; cursor:pointer;">
+                        <input type="checkbox" id="sameAddr" onclick="syncAddress()" style="width:18px; height:18px; margin-right:10px;"> Permanent same as current
+                    </label>
+                    <textarea id="permAddr" placeholder="Permanent Residential Address" rows="2" required></textarea>
+                </div>
+            </section>
+
+            <div style="display: flex; gap: 15px;">
+                <button type="submit" id="submitBtn" class="royal-btn btn-block btn-success">PROCEED WITH REGISTRATION</button>
+                <button type="button" id="cancelEdit" class="royal-btn btn-danger" style="display:none;" onclick="resetForm()">CANCEL</button>
+            </div>
+        </form>
+
+        <div style="margin-top:80px;">
+            <h2>STUDENT REGISTRY LOG</h2>
+            <div style="display: flex; gap: 10px; margin-bottom: 30px; justify-content: center; flex-wrap: wrap;">
+                <input type="text" id="searchInput" placeholder="Quick Search (Name, ID or Class)..." style="max-width: 450px;">
+                <button class="royal-btn" onclick="searchStudents()">SEARCH RECORD</button>
+            </div>
+            
+            <div id="recentList" class="profile-grid-custom">
+                <p style="text-align:center; grid-column:1/-1;">Synchronizing with database...</p>
+            </div>
         </div>
     </div>
 </div>
@@ -141,20 +143,21 @@
 <div id="detailModal" class="modal">
     <div class="modal-content">
         <span class="close-modal" onclick="closeModal()">&times;</span>
-        <h2 id="modalName" style="text-align:center; border-bottom: 2px solid var(--gold); padding-bottom:10px; color: var(--royal-blue);">STUDENT PROFILE</h2>
-        <div class="modal-body">
-            <img id="modalPhoto" src="" class="modal-photo">
-            <div class="modal-details" id="modalDetails"></div>
+        <h2 id="modalName">STUDENT PROFILE</h2>
+        <div style="display: flex; gap: 30px; flex-wrap: wrap; margin-top:25px;">
+            <img id="modalPhoto" src="" class="modal-img-custom" style="width:200px; height:240px; border:4px solid var(--gold); border-radius:10px; object-fit:cover; box-shadow: var(--shadow-md);">
+            <div id="modalDetails" style="flex:1; display:grid; grid-template-columns: 1fr 1fr; gap:15px; font-size:0.95rem;">
+                </div>
         </div>
-        <div class="action-bar">
-            <button class="btn-edit" id="modalEditBtn">EDIT RECORD</button>
-            <button class="btn-delete" id="modalDeleteBtn">DELETE RECORD</button>
+        <div style="margin-top:40px; display:flex; gap:15px; justify-content:flex-end; border-top:1px solid #eee; padding-top:20px;">
+            <button class="royal-btn btn-sm" id="modalEditBtn">EDIT DATA</button>
+            <button class="royal-btn btn-sm btn-danger" id="modalDeleteBtn">DELETE PERMANENTLY</button>
         </div>
     </div>
 </div>
 
 <script>
-// Internal Logic (Keep 100% same)
+// --- CORE LOGIC (UNCHANGED) ---
 let compressedBase64 = "";
 let currentViewData = null;
 let allStudents = [];
@@ -188,28 +191,19 @@ function syncAddress() {
 function toggleTransportDistance() {
     const transportVal = document.getElementById('sTransport').value;
     const distanceSelect = document.getElementById('sTransportDistance');
-    if(transportVal === 'Yes') {
-        distanceSelect.style.display = 'block';
-        distanceSelect.required = true;
-    } else {
-        distanceSelect.style.display = 'none';
-        distanceSelect.required = false;
-        distanceSelect.value = ""; 
-    }
+    distanceSelect.style.display = (transportVal === 'Yes') ? 'block' : 'none';
+    distanceSelect.required = (transportVal === 'Yes');
 }
 
 document.getElementById('admissionForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const btn = document.getElementById('submitBtn');
     const editingId = document.getElementById('editingId').value;
-    btn.disabled = true;
-    btn.innerText = "Processing...";
+    btn.disabled = true; 
+    btn.innerText = "Processing Transaction...";
 
     try {
         let uniqueID = editingId;
-        const sClass = document.getElementById('sClass').value;
-        const sSection = document.getElementById('sSection').value;
-
         if(!editingId) {
             const lastSnap = await db.collection('students').orderBy('uniqueID', 'desc').limit(1).get();
             uniqueID = lastSnap.empty ? 1001 : Number(lastSnap.docs[0].data().uniqueID) + 1;
@@ -222,8 +216,8 @@ document.getElementById('admissionForm').addEventListener('submit', async (e) =>
             gender: document.getElementById('sGender').value,
             blood: document.getElementById('sBlood').value,
             aadhar: document.getElementById('sAadhar').value,
-            class: sClass, 
-            section: sSection, 
+            class: document.getElementById('sClass').value, 
+            section: document.getElementById('sSection').value, 
             house: document.getElementById('sHouse').value,
             hostel: document.getElementById('sHostel').value,
             transport: document.getElementById('sTransport').value,
@@ -238,12 +232,9 @@ document.getElementById('admissionForm').addEventListener('submit', async (e) =>
         };
 
         await db.collection('students').doc(uniqueID.toString()).set(studentData, {merge: true});
-        alert("Success! ID: " + uniqueID);
+        alert("Registration Successful! Student ID: " + uniqueID);
         location.reload();
-    } catch (err) { 
-        alert("Error: " + err.message); 
-        btn.disabled = false; 
-    }
+    } catch (err) { alert("Error: " + err.message); btn.disabled = false; }
 });
 
 async function loadAllData() {
@@ -253,28 +244,29 @@ async function loadAllData() {
         snap.forEach(doc => allStudents.push(doc.data()));
         allStudents.sort((a, b) => b.timestamp - a.timestamp);
         renderList(allStudents);
-    } catch (err) {
-        document.getElementById('recentList').innerHTML = `<p style="color:red;">Error: ${err.message}</p>`;
-    }
+    } catch (err) { document.getElementById('recentList').innerHTML = `<p style="color:red;">Failed to sync data.</p>`; }
 }
 
 function renderList(dataArray) {
     const list = document.getElementById('recentList');
     list.innerHTML = "";
     if(dataArray.length === 0) {
-        list.innerHTML = '<p style="text-align:center; grid-column:1/-1;">No records found.</p>';
+        list.innerHTML = '<p style="text-align:center; grid-column:1/-1;">No records found in database.</p>';
         return;
     }
     dataArray.forEach(data => {
         const card = document.createElement('div');
-        card.className = 'profile-card';
+        card.className = 'custom-id-card';
         card.onclick = () => showDetails(data);
         card.innerHTML = `
-            <img src="${data.photo || 'https://via.placeholder.com/150'}" class="card-img">
-            <div class="card-info">
+            <img src="${data.photo || 'https://via.placeholder.com/150'}" class="id-photo">
+            <div class="id-info">
                 <h4>${data.name}</h4>
-                <p><b>ID:</b> ${data.uniqueID} | <b>Class:</b> ${data.class}</p>
-                <p style="color: ${data.hostel === 'Yes' ? 'green' : '#666'}"><b>Hostel:</b> ${data.hostel}</p>
+                <p><b>ID No:</b> ${data.uniqueID}</p>
+                <p><b>Class:</b> ${data.class}-${data.section}</p>
+                <span class="status-badge" style="background:${data.hostel==='Yes'?'#e8f5e9':'#f3f3f3'}; color:${data.hostel==='Yes'?'#2e7d32':'#666'};">
+                    ${data.hostel === 'Yes' ? '🏠 Hosteller' : '🚌 Day Scholar'}
+                </span>
             </div>`;
         list.appendChild(card);
     });
@@ -282,38 +274,24 @@ function renderList(dataArray) {
 
 function searchStudents() {
     const val = document.getElementById('searchInput').value.toLowerCase();
-    const filtered = allStudents.filter(s => 
-        s.name.toLowerCase().includes(val) || s.uniqueID.toString().includes(val)
-    );
+    const filtered = allStudents.filter(s => s.name.toLowerCase().includes(val) || s.uniqueID.toString().includes(val) || s.class.toLowerCase().includes(val));
     renderList(filtered);
 }
-
 document.getElementById('searchInput').addEventListener('input', searchStudents);
 
 function showDetails(data) {
     currentViewData = data;
     document.getElementById('modalName').innerText = data.name;
     document.getElementById('modalPhoto').src = data.photo || 'https://via.placeholder.com/150';
-    
-    let transportTxt = data.transport;
-    if(data.transport === 'Yes' && data.transportDistance) {
-        transportTxt += ` (${data.transportDistance})`;
-    }
-
     document.getElementById('modalDetails').innerHTML = `
-        <p><b>ID:</b> ${data.uniqueID}</p>
+        <p><b>Admission ID:</b> ${data.uniqueID}</p>
         <p><b>DOB:</b> ${data.dob}</p>
-        <p><b>Class:</b> ${data.class} (${data.section})</p>
-        <p><b>House:</b> ${data.house}</p>
-        <p><b>Hostel:</b> <span style="color:${data.hostel==='Yes'?'green':'red'}">${data.hostel}</span></p>
-        <p><b>Transport:</b> <span style="color:${data.transport==='Yes'?'green':'red'}">${transportTxt}</span></p>
-        <p><b>Father:</b> ${data.father}</p>
-        <p><b>Mother:</b> ${data.mother}</p>
+        <p><b>Gender:</b> ${data.gender}</p>
+        <p><b>Grade:</b> ${data.class} (${data.section})</p>
+        <p><b>Father's Name:</b> ${data.father}</p>
         <p><b>Contact:</b> ${data.contact}</p>
-        <p><b>Aadhar:</b> ${data.aadhar}</p>
-        <p style="grid-column: 1/-1;"><b>Address:</b> ${data.currentAddr}</p>
+        <p style="grid-column: 1/-1;"><b>Primary Address:</b> ${data.currentAddr}</p>
     `;
-    
     document.getElementById('modalEditBtn').onclick = () => startEdit(data);
     document.getElementById('modalDeleteBtn').onclick = () => deleteRecord(data.uniqueID);
     document.getElementById('detailModal').style.display = 'block';
@@ -322,46 +300,26 @@ function showDetails(data) {
 function startEdit(data) {
     closeModal();
     window.scrollTo({top: 0, behavior: 'smooth'});
-    document.getElementById('formTitle').innerText = "Update Profile";
-    document.getElementById('submitBtn').innerText = "SAVE CHANGES";
-    document.getElementById('cancelEdit').style.display = 'block';
-    
+    document.getElementById('formTitle').innerText = "Update Student Record";
     document.getElementById('editingId').value = data.uniqueID;
     document.getElementById('sName').value = data.name;
     document.getElementById('sDob').value = data.dob;
     document.getElementById('sGender').value = data.gender;
-    document.getElementById('sBlood').value = data.blood;
-    document.getElementById('sAadhar').value = data.aadhar;
     document.getElementById('sClass').value = data.class;
     document.getElementById('sSection').value = data.section;
-    document.getElementById('sHouse').value = data.house;
-    document.getElementById('sHostel').value = data.hostel;
-    document.getElementById('sTransport').value = data.transport;
-    toggleTransportDistance();
-    if(data.transport === 'Yes') {
-        document.getElementById('sTransportDistance').value = data.transportDistance || "";
-    }
     document.getElementById('pFather').value = data.father;
     document.getElementById('pMother').value = data.mother;
     document.getElementById('pContact').value = data.contact;
     document.getElementById('currAddr').value = data.currentAddr;
     document.getElementById('permAddr').value = data.permanentAddr;
-    if(data.photo) {
-        document.getElementById('imgPreview').src = data.photo;
-        document.getElementById('imgPreview').style.display = 'block';
-    }
+    document.getElementById('submitBtn').innerText = "UPDATE RECORD";
+    document.getElementById('submitBtn').classList.replace('btn-success', 'btn-block');
+    document.getElementById('cancelEdit').style.display = 'block';
 }
 
-async function deleteRecord(id) {
-    if(confirm("Permanently delete this record?")) {
-        await db.collection('students').doc(id.toString()).delete();
-        location.reload();
-    }
-}
-
+async function deleteRecord(id) { if(confirm("Are you sure? This will permanently delete the student profile from the registry.")) { await db.collection('students').doc(id.toString()).delete(); location.reload(); } }
 function closeModal() { document.getElementById('detailModal').style.display = 'none'; }
 function resetForm() { location.reload(); }
-
 loadAllData();
 </script>
 
