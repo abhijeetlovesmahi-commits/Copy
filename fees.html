@@ -3,152 +3,244 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Imperial Treasury - The Lalit Intl.</title>
+    <title>Imperial Treasury | The Lalit Intl.</title>
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
+    
+    <script src="firebase-config.js"></script>
+    <script src="auth-guard.js"></script>
+    <script src="brand.js"></script>
+
     <style>
         :root { --royal-blue: #002366; --gold: #D4AF37; --light-gold: #FDFBF0; }
-        body { background-color: var(--light-gold); font-family: 'Georgia', serif; }
+        body { background-color: var(--light-gold); color: var(--royal-blue); }
         
-        .main-content { padding: 40px; max-width: 900px; margin: auto; }
-        .royal-card { 
-            background: white; border: 1px solid var(--gold); 
-            padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
-            border-radius: 8px;
-        }
-        .royal-btn { 
-            background: var(--royal-blue); color: var(--gold); 
-            border: 1px solid var(--gold); padding: 12px; 
-            font-weight: bold; transition: 0.3s; width: 100%;
-        }
-        .royal-btn:hover { background: #001a4d; color: #fff; }
+        .main-content { padding: 30px; max-width: 1000px; margin: auto; }
         
+        .treasury-panel { 
+            background: white; border: 2px solid var(--gold); 
+            padding: 30px; border-radius: 12px; box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+
+        .search-box {
+            background: #fdfaf0; border: 1px dashed var(--gold);
+            padding: 20px; border-radius: 8px; margin-bottom: 25px;
+        }
+
         .fee-info-box {
-            background: #f8f9fa; border-left: 4px solid var(--royal-blue);
-            padding: 15px; margin-bottom: 20px;
+            background: var(--royal-blue); color: white;
+            padding: 20px; border-radius: 8px; margin-bottom: 25px;
+            border-left: 8px solid var(--gold);
         }
-        .text-velvet { color: var(--royal-blue); font-weight: bold; }
-        .border-gold { border: 1px solid var(--gold) !important; }
+
+        .royal-input { border: 1px solid var(--gold); border-radius: 5px; padding: 12px; }
+        .royal-input:focus { border-color: var(--royal-blue); box-shadow: 0 0 8px rgba(0,35,102,0.2); }
+
+        .btn-receive {
+            background: var(--royal-blue); color: var(--gold);
+            font-weight: bold; width: 100%; padding: 15px;
+            border: 2px solid var(--gold); border-radius: 8px;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .btn-receive:hover { background: #001a4d; color: #fff; }
+
+        /* Receipt Style (Only for Print) */
+        #receiptPrint { display: none; }
+        @media print {
+            .no-print, #menu-container { display: none !important; }
+            body { background: white; }
+            #receiptPrint { display: block; padding: 20px; border: 2px solid #000; }
+            .receipt-header { border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; }
+        }
     </style>
 </head>
 <body>
 
+<div id="menu-container"></div>
+
 <div class="main-content">
-    <div class="royal-card">
-        <h2 class="text-center mb-4 text-velvet"><i class="fas fa-vault me-2"></i>IMPERIAL TREASURY</h2>
+    <div id="brand-header-container" class="no-print mb-4"></div>
+
+    <div class="treasury-panel no-print">
+        <h3 class="brand-font text-center mb-4"><i class="fas fa-coins me-2"></i>Fee Collection Portal</h3>
         
-        <div class="p-4 mb-4" style="background: rgba(0,0,0,0.03); border: 1px dashed var(--gold);">
-            <label class="fw-bold mb-2 text-velvet">Locate Student by Unique ID:</label>
-            <div class="input-group">
-                <input type="number" id="feeRoll" class="form-control border-gold" placeholder="Enter Student ID (e.g. 2024001)">
-                <button class="btn btn-dark" onclick="findStudent()">LOCATE SOUL</button>
+        <div class="search-box">
+            <div class="row align-items-end">
+                <div class="col-md-9">
+                    <label class="small fw-bold mb-1">Enter Student Admission ID:</label>
+                    <input type="number" id="feeRoll" class="form-control royal-input" placeholder="Ex: 2024001">
+                </div>
+                <div class="col-md-3">
+                    <button class="btn btn-dark w-100 py-2" onclick="findStudent()">
+                        <i class="fas fa-search me-2"></i>SEARCH
+                    </button>
+                </div>
             </div>
         </div>
 
         <div id="treasuryForm" style="display: none;">
-            <div class="fee-info-box">
-                <h5 id="sNameDisplay" class="text-velvet mb-1"></h5>
-                <p id="sDetailsDisplay" class="mb-0 text-muted small"></p>
-                <hr>
+            <div class="fee-info-box shadow-sm">
                 <div class="row">
-                    <div class="col-6"><small>Expected Academic:</small> <b id="expAcademic">₹0</b></div>
-                    <div class="col-6"><small>Monthly Transport:</small> <b id="expTransport">₹0</b></div>
+                    <div class="col-md-8">
+                        <h4 id="sNameDisplay" class="mb-1 text-uppercase fw-bold"></h4>
+                        <p id="sDetailsDisplay" class="mb-0 small opacity-75"></p>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <div class="small">Expected Monthly:</div>
+                        <h4 id="totalExpected" class="text-warning fw-bold">₹0</h4>
+                    </div>
+                </div>
+                <hr style="background: var(--gold);">
+                <div class="row small">
+                    <div class="col-6">Tuition: <span id="expTuition">₹0</span></div>
+                    <div class="col-6 text-end">Transport: <span id="expTransport">₹0</span></div>
                 </div>
             </div>
             
             <div class="row g-3">
                 <div class="col-md-6">
-                    <label class="fw-bold">Amount to Collect (₹)</label>
-                    <input type="number" id="fAmount" class="form-control border-gold" placeholder="Enter Amount">
-                </div>
-                <div class="col-md-6">
-                    <label class="fw-bold">Payment Purpose / Month</label>
-                    <select id="fMonth" class="form-select border-gold">
-                        <option value="">-- Select Purpose --</option>
+                    <label class="small fw-bold">Collection Month/Purpose</label>
+                    <select id="fMonth" class="form-select royal-input">
+                        <option value="">-- Choose Purpose --</option>
                         <option value="Admission">Admission Fee</option>
                         <option value="Annual">Annual Charges</option>
                         <script>
-                            const fMonths = ["April", "May", "June", "July", "August", "September", "October", "November", "December", "January", "February", "March"];
-                            fMonths.forEach(m => document.write(`<option value="${m}">${m} Fee</option>`));
+                            ["April", "May", "June", "July", "August", "September", "October", "November", "December", "January", "February", "March"].forEach(m => {
+                                document.write(`<option value="${m}">${m} Fee</option>`);
+                            });
                         </script>
                         <option value="Miscellaneous">Miscellaneous</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="small fw-bold">Amount Received (₹)</label>
+                    <input type="number" id="fAmount" class="form-control royal-input" placeholder="0.00">
+                </div>
+                <div class="col-12">
+                    <label class="small fw-bold">Payment Mode</label>
+                    <select id="fMode" class="form-select royal-input">
+                        <option value="Cash">Cash</option>
+                        <option value="UPI/Online">UPI / Online</option>
+                        <option value="Cheque">Cheque</option>
                     </select>
                 </div>
             </div>
             
             <div class="mt-4">
-                <button class="royal-btn shadow" onclick="submitFee()">RECEIVE GOLD & ISSUE RECORD</button>
+                <button class="btn-receive shadow" onclick="submitFee()">
+                    <i class="fas fa-check-circle me-2"></i>RECEIVE PAYMENT & PRINT
+                </button>
             </div>
         </div>
     </div>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
-
-<script src="firebase-config.js"></script>
+<div id="receiptPrint">
+    <div class="receipt-header text-center">
+        <h2 id="rSchoolName" style="margin:0;">THE LALIT INTERNATIONAL SCHOOL</h2>
+        <p class="small">FEE RECEIPT | SESSION 2025-26</p>
+    </div>
+    <div class="row mb-3">
+        <div class="col-6"><b>Receipt No:</b> <span id="rNum"></span></div>
+        <div class="col-6 text-end"><b>Date:</b> <span id="rDate"></span></div>
+    </div>
+    <table class="table table-bordered">
+        <tr><td width="30%">Student Name</td><td id="rName"></td></tr>
+        <tr><td>Student ID</td><td id="rID"></td></tr>
+        <tr><td>Class-Sec</td><td id="rClass"></td></tr>
+        <tr><td>Purpose/Month</td><td id="rPurpose"></td></tr>
+        <tr class="fw-bold"><td>Amount Paid</td><td>₹ <span id="rAmt"></span></td></tr>
+        <tr><td>Payment Mode</td><td id="rMode"></td></tr>
+    </table>
+    <div class="mt-5 d-flex justify-content-between">
+        <div class="text-center" style="width:150px; border-top:1px solid #000;">Parent Sign</div>
+        <div class="text-center" style="width:150px; border-top:1px solid #000;">Office Seal</div>
+    </div>
+</div>
 
 <script>
+    let currentStudent = null;
+
     async function findStudent() {
         const id = document.getElementById('feeRoll').value;
-        if(!id) return alert("Please enter Student ID!");
+        if(!id) return alert("Please enter ID!");
 
         const sSnap = await db.collection('students').where('uniqueID', '==', Number(id)).get();
         
         if(!sSnap.empty) {
-            const s = sSnap.docs[0].data();
-            document.getElementById('sNameDisplay').innerText = s.name.toUpperCase();
-            document.getElementById('sDetailsDisplay').innerText = `Class: ${s.class} | Father: ${s.father} | Transport: ${s.transport}`;
+            currentStudent = sSnap.docs[0].data();
+            document.getElementById('sNameDisplay').innerText = currentStudent.name;
+            document.getElementById('sDetailsDisplay').innerText = `Class: ${currentStudent.class}-${currentStudent.section} | Father: ${currentStudent.father}`;
             
-            // Fetch Academic Fee
-            const mDoc = await db.collection('fee_master').doc(s.class).get();
-            let academicMonthly = 0;
-            if(mDoc.exists) {
-                academicMonthly = mDoc.data().tuition || 0;
+            // Fetch Expected Fees from Master
+            const mDoc = await db.collection('fee_master').doc(currentStudent.class).get();
+            let tuition = 0;
+            if(mDoc.exists) tuition = mDoc.data().tuition || 0;
+            
+            let transport = 0;
+            if(currentStudent.transport === 'Yes') {
+                const slab = currentStudent.transportDistance;
+                const tDoc = await db.collection('transport_master').doc(slab).get();
+                if(tDoc.exists) transport = tDoc.data().amount || 0;
             }
-            document.getElementById('expAcademic').innerText = "₹" + academicMonthly;
 
-            // Fetch Transport Fee (Distance based)
-            let transportMonthly = 0;
-            if(s.transport === 'Yes') {
-                const bSlab = (s.transportDistance || "").trim();
-                const tDoc = await db.collection('transport_master').doc(bSlab).get();
-                if(tDoc.exists) {
-                    transportMonthly = tDoc.data().amount || 0;
-                }
-            }
-            document.getElementById('expTransport').innerText = "₹" + transportMonthly;
+            document.getElementById('expTuition').innerText = "₹" + tuition;
+            document.getElementById('expTransport').innerText = "₹" + transport;
+            document.getElementById('totalExpected').innerText = "₹" + (tuition + transport);
             
             document.getElementById('treasuryForm').style.display = 'block';
         } else {
-            alert("Student not found in the Royal Registry!");
+            alert("Student not found!");
             document.getElementById('treasuryForm').style.display = 'none';
         }
     }
 
     async function submitFee() {
-        const id = document.getElementById('feeRoll').value;
         const amount = document.getElementById('fAmount').value;
         const purpose = document.getElementById('fMonth').value;
+        const mode = document.getElementById('fMode').value;
 
-        if(!amount || !purpose) return alert("Please enter amount and select purpose!");
+        if(!amount || !purpose) return alert("Fill all fields!");
+
+        const receiptData = {
+            studentID: currentStudent.uniqueID,
+            studentName: currentStudent.name,
+            class: currentStudent.class,
+            amount: Number(amount),
+            month: purpose,
+            mode: mode,
+            date: new Date().toLocaleDateString('en-GB'),
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        };
 
         try {
-            await db.collection('fee_transactions').add({
-                studentID: Number(id),
-                amount: Number(amount),
-                month: purpose, // Storing as 'month' to match Ledger logic
-                date: new Date().toLocaleDateString('en-GB'),
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            });
+            const docRef = await db.collection('fee_transactions').add(receiptData);
             
-            alert("Treasury Updated! Receipt logged in Archives.");
+            // Fill Receipt
+            document.getElementById('rNum').innerText = docRef.id.substring(0,8).toUpperCase();
+            document.getElementById('rDate').innerText = receiptData.date;
+            document.getElementById('rName').innerText = receiptData.studentName;
+            document.getElementById('rID').innerText = receiptData.studentID;
+            document.getElementById('rClass').innerText = receiptData.class;
+            document.getElementById('rPurpose').innerText = receiptData.month;
+            document.getElementById('rAmt').innerText = receiptData.amount;
+            document.getElementById('rMode').innerText = receiptData.mode;
+
+            // Trigger Print
+            window.print();
             location.reload();
         } catch (e) {
             alert("Error: " + e.message);
         }
     }
 </script>
+
 <script src="menu.js"></script>
 </body>
 </html>
