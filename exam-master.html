@@ -3,141 +3,161 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Lalit - Exam Master</title>
-    <style>
-        :root {
-            --royal-blue: #002366; --gold: #D4AF37; --deep-gold: #aa8a2e;
-            --light-gold: #FDFBF0; --white: #ffffff; --danger: #c0392b;
-        }
-
-        body { background: var(--light-gold); margin: 0; padding: 40px 20px; font-family: 'Georgia', serif; color: var(--royal-blue); }
-
-        .container {
-            max-width: 1000px; margin: 0 auto; background: var(--white);
-            padding: 50px; border-radius: 5px; box-shadow: 0 20px 50px rgba(0,0,0,0.1);
-            border: 1px solid var(--gold); position: relative;
-        }
-
-        .container::before {
-            content: ""; position: absolute; top: 10px; left: 10px; right: 10px; bottom: 10px;
-            border: 1px solid var(--gold); pointer-events: none; opacity: 0.5;
-        }
-
-        .header { text-align: center; border-bottom: 3px double var(--gold); margin-bottom: 40px; padding-bottom: 20px; }
-        .school-logo { width: 110px; margin-bottom: 10px; }
-
-        h1 { text-transform: uppercase; letter-spacing: 4px; font-size: 2.2rem; margin: 10px 0; color: var(--royal-blue); }
-
-        .form-section { margin-bottom: 35px; border: 1px solid #eee; padding: 25px; background: #fff; position: relative; }
-
-        .section-title {
-            position: absolute; top: -12px; left: 20px; background: white;
-            padding: 0 15px; font-weight: bold; color: var(--deep-gold);
-            text-transform: uppercase; font-size: 0.9rem;
-        }
-
-        .config-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
-
-        input, select {
-            padding: 12px; border: 1px solid #ccc; background: #fff; font-size: 1rem;
-            border-bottom: 2px solid var(--gold); outline: none; width: 100%; box-sizing: border-box;
-        }
-
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { background: var(--royal-blue); color: var(--gold); padding: 15px; text-align: left; font-size: 0.9rem; text-transform: uppercase; }
-        td { padding: 10px; border-bottom: 1px solid #eee; }
-
-        .main-btn {
-            width: 100%; padding: 20px; background: var(--royal-blue); color: var(--gold);
-            border: 1px solid var(--gold); font-size: 1.3rem; font-weight: bold;
-            cursor: pointer; letter-spacing: 2px; transition: 0.3s; margin-top: 20px;
-        }
-
-        .main-btn:hover { background: #001a4d; }
-
-        .btn-small { padding: 8px 15px; font-size: 0.8rem; cursor: pointer; border: 1px solid var(--gold); font-weight: bold; }
-        .btn-add { background: var(--gold); color: white; }
-        .btn-reset { background: #666; color: white; border: none; }
-        .btn-del { background: var(--danger); color: white; border: none; }
-
-        #status { text-align: center; margin-top: 15px; font-weight: bold; }
-    </style>
-
+    <title>Exam Master | The Lalit Intl.</title>
+    
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
-
+    
     <script src="firebase-config.js"></script>
+    <script src="auth-guard.js"></script>
+    <script src="brand.js"></script>
+
+    <style>
+        .exam-container { max-width: 1000px; margin: 0 auto; }
+        
+        .config-card {
+            background: #fff; border: 1px solid var(--gold);
+            border-radius: 12px; padding: 30px; margin-bottom: 25px;
+            box-shadow: var(--shadow-sm); position: relative;
+        }
+
+        .card-label {
+            position: absolute; top: -12px; left: 20px;
+            background: white; padding: 0 10px;
+            font-size: 0.75rem; font-weight: bold; color: var(--gold);
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+
+        .master-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .subject-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .subject-table th { 
+            background: var(--royal-blue); color: var(--gold); 
+            padding: 12px; font-size: 0.8rem; text-transform: uppercase;
+        }
+        .subject-table td { padding: 10px; border-bottom: 1px solid #eee; }
+
+        .sub-input { 
+            border: none; border-bottom: 2px solid #eee; padding: 8px; 
+            width: 100%; transition: 0.3s; font-weight: bold;
+        }
+        .sub-input:focus { border-color: var(--gold); outline: none; background: #fffdf5; }
+
+        .btn-action {
+            padding: 8px 15px; border-radius: 5px; font-size: 0.8rem;
+            font-weight: bold; cursor: pointer; transition: 0.3s; border: 1px solid transparent;
+        }
+        .btn-add-sub { background: var(--light-gold); color: var(--royal-blue); border-color: var(--gold); }
+        .btn-add-sub:hover { background: var(--gold); color: white; }
+        .btn-del-sub { background: #fff5f5; color: #e74c3c; border-color: #ffdada; }
+        .btn-del-sub:hover { background: #e74c3c; color: white; }
+
+        #status-box { 
+            text-align: center; padding: 15px; margin-top: 20px; 
+            border-radius: 8px; font-weight: bold; display: none;
+        }
+    </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="header">
-        <img src="logo.png" alt="Logo" class="school-logo">
-        <h1>Exam Master Settings</h1>
-        <p style="letter-spacing: 5px; font-size: 0.8rem; color: var(--deep-gold);">ACADEMIC CONFIGURATION PANEL</p>
+<div id="menu-container"></div>
+
+<div class="main-content">
+    <div class="exam-container">
+        <div class="royal-card">
+            <div class="header" id="brand-header-container"></div>
+
+            <h2 class="brand-font text-center mb-4" style="color: var(--royal-blue);">Exam Configuration Master</h2>
+
+            <div class="config-card">
+                <span class="card-label">Examination Details</span>
+                <div class="master-grid">
+                    <div>
+                        <label class="small fw-bold">EXAM TYPE</label>
+                        <select id="examType" class="form-select" onchange="autoPopulate()">
+                            <option value="">-- Select Exam --</option>
+                            <option value="Formative Test -I">Formative Test -I</option>
+                            <option value="Periodic Test -I">Periodic Test -I</option>
+                            <option value="Term -I">Term -I</option>
+                            <option value="Formative Test -II">Formative Test -II</option>
+                            <option value="Periodic -II">Periodic -II</option>
+                            <option value="Term -II">Term -II</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="small fw-bold">TARGET CLASS</label>
+                        <select id="examClass" class="form-select" onchange="autoPopulate()">
+                            <option value="">-- Select Class --</option>
+                            <option value="Pre-Nursery">Pre-Nursery</option>
+                            <option value="Nursery">Nursery</option>
+                            <option value="LKG">LKG</option>
+                            <option value="UKG">UKG</option>
+                            <option value="1">Class 1</option>
+                            <option value="2">Class 2</option>
+                            <option value="3">Class 3</option>
+                            <option value="4">Class 4</option>
+                            <option value="5">Class 5</option>
+                            <option value="6">Class 6</option>
+                            <option value="7">Class 7</option>
+                            <option value="8">Class 8</option>
+                            <option value="9">Class 9</option>
+                            <option value="10">Class 10</option>
+                            <option value="11">Class 11</option>
+                            <option value="12">Class 12</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="small fw-bold">START DATE</label>
+                        <input type="date" id="examDate" class="form-control">
+                    </div>
+                </div>
+            </div>
+
+            <div class="config-card">
+                <span class="card-label">Subject & Full Marks Mapping</span>
+                <div style="overflow-x: auto;">
+                    <table class="subject-table">
+                        <thead>
+                            <tr>
+                                <th>Subject Name</th>
+                                <th style="width: 180px;">Full Marks (MM)</th>
+                                <th style="width: 80px;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="subjectBody">
+                            </tbody>
+                    </table>
+                </div>
+                <div class="mt-3 d-flex gap-2">
+                    <button class="btn-action btn-add-sub" onclick="addRow('', 0)">
+                        <i class="fas fa-plus me-1"></i> ADD SUBJECT
+                    </button>
+                    <button class="btn-action" style="background: #666; color: white;" onclick="autoPopulate()">
+                        <i class="fas fa-undo me-1"></i> RESET
+                    </button>
+                </div>
+            </div>
+
+            <button class="royal-btn btn-block btn-lg" onclick="saveExamSettings()" id="saveBtn">
+                <i class="fas fa-save me-2"></i>DEPLOY CONFIGURATION
+            </button>
+
+            <div id="status-box"></div>
+        </div>
     </div>
-
-    <section class="form-section">
-        <span class="section-title">Examination Details</span>
-        <div class="config-grid">
-            <div>
-                <label style="font-size: 0.8rem; font-weight: bold;">Exam Type</label>
-                <select id="examType" onchange="autoPopulate()">
-                    <option value="">-- Select Exam --</option>
-                    <option value="Formative Test -I">Formative Test -I</option>
-                    <option value="Periodic Test -I">Periodic Test -I</option>
-                    <option value="Term -I">Term -I</option>
-                    <option value="Formative Test -II">Formative Test -II</option>
-                    <option value="Periodic -II">Periodic -II</option>
-                    <option value="Term -II">Term -II</option>
-                </select>
-            </div>
-            <div>
-                <label style="font-size: 0.8rem; font-weight: bold;">Class</label>
-                <select id="examClass" onchange="autoPopulate()">
-                    <option value="">-- Select Class --</option>
-                    <option value="Pre-Nursery">Pre-Nursery</option>
-                    <option value="Nursery">Nursery</option>
-                    <option value="LKG">LKG</option>
-                    <option value="UKG">UKG</option>
-                    <script>
-                        for(let i=1; i<=12; i++) document.write(`<option value="${i}">Class ${i}</option>`);
-                    </script>
-                </select>
-            </div>
-            <div>
-                <label style="font-size: 0.8rem; font-weight: bold;">Exam Date</label>
-                <input type="date" id="examDate">
-            </div>
-        </div>
-    </section>
-
-    <section class="form-section">
-        <span class="section-title">Subject & Marks Mapping</span>
-        <table id="subjectTable">
-            <thead>
-                <tr>
-                    <th>Subject Name</th>
-                    <th style="width: 150px;">Full Marks</th>
-                    <th style="width: 100px;">Action</th>
-                </tr>
-            </thead>
-            <tbody id="subjectBody"></tbody>
-        </table>
-        <div style="margin-top: 20px; display: flex; gap: 10px;">
-            <button class="btn-small btn-add" onclick="addRow('', 0)">+ ADD SUBJECT</button>
-            <button class="btn-small btn-reset" onclick="autoPopulate()">RESET TO DEFAULT</button>
-        </div>
-    </section>
-
-    <button class="main-btn" onclick="saveExamSettings()">SAVE EXAM CONFIGURATION</button>
-    <div id="status"></div>
 </div>
 
 <script>
 const defaultSubjects = [
-    "English", "Hindi", "Sanskrit", "Science", "Social Science", 
-    "Mathematics", "Computer", "General Knowledge", "Moral Education", "Drawing"
+    "English", "Hindi", "Mathematics", "Science", "Social Science", 
+    "Computer", "General Knowledge", "Drawing"
 ];
 
 function getMarksByExam(examType) {
@@ -161,9 +181,13 @@ function addRow(name = "", marks = "") {
     const tbody = document.getElementById('subjectBody');
     const tr = document.createElement('tr');
     tr.innerHTML = `
-        <td><input type="text" class="sub-name" value="${name}"></td>
-        <td><input type="number" class="sub-marks" value="${marks}"></td>
-        <td><button class="btn-small btn-del" onclick="this.parentElement.parentElement.remove()">DEL</button></td>
+        <td><input type="text" class="sub-input sub-name" value="${name}" placeholder="Subject Name"></td>
+        <td><input type="number" class="sub-input sub-marks" value="${marks}" placeholder="MM"></td>
+        <td class="text-center">
+            <button class="btn-action btn-del-sub" onclick="this.closest('tr').remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        </td>
     `;
     tbody.appendChild(tr);
 }
@@ -172,12 +196,15 @@ async function saveExamSettings() {
     const examType = document.getElementById('examType').value;
     const sClass = document.getElementById('examClass').value;
     const examDate = document.getElementById('examDate').value;
-    const status = document.getElementById('status');
+    const btn = document.getElementById('saveBtn');
 
     if(!examType || !sClass || !examDate) {
-        alert("Pehle Exam Type, Class aur Date select karein.");
+        alert("Please complete the Exam Details first.");
         return;
     }
+
+    btn.disabled = true;
+    btn.innerHTML = "<i class='fas fa-spinner fa-spin me-2'></i>SAVING...";
 
     const subjects = [];
     document.querySelectorAll('#subjectBody tr').forEach(row => {
@@ -194,14 +221,28 @@ async function saveExamSettings() {
             examType: examType,
             examDate: examDate,
             subjects: subjects,
-            timestamp: Date.now()
+            lastUpdated: Date.now()
         });
-        status.innerHTML = `<span style="color:green;">✓ Settings saved for ${sClass} - ${examType}</span>`;
+        
+        showStatus(`✓ Configuration deployed for Class ${sClass} (${examType})`, "success");
     } catch (err) {
-        status.innerHTML = `<span style="color:red;">Error: ${err.message}</span>`;
+        showStatus("Error: " + err.message, "danger");
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = "<i class='fas fa-save me-2'></i>DEPLOY CONFIGURATION";
     }
 }
+
+function showStatus(msg, type) {
+    const box = document.getElementById('status-box');
+    box.style.display = "block";
+    box.style.backgroundColor = type === 'success' ? '#e8f5e9' : '#ffebee';
+    box.style.color = type === 'success' ? '#2e7d32' : '#c62828';
+    box.innerText = msg;
+    setTimeout(() => { box.style.display = "none"; }, 4000);
+}
 </script>
+
 <script src="menu.js"></script>
 </body>
 </html>
