@@ -1,17 +1,4 @@
-/* THE LALIT INTERNATIONAL SCHOOL - ORIGINAL CODE RESTORED */
-
-// 1. Firebase Config (Jo aapne di thi)
-const firebaseConfig = {
-  apiKey: "AIzaSyDqDmsMp2eAuHJBcjW-ciO2JcLTXapiIrs",
-  authDomain: "the-lalit-d7472.firebaseapp.com",
-  projectId: "the-lalit-d7472",
-  appId: "1:479237084229:web:31078825739b3c5712ff2c"
-};
-
-// Initialization fix: Taki firebase error na de
-if (typeof firebase !== 'undefined' && !firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-}
+/* THE LALIT INTERNATIONAL SCHOOL - FINAL COMPLETED SECURE MENU */
 
 function loadMenu() {
     if (document.getElementById('sidebar-wrapper')) return;
@@ -119,6 +106,15 @@ async function renderDynamicLinks() {
                     if (p.report_card) html += `<a href="exam-repot-card.html"><i class="fas fa-file-alt"></i> Report Card</a>`;
                     if (p.attendance) html += `<a href="attendance.html"><i class="fas fa-calendar-check"></i> Attendance</a>`;
                 }
+                if (p.collect_fees || p.fee_master || p.master_ledger || p.fee_history || p.demand_slip || p.defaulter_list) {
+                    html += `<div class="menu-divider">Treasury & Accounts</div>`;
+                    if (p.fee_master) html += `<a href="fee-master.html"><i class="fas fa-cog"></i> Fee Structure</a>`;
+                    if (p.collect_fees) html += `<a href="collect-fees.html"><i class="fas fa-vault"></i> Collect Fees</a>`;
+                    if (p.fee_history) html += `<a href="fee-history.html"><i class="fas fa-history"></i> Fee History</a>`;
+                    if (p.demand_slip) html += `<a href="fee-demand-slip.html"><i class="fas fa-file-invoice"></i> Demand Slips</a>`;
+                    if (p.master_ledger) html += `<a href="master-ledger.html"><i class="fas fa-book"></i> Master Ledger</a>`;
+                    if (p.defaulter_list) html += `<a href="defaulter-list.html"><i class="fas fa-exclamation-triangle"></i> Defaulter List</a>`;
+                }
             }
             html += `<a href="#" onclick="handleLogout()" class="nav-links logout-link"><i class="fas fa-sign-out-alt"></i> Logout Registry</a>`;
             nav.innerHTML = html;
@@ -126,6 +122,7 @@ async function renderDynamicLinks() {
     });
 }
 
+// --- ESSENTIAL TOGGLE FUNCTIONS ---
 function handleMenuClick(e) {
     e.stopPropagation();
     const sidebar = document.getElementById('mySidebar');
@@ -157,3 +154,18 @@ function handleLogout() {
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadMenu);
 else loadMenu();
 
+
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDqDmsMp2eAuHJBcjW-ciO2JcLTXapiIrs",
+  authDomain: "the-lalit-d7472.firebaseapp.com",
+  projectId: "the-lalit-d7472",
+  appId: "1:479237084229:web:31078825739b3c5712ff2c"
+};
+
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+
+var db = firebase.firestore();
+var auth = firebase.auth();
