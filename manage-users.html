@@ -4,76 +4,100 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Staff Management | The Lalit Intl.</title>
+    
+    <link rel="stylesheet" href="style.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
-        :root { --royal-blue: #002366; --gold: #D4AF37; }
-        body { background: #f4f7f6; font-family: 'Poppins', sans-serif; }
-        .user-card { background: white; border-radius: 12px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-top: 5px solid var(--royal-blue); height: 100%; }
-        .perm-box { background: #fff9e6; padding: 15px; border-radius: 8px; margin-top: 10px; border: 1px solid #ffeeba; max-height: 450px; overflow-y: auto; }
-        .section-title { font-size: 11px; font-weight: bold; color: var(--royal-blue); text-transform: uppercase; margin: 15px 0 5px; display: block; border-bottom: 2px solid rgba(0,35,102,0.1); padding-bottom: 3px; }
-        .form-check-label { font-size: 13px; cursor: pointer; color: #444; }
-        .role-badge { font-size: 0.75rem; padding: 4px 10px; border-radius: 20px; font-weight: bold; text-transform: uppercase; background: #e3f2fd; color: #1565c0; }
+        /* Custom tweaks to match Royal Theme within Bootstrap */
+        .user-card { 
+            background: white; border-radius: 15px; padding: 25px; 
+            box-shadow: var(--shadow-md); border-top: 5px solid var(--royal-blue); 
+            height: 100%; position: relative;
+        }
+        .perm-box { 
+            background: var(--light-gold); padding: 15px; border-radius: 8px; 
+            margin-top: 10px; border: 1px solid var(--gold); max-height: 400px; overflow-y: auto; 
+        }
+        .section-title-perm { 
+            font-size: 11px; font-weight: bold; color: var(--royal-blue); 
+            text-transform: uppercase; margin: 15px 0 5px; display: block; 
+            border-bottom: 2px solid var(--gold); padding-bottom: 3px; 
+        }
+        .role-badge { 
+            font-size: 0.75rem; padding: 4px 10px; border-radius: 20px; 
+            font-weight: bold; text-transform: uppercase; background: #e3f2fd; color: #1565c0; 
+        }
     </style>
 </head>
 <body>
 
-<div class="container-fluid py-4">
-    <div class="row g-4">
-        <div class="col-lg-4 col-md-5">
-            <div class="user-card">
-                <h5 class="fw-bold mb-4" style="color: var(--royal-blue);"><i class="fas fa-user-shield me-2"></i>Authorize New Staff</h5>
-                
-                <div class="mb-3">
-                    <label class="small fw-bold text-muted">Full Name</label>
-                    <input type="text" id="uName" class="form-control form-control-sm" placeholder="e.g. Rahul Kumar">
-                </div>
-                <div class="mb-3">
-                    <label class="small fw-bold text-muted">Email Address</label>
-                    <input type="email" id="uEmail" class="form-control form-control-sm" placeholder="staff@thelalit.com">
-                </div>
-                <div class="row">
-                    <div class="col-6 mb-3">
-                        <label class="small fw-bold text-muted">Role</label>
-                        <select id="uRole" class="form-select form-select-sm">
-                            <option value="teacher">Teacher</option>
-                            <option value="accountant">Accountant</option>
-                            <option value="admin">Administrator</option>
-                        </select>
-                    </div>
-                    <div class="col-6 mb-3">
-                        <label class="small fw-bold text-muted">Password</label>
-                        <input type="text" id="uPass" class="form-control form-control-sm" value="Lalit@123">
-                    </div>
-                </div>
+<div id="menu-container"></div>
 
-                <div class="perm-box" id="new_staff_perms_container">
-                    </div>
-
-                <button class="btn btn-primary w-100 mt-4 fw-bold py-2" id="createBtn" onclick="createNewStaff()">CREATE ACCOUNT</button>
+<div class="main-content">
+    <div class="royal-card">
+        <div class="header" id="brand-header-container">
             </div>
-        </div>
 
-        <div class="col-lg-8 col-md-7">
-            <div class="user-card">
-                <h5 class="fw-bold mb-4 d-flex justify-content-between">
-                    <span><i class="fas fa-list-ul me-2"></i>Staff Registry</span>
-                    <span id="staffCount" class="badge bg-secondary">0</span>
-                </h5>
-                <div class="table-responsive">
-                    <table class="table align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Name & Email</th>
-                                <th>Role</th>
-                                <th>Access</th>
-                                <th class="text-end">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="staffList">
-                            <tr><td colspan="4" class="text-center py-5">Loading Staff Data...</td></tr>
-                        </tbody>
-                    </table>
+        <div class="container-fluid py-4">
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-5">
+                    <div class="user-card">
+                        <h5 class="brand-font" style="font-size: 1.2rem; margin-bottom:20px;">
+                            <i class="fas fa-user-shield me-2"></i>Authorize Staff
+                        </h5>
+                        
+                        <div class="mb-3">
+                            <label class="small fw-bold text-muted">Full Name</label>
+                            <input type="text" id="uName" class="form-control" placeholder="Name">
+                        </div>
+                        <div class="mb-3">
+                            <label class="small fw-bold text-muted">Email Address</label>
+                            <input type="email" id="uEmail" class="form-control" placeholder="staff@thelalit.com">
+                        </div>
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="small fw-bold text-muted">Role</label>
+                                <select id="uRole" class="form-select">
+                                    <option value="staff">Staff</option>
+                                    <option value="admin">Admin</option>
+                                </select>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="small fw-bold text-muted">Password</label>
+                                <input type="text" id="uPass" class="form-control" value="Lalit@2026">
+                            </div>
+                        </div>
+
+                        <div class="perm-box" id="new_staff_perms_container"></div>
+
+                        <button class="royal-btn btn-block mt-4" id="createBtn" onclick="createNewStaff()">CREATE ACCOUNT</button>
+                    </div>
+                </div>
+
+                <div class="col-lg-8 col-md-7">
+                    <div class="user-card">
+                        <h5 class="brand-font" style="font-size: 1.2rem; margin-bottom:20px; display:flex; justify-content:space-between;">
+                            <span><i class="fas fa-list-ul me-2"></i>Staff Registry</span>
+                            <span id="staffCount" class="badge bg-dark">0</span>
+                        </h5>
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Name & Email</th>
+                                        <th>Role</th>
+                                        <th>Access</th>
+                                        <th class="text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="staffList">
+                                    <tr><td colspan="4" class="text-center py-5">Loading...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -82,18 +106,17 @@
 
 <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content shadow-lg border-0">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title fw-bold" id="editTitle">Edit Permissions</h5>
+        <div class="modal-content border-0" style="border-radius:15px; border:2px solid var(--gold) !important;">
+            <div class="modal-header" style="background:var(--royal-blue); color:var(--gold);">
+                <h5 class="modal-title brand-font" id="editTitle" style="font-size:1rem;">Edit Permissions</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="editUid">
-                <div class="perm-box bg-light border-0" id="edit_staff_perms_container">
-                    </div>
+                <div class="perm-box" id="edit_staff_perms_container"></div>
             </div>
             <div class="modal-footer border-0">
-                <button class="btn btn-primary w-100 fw-bold py-2" onclick="savePermissions()">SAVE UPDATED ACCESS</button>
+                <button class="royal-btn btn-block" onclick="savePermissions()">SAVE UPDATED ACCESS</button>
             </div>
         </div>
     </div>
@@ -104,71 +127,77 @@
 <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
+<script src="brand.js"></script>
 
 <script>
-    // --- 1. MASTER PAGE LIST (All Genuine Pages) ---
+    // --- 1. PAGE LIST ---
     const masterPages = {
         "Student Records": {
-            view_students: "Student Registry",
-            add_student: "New Admission",
-            edit_student: "Edit Student"
+            add_student: "Admission Form",
+            view_students: "Student List",
         },
         "Academic & Exams": {
-            attendance: "Attendance Record",
-            exam_master: "Exam Master",
             marks_entry: "Marks Entry",
             report_card: "Report Card"
         },
-        "Accounts & Treasury": {
-            fee_master: "Fee Structure",
-            collect_fees: "Collect Fees",
-            fee_history: "Fee History",
-            demand_slip: "Demand Slips",
-            master_ledger: "Master Ledger",
-            defaulter_list: "Defaulter List"
+        "Accounts": {
+            collect_fees: "Fee Collection",
+            fee_history: "Fee Ledger"
         },
-        "System Admin": {
-            manage_users: "Manage Staff",
-            web_control: "Web Manager"
+        "System": {
+            manage_staff: "Manage Staff",
+            web_control: "Settings"
         }
     };
 
-    // --- 2. GENERATE PERMISSIONS LIST ---
+    // --- 2. AUTH & ADMIN PROTECTION ---
+    firebase.auth().onAuthStateChanged(async user => {
+        if (!user) {
+            window.location.href = "login.html";
+        } else {
+            const doc = await db.collection('users').doc(user.uid).get();
+            if (!doc.exists || doc.data().role !== 'admin') {
+                alert("Unauthorized Access! Admin only.");
+                window.location.href = "index.html";
+            }
+        }
+    });
+
+    // --- 3. GENERATE LISTS ---
     function generatePermList(containerId, currentPerms = {}, isEdit = false) {
         const container = document.getElementById(containerId);
-        container.innerHTML = `<p class="text-center small fw-bold text-muted mb-2"><i class="fas fa-lock me-1"></i> SELECT PAGE PERMISSIONS</p>`;
+        container.innerHTML = `<p class="text-center small fw-bold text-muted mb-2">GRANT ACCESS TO PAGES</p>`;
         const prefix = isEdit ? "edit_" : "new_";
 
         for (const [category, pages] of Object.entries(masterPages)) {
-            container.insertAdjacentHTML('beforeend', `<span class="section-title">${category}</span>`);
+            container.insertAdjacentHTML('beforeend', `<span class="section-title-perm">${category}</span>`);
             for (const [id, label] of Object.entries(pages)) {
                 const isChecked = currentPerms[id] ? "checked" : "";
                 container.insertAdjacentHTML('beforeend', `
                     <div class="form-check form-switch mb-1">
-                        <input class="form-check-input perm-switch-${prefix}" type="checkbox" id="${prefix}${id}" ${isChecked} data-key="${id}">
-                        <label class="form-check-label" for="${prefix}${id}">${label}</label>
+                        <input class="form-check-input" type="checkbox" id="${prefix}${id}" ${isChecked} data-key="${id}">
+                        <label class="form-check-label ms-2" style="font-size:13px;" for="${prefix}${id}">${label}</label>
                     </div>`);
             }
         }
     }
 
-    // --- 3. CREATE STAFF ---
+    // --- 4. CREATE STAFF ---
     async function createNewStaff() {
         const name = document.getElementById('uName').value;
         const email = document.getElementById('uEmail').value;
         const role = document.getElementById('uRole').value;
         const pass = document.getElementById('uPass').value;
-        const btn = document.getElementById('createBtn');
-
+        
         let perms = {};
-        document.querySelectorAll('.perm-switch-new_').forEach(cb => {
+        document.querySelectorAll('#new_staff_perms_container input').forEach(cb => {
             perms[cb.getAttribute('data-key')] = cb.checked;
         });
 
-        if(!name || !email) return alert("Please fill details!");
+        if(!name || !email) return alert("Fill details");
 
-        btn.disabled = true; btn.innerText = "Processing...";
         try {
+            // Using Secondary App to create user without logging out admin
             const secondaryApp = firebase.initializeApp(firebaseConfig, "Secondary");
             const cred = await secondaryApp.auth().createUserWithEmailAndPassword(email, pass);
             await db.collection('users').doc(cred.user.uid).set({
@@ -176,39 +205,36 @@
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
             await secondaryApp.delete();
-            alert("Staff Authorized!"); location.reload();
-        } catch (e) { alert(e.message); btn.disabled = false; btn.innerText = "CREATE ACCOUNT"; }
+            alert("Staff Account Created!"); location.reload();
+        } catch (e) { alert(e.message); }
     }
 
-    // --- 4. LOAD TABLE ---
+    // --- 5. LOAD LIST ---
     function loadStaff() {
-        db.collection('users').orderBy('createdAt', 'desc').onSnapshot(snap => {
+        db.collection('users').onSnapshot(snap => {
             const list = document.getElementById('staffList');
             document.getElementById('staffCount').innerText = snap.size;
             list.innerHTML = "";
             snap.forEach(doc => {
                 const u = doc.data();
-                const p = u.permissions || {};
-                const pCount = Object.values(p).filter(v => v === true).length;
-
+                const pCount = Object.values(u.permissions || {}).filter(v => v === true).length;
                 list.innerHTML += `
                 <tr>
-                    <td><b>${u.name}</b><br><small class="text-muted">${u.email}</small></td>
+                    <td><b>${u.name}</b><br><small>${u.email}</small></td>
                     <td><span class="role-badge">${u.role}</span></td>
-                    <td><span class="badge bg-success-subtle text-success">${u.role==='admin'?'Full Access':pCount+' Pages'}</span></td>
+                    <td><span class="badge bg-light text-dark border">${u.role==='admin'?'Full':pCount+' Pages'}</span></td>
                     <td class="text-end">
-                        <button class="btn btn-sm btn-light text-primary me-1" onclick="openEditModal('${doc.id}', '${u.name}')"><i class="fas fa-edit"></i></button>
-                        <button class="btn btn-sm btn-light text-danger" onclick="deleteUser('${doc.id}')"><i class="fas fa-trash"></i></button>
+                        <button class="btn btn-sm btn-outline-primary" onclick="openEditModal('${doc.id}', '${u.name}')"><i class="fas fa-key"></i></button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${doc.id}')"><i class="fas fa-trash"></i></button>
                     </td>
                 </tr>`;
             });
         });
     }
 
-    // --- 5. EDIT LOGIC ---
     async function openEditModal(uid, name) {
         document.getElementById('editUid').value = uid;
-        document.getElementById('editTitle').innerText = "Update Access: " + name;
+        document.getElementById('editTitle').innerText = "Access for: " + name;
         const doc = await db.collection('users').doc(uid).get();
         generatePermList("edit_staff_perms_container", doc.data().permissions || {}, true);
         new bootstrap.Modal(document.getElementById('editModal')).show();
@@ -217,19 +243,11 @@
     async function savePermissions() {
         const uid = document.getElementById('editUid').value;
         let perms = {};
-        document.querySelectorAll('.perm-switch-edit_').forEach(cb => {
+        document.querySelectorAll('#edit_staff_perms_container input').forEach(cb => {
             perms[cb.getAttribute('data-key')] = cb.checked;
         });
-
-        try {
-            await db.collection('users').doc(uid).update({ permissions: perms });
-            alert("Permissions Updated!");
-            bootstrap.Modal.getInstance(document.getElementById('editModal')).hide();
-        } catch (e) { alert(e.message); }
-    }
-
-    async function deleteUser(id) {
-        if(confirm("Confirm Deletion?")) await db.collection('users').doc(id).delete();
+        await db.collection('users').doc(uid).update({ permissions: perms });
+        alert("Updated!"); location.reload();
     }
 
     window.onload = () => {
