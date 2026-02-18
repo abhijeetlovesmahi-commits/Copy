@@ -3,36 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Staff Attendance - TLIS</title>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <title>Staff Attendance | TLIS Registry</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+
     <style>
-        body { font-family: 'Poppins', sans-serif; background: #f4f7f6; margin: 0; padding: 20px; padding-top: 80px; }
-        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h2 { color: #002366; border-left: 5px solid #D4AF37; padding-left: 15px; }
-        .staff-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee; }
-        .status-btn { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .present { background: #2ecc71; color: white; }
-        .absent { background: #e74c3c; color: white; }
-        .save-btn { width: 100%; background: #002366; color: #D4AF37; padding: 15px; border: none; border-radius: 8px; font-size: 16px; margin-top: 20px; cursor: pointer; }
+        :root { --royal-blue: #002366; --gold: #D4AF37; }
+        body { background: #f8f9fa; font-family: 'Montserrat', sans-serif; }
+        
+        .attendance-card { 
+            background: white; border-radius: 15px; padding: 25px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-top: 5px solid var(--royal-blue);
+        }
+        
+        .staff-item { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 12px 15px; border-bottom: 1px solid #eee; transition: 0.2s;
+        }
+        .staff-item:hover { background: #fdfbf0; }
+        
+        .btn-group-toggle .btn { width: 100px; font-weight: bold; border-radius: 5px !important; }
+        
+        .submit-section { 
+            position: sticky; bottom: 0; background: white; 
+            padding: 20px; border-top: 1px solid #ddd; border-radius: 0 0 15px 15px;
+        }
+
+        #attendance-status { font-size: 0.9rem; font-weight: bold; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2><i class="fas fa-user-check"></i> Staff Attendance</h2>
-        <p id="current-date"></p>
-        <hr>
-        <div id="staff-list">
-            <p>Loading staff registry...</p>
-        </div>
-        <button class="save-btn" onclick="saveAttendance()">Submit Attendance</button>
-    </div>
 
-    <script src="menu.js"></script> 
-    <script>
-        document.getElementById('current-date').innerText = "Date: " + new Date().toLocaleDateString();
-        // Attendance logic yahan aayega
-    </script>
+<div id="menu-container"></div>
+
+<div class="main-content container py-4">
+    <div class="attendance-card">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="brand-font mb-0" style="color: var(--royal-blue);">
+                    <i class="fas fa-calendar-check me-2 text-warning"></i> STAFF ATTENDANCE
+                </h2>
+                <p class="text-muted small mt-1" id="display-date"></p>
+            </div>
+            <div id="attendance-status"></div>
+        </div>
+
+        <div id="staff-list">
+            <div class="text-center py-5 text-muted">
+                <div class="spinner-border text-primary mb-2"></div>
+                <p>Syncing with Staff Registry...</p>
+            </div>
+        </div>
+
+        <div class="submit-section text-center">
+            <button class="royal-btn px-5 py-3 shadow" id="saveBtn" onclick="saveAttendance()">
+                <i class="fas fa-cloud-upload-alt me-2"></i> SUBMIT TODAY'S RECORD
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
+
+<script src="firebase-config.js"></script>
+<script src="brand.js"></script>
+<script src="menu.js"></script>
+
+<script>
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    document.getElementById('display-date').innerText = "Register for: " + new Date().toDateString();
+    
+    let attendanceData = {};
+
+    // 1. Auth & Permission Check
+    firebase.auth().onAuthStateChanged(async user => {
+        if (!user) {
+            window.location.href = "login.html";
+            return;
+        }
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        if (userDoc.exists) {
+            const userData = userDoc.data();
+            // Sirf Admin ya 'staff_attendance' permission wale hi access kar sakte hain
+            if (userData.role === 'admin' || userData.permissions?.staff_attendance) {
+                loadStaffAndRecords();
+            } else {
+                alert("Unauthorized Access!");
+                window.location.href = "index.html";
+            }
+        }
+    });
+
+    async function loadStaffAndRecords() {
+        try {
+            // Pehle check karo aaj ki attendance ho chuki hai?
+            const existingDoc = await db.collection('staff_attendance').doc(today).get();
+            const existingData = existingDoc.exists ? existingDoc.data().records : {};
+
+            if(existingDoc.exists) {
+                document.getElementById('attendance-status').innerHTML = '<span class="text-success"><i class="fas fa-check-double"></i> Records Synced</span>';
+            }
+
+            // Staff list fetch karo 'users' collection se
+            const staffSnap = await db.collection('users').get();
+            const listContainer = document.getElementById('staff-list');
+            listContainer.innerHTML = "";
+
+            staffSnap.forEach(doc => {
+                const staff = doc.data();
+                const status = existingData[doc.id] || "Present"; // Default Present
+                attendanceData[doc.id] = status;
+
+                listContainer.innerHTML += `
+                    <div class="staff-item">
+                        <div>
+                            <span class="fw-bold d-block text-dark">${staff.name}</span>
+                            <span class="small text-muted text-uppercase">${staff.role}</span>
+                        </div>
+                        <div class="btn-group" role="group">
+                            <input type="radio" class="btn-check" name="status-${doc.id}" id="p-${doc.id}" 
+                                autocomplete="off" ${status === 'Present' ? 'checked' : ''} onclick="updateStatus('${doc.id}', 'Present')">
+                            <label class="btn btn-outline-success btn-sm" for="p-${doc.id}">PRESENT</label>
+
+                            <input type="radio" class="btn-check" name="status-${doc.id}" id="a-${doc.id}" 
+                                autocomplete="off" ${status === 'Absent' ? 'checked' : ''} onclick="updateStatus('${doc.id}', 'Absent')">
+                            <label class="btn btn-outline-danger btn-sm" for="a-${doc.id}">ABSENT</label>
+                        </div>
+                    </div>`;
+            });
+
+        } catch (e) { console.error(e); }
+    }
+
+    function updateStatus(uid, status) {
+        attendanceData[uid] = status;
+    }
+
+    async function saveAttendance() {
+        const btn = document.getElementById('saveBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+        try {
+            await db.collection('staff_attendance').doc(today).set({
+                date: today,
+                records: attendanceData,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                updatedBy: firebase.auth().currentUser.email
+            });
+            alert("Attendance Submitted Successfully!");
+            location.reload();
+        } catch (e) {
+            alert("Error: " + e.message);
+            btn.disabled = false;
+        }
+    }
+</script>
+
 </body>
 </html>
