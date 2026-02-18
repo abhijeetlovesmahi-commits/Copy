@@ -1,121 +1,137 @@
-document.addEventListener("DOMContentLoaded", async () => {
-    const menuContainer = document.getElementById('menu-container');
-    if (!menuContainer) return;
+/* THE LALIT INTERNATIONAL SCHOOL - UNIVERSAL MODULAR MENU */
 
-    // 1. Authentication & Role Check
-    firebase.auth().onAuthStateChanged(async (user) => {
-        if (!user) {
-            menuContainer.innerHTML = "";
-            return;
-        }
+const menuConfig = [
+    { title: "Dashboard", icon: "fa-home", link: "index.html", role: "all" },
+    { title: "Student Registry", icon: "fa-users", link: "view-students.html", role: "all" },
+    { title: "Admission", icon: "fa-user-plus", link: "add-student.html", role: "admin" },
+    
+    { type: "divider", title: "Academic & Exams" },
+    { title: "Attendance", icon: "fa-calendar-check", link: "attendance.html", role: "all" },
+    { title: "Marks Entry", icon: "fa-pen-nib", link: "exam-marks-entry.html", role: "teacher" },
+    { title: "Report Card", icon: "fa-file-alt", link: "exam-repot-card.html", role: "all" },
 
-        try {
-            const userDoc = await db.collection('users').doc(user.uid).get();
-            if (!userDoc.exists) return;
+    { type: "divider", title: "Treasury & Accounts" },
+    { title: "Collect Fees", icon: "fa-vault", link: "collect-fees.html", role: "admin" },
+    { title: "Fee History", icon: "fa-history", link: "fee-history.html", role: "all" },
+    { title: "Defaulter List", icon: "fa-exclamation-triangle", link: "defaulter-list.html", role: "admin" },
 
-            const userData = userDoc.data();
-            const isAdmin = userData.role === 'admin';
-            const perms = userData.permissions || {};
+    { type: "divider", title: "Security" },
+    { title: "Logout Registry", icon: "fa-sign-out-alt", link: "#", role: "all", id: "logoutBtn" }
+];
 
-            // 2. Menu Structure (Synced with your GitHub filenames)
-            const menuData = [
-                {
-                    category: "Academic",
-                    icon: "fas fa-user-graduate",
-                    items: [
-                        { name: "Add Student", link: "add-student.html", id: "admission" },
-                        { name: "View Registry", link: "view-students.html", id: "registry" },
-                        { name: "Edit Student", link: "edit-student.html", id: "edit_student" },
-                        { name: "Attendance", link: "attendance.html", id: "attendance" }
-                    ]
-                },
-                {
-                    category: "Finance",
-                    icon: "fas fa-coins",
-                    items: [
-                        { name: "Collect Fees", link: "collect-fees.html", id: "fees" },
-                        { name: "Fee History", link: "fee-history.html", id: "ledger" },
-                        { name: "Defaulter List", link: "defaulter-list.html", id: "defaulter" },
-                        { name: "Demand Slips", link: "fee-demand-slip.html", id: "demand" },
-                        { name: "Fee Master", link: "fee-master.html", id: "master" }
-                    ]
-                },
-                {
-                    category: "Exams",
-                    icon: "fas fa-file-invoice",
-                    items: [
-                        { name: "Exam Master", link: "exam-master.html", id: "exam_master" },
-                        { name: "Marks Entry", link: "exam-marks-entry.html", id: "marks_entry" },
-                        { name: "Report Cards", link: "exam-repot-card.html", id: "report_card" }
-                    ]
-                },
-                {
-                    category: "System",
-                    icon: "fas fa-user-shield",
-                    items: [
-                        { name: "Manage Staff", link: "manage-users.html", id: "staff" },
-                        { name: "Staff Attendance", link: "staff-attendance.html", id: "staff_attendance" },
-                        { name: "Profile", link: "profile.html", id: "profile" }
-                    ]
-                }
-            ];
+function initUniversalMenu() {
+    // 1. Sidebar aur Overlay ka Structure create karna
+    const menuWrapper = document.createElement('div');
+    menuWrapper.id = 'imperial-menu-wrapper';
 
-            // 3. Build Navigation HTML
-            let menuHtml = `
-            <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow mb-4 no-print">
-                <div class="container-fluid">
-                    <a class="navbar-brand brand-font" href="index.html">
-                        <img src="logo.png" width="30" class="me-2"> TLIS REGISTRY
-                    </a>
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminMenu">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-                    <div class="collapse navbar-collapse" id="adminMenu">
-                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                            <li class="nav-item">
-                                <a class="nav-link" href="index.html"><i class="fas fa-th-large me-1"></i> Dashboard</a>
-                            </li>
-            `;
+    let menuItemsHTML = '';
+    const currentPage = window.location.pathname.split("/").pop() || 'index.html';
 
-            menuData.forEach(cat => {
-                // Filter items: Agar admin hai to sab dikhao, staff hai to perms check karo
-                const allowedItems = cat.items.filter(item => isAdmin || perms[item.id] === true);
-
-                if (allowedItems.length > 0) {
-                    menuHtml += `
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="${cat.icon} me-1"></i> ${cat.category}
-                        </a>
-                        <ul class="dropdown-menu shadow border-0">`;
-                    
-                    allowedItems.forEach(item => {
-                        menuHtml += `<li><a class="dropdown-item" href="${item.link}">${item.name}</a></li>`;
-                    });
-
-                    menuHtml += `</ul></li>`;
-                }
-            });
-
-            menuHtml += `
-                        </ul>
-                        <div class="d-flex align-items-center">
-                            <div class="text-light me-3 text-end d-none d-md-block">
-                                <div class="fw-bold small" style="line-height:1;">${userData.name}</div>
-                                <span class="badge bg-gold text-dark" style="font-size:10px;">${userData.role.toUpperCase()}</span>
-                            </div>
-                            <button onclick="firebase.auth().signOut()" class="btn btn-sm btn-danger shadow-sm">
-                                <i class="fas fa-sign-out-alt"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </nav>`;
-
-            menuContainer.innerHTML = menuHtml;
-
-        } catch (error) {
-            console.error("Menu Error:", error);
+    menuConfig.forEach(item => {
+        if (item.type === "divider") {
+            menuItemsHTML += `<div class="menu-divider">${item.title}</div>`;
+        } else {
+            const isActive = currentPage === item.link ? 'active-link' : '';
+            menuItemsHTML += `
+                <a href="${item.link}" class="nav-item ${isActive}" id="${item.id || ''}">
+                    <i class="fas ${item.icon}"></i> <span>${item.title}</span>
+                </a>`;
         }
     });
-});
+
+    menuWrapper.innerHTML = `
+        <div id="menu-overlay"></div>
+        <div id="sidebar-panel">
+            <div class="sidebar-header">
+                <img src="logo.png" class="menu-logo" onerror="this.src='https://via.placeholder.com/60'">
+                <h3>THE LALIT</h3>
+                <p>INTERNATIONAL SCHOOL</p>
+            </div>
+            <nav class="nav-links">${menuItemsHTML}</nav>
+        </div>
+        <button id="menu-trigger-btn">
+            <span></span><span></span><span></span>
+        </button>
+    `;
+
+    document.body.prepend(menuWrapper);
+
+    // 2. CSS Inject Karna (Universal styling)
+    const style = document.createElement('style');
+    style.textContent = `
+        #menu-trigger-btn {
+            position: fixed; top: 15px; left: 15px; width: 45px; height: 45px;
+            background: #002366; border: 1px solid #D4AF37; border-radius: 8px;
+            z-index: 20001; cursor: pointer; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; gap: 5px; transition: 0.3s;
+        }
+        #menu-trigger-btn span { width: 25px; height: 3px; background: #D4AF37; border-radius: 2px; transition: 0.4s; }
+        
+        #sidebar-panel {
+            position: fixed; top: 0; left: -300px; width: 280px; height: 100vh;
+            background: #002366; z-index: 20000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 5px 0 25px rgba(0,0,0,0.3); overflow-y: auto; color: white;
+            border-right: 3px solid #D4AF37;
+        }
+        #sidebar-panel.open { left: 0; }
+        
+        #menu-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 19999; display: none; backdrop-filter: blur(3px);
+        }
+
+        .sidebar-header { padding: 30px 20px; text-align: center; background: rgba(0,0,0,0.2); border-bottom: 1px solid rgba(212,175,55,0.2); }
+        .menu-logo { width: 65px; height: 65px; border-radius: 50%; border: 2px solid #D4AF37; padding: 3px; background: white; }
+        .sidebar-header h3 { font-family: 'Cinzel', serif; color: #D4AF37; margin: 10px 0 0; font-size: 1.2rem; }
+        .sidebar-header p { font-size: 0.6rem; letter-spacing: 2px; margin: 0; color: #aaa; }
+
+        .nav-links { padding: 15px; }
+        .menu-divider { font-size: 10px; text-transform: uppercase; color: #D4AF37; opacity: 0.6; padding: 20px 10px 5px; letter-spacing: 1.5px; font-weight: bold; }
+        
+        .nav-item { 
+            display: flex; align-items: center; padding: 12px 15px; color: white; text-decoration: none;
+            margin-bottom: 5px; border-radius: 6px; transition: 0.3s; font-size: 0.9rem;
+        }
+        .nav-item i { width: 25px; color: #D4AF37; font-size: 1.1rem; margin-right: 12px; text-align: center; }
+        .nav-item:hover { background: rgba(212,175,55,0.15); color: #D4AF37; }
+        .active-link { background: rgba(212,175,55,0.2) !important; border-left: 4px solid #D4AF37; color: #D4AF37 !important; font-weight: bold; }
+
+        /* Animation class for button */
+        .open-btn span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+        .open-btn span:nth-child(2) { opacity: 0; }
+        .open-btn span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+    `;
+    document.head.appendChild(style);
+
+    // 3. Logic: Open/Close
+    const trigger = document.getElementById('menu-trigger-btn');
+    const panel = document.getElementById('sidebar-panel');
+    const overlay = document.getElementById('menu-overlay');
+
+    const toggle = () => {
+        panel.classList.toggle('open');
+        trigger.classList.toggle('open-btn');
+        overlay.style.display = panel.classList.contains('open') ? 'block' : 'none';
+    };
+
+    trigger.onclick = toggle;
+    overlay.onclick = toggle;
+
+    // 4. Logout Logic
+    const logoutBtn = document.getElementById('logoutBtn');
+    if(logoutBtn) {
+        logoutBtn.onclick = (e) => {
+            e.preventDefault();
+            if(confirm("Do you want to exit Imperial Registry?")) {
+                firebase.auth().signOut().then(() => { window.location.href = "login.html"; });
+            }
+        };
+    }
+}
+
+// Start menu on load
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initUniversalMenu);
+} else {
+    initUniversalMenu();
+}
