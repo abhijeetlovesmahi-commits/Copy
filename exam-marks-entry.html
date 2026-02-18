@@ -3,143 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Lalit - Marks Entry Master</title>
+    <title>Marks Entry | The Lalit Intl.</title>
+    
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
+    
+    <script src="firebase-config.js"></script>
+    <script src="auth-guard.js"></script>
+    <script src="brand.js"></script>
+
     <style>
-        :root {
-            --royal-blue: #002366; --gold: #D4AF37; --deep-gold: #aa8a2e;
-            --light-gold: #FDFBF0; --white: #ffffff; --danger: #e74c3c;
-        }
-
-        body {
-            background: var(--light-gold); margin: 0; padding: 20px;
-            font-family: 'Georgia', serif; color: var(--royal-blue);
-        }
-
-        .container {
-            max-width: 1200px; margin: 0 auto; background: var(--white);
-            padding: 30px; border-radius: 5px; box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-            border: 1px solid var(--gold);
-        }
-
-        .school-header {
-            text-align: center; border-bottom: 3px double var(--gold);
-            margin-bottom: 20px; padding-bottom: 15px;
-        }
-        
-        .school-logo { width: 100px; margin-bottom: 10px; }
-
         .filter-section {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 15px; background: #fdfaf0; padding: 20px;
-            border: 1px solid var(--gold); margin-bottom: 20px; border-radius: 8px;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px; background: #fff; padding: 25px;
+            border: 1px solid var(--gold); border-radius: 12px; margin-bottom: 25px;
+            box-shadow: var(--shadow-sm);
         }
 
         .subject-highlight {
-            background: #fff8e1; border: 2px solid var(--gold) !important; font-weight: bold;
+            border: 2px solid var(--gold) !important;
+            background: var(--light-gold);
+            font-weight: bold;
         }
 
-        label { font-size: 0.75rem; font-weight: bold; color: var(--deep-gold); text-transform: uppercase; }
-        
-        select, input {
-            width: 100%; padding: 10px; border: 1px solid #ccc;
-            border-bottom: 2px solid var(--gold); outline: none;
+        .marks-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .marks-table th { 
+            background: var(--royal-blue); color: var(--gold); 
+            padding: 15px; font-size: 0.8rem; text-transform: uppercase;
         }
-
-        table { width: 100%; border-collapse: collapse; }
-        th { background: var(--royal-blue); color: var(--gold); padding: 12px; font-size: 0.8rem; text-transform: uppercase; }
-        td { padding: 8px; border-bottom: 1px solid #eee; text-align: center; }
-
-        .id-badge { font-size: 0.75rem; color: #666; display: block; margin-top: 2px; }
-        .roll-no { font-size: 1.1rem; font-weight: bold; color: var(--royal-blue); }
-
-        .std-img { width: 50px; height: 60px; object-fit: cover; border: 1px solid var(--gold); background: #f0f0f0; }
+        .marks-table td { padding: 12px; border-bottom: 1px solid #eee; text-align: center; vertical-align: middle; }
 
         .marks-input {
-            width: 75px; padding: 8px; text-align: center; border: 2px solid #ddd;
-            font-weight: bold; font-size: 1.1rem;
+            width: 80px; padding: 10px; text-align: center; 
+            border: 2px solid #ddd; border-radius: 6px;
+            font-weight: bold; font-size: 1.1rem; transition: 0.3s;
         }
+        .marks-input:focus { border-color: var(--royal-blue); outline: none; }
+        .marks-input.error { border-color: var(--danger); background-color: #fff5f5; color: var(--danger); }
 
-        .marks-input.error { border-color: var(--danger); background-color: #ffdada; color: var(--danger); }
+        .std-img { 
+            width: 45px; height: 45px; border-radius: 50%; 
+            object-fit: cover; border: 1px solid var(--gold); 
+        }
+        
         .hidden { display: none; }
-
-        .submit-btn {
-            width: 100%; padding: 20px; background: var(--royal-blue); color: var(--gold);
-            border: 1px solid var(--gold); font-size: 1.2rem; font-weight: bold; cursor: pointer; margin-top: 25px;
-        }
-
-        #status { text-align: center; margin-top: 15px; font-weight: bold; }
+        #status-msg { font-weight: bold; padding: 15px; text-align: center; border-radius: 8px; margin-top: 15px; }
+        .msg-success { background: #e8f5e9; color: #2e7d32; }
+        .msg-info { background: #e3f2fd; color: #1565c0; }
     </style>
-    
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
-
-    <script src="firebase-config.js"></script>
 </head>
 <body>
 
-<div class="container">
-    <div class="school-header">
-        <img src="logo.png" alt="School Logo" class="school-logo" onerror="this.src='https://via.placeholder.com/100?text=LOGO'">
-        <h1 style="font-size: 1.8rem; margin: 5px 0;">STUDENT MARKS ENTRY</h1>
-        <p id="currentAction" style="color: var(--danger); font-weight: bold;">Select Subject to Load Full Marks</p>
+<div id="menu-container"></div>
+
+<div class="main-content">
+    <div class="royal-card">
+        <div class="header" id="brand-header-container"></div>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="brand-font" style="color: var(--royal-blue); margin: 0;">
+                <i class="fas fa-edit me-2"></i>MARKS ENTRY LEDGER
+            </h2>
+            <div id="currentAction" class="badge bg-danger p-2" style="font-size: 0.9rem;">Select Exam & Subject</div>
+        </div>
+
+        <div class="filter-section">
+            <div>
+                <label class="small fw-bold">EXAM TYPE</label>
+                <select id="examType" class="form-select" onchange="toggleTermFields(); fetchSubjects();">
+                    <option value="">-- Select --</option>
+                    <option value="Formative Test -I">Formative Test -I</option>
+                    <option value="Periodic Test -I">Periodic Test -I</option>
+                    <option value="Term -I">Term -I</option>
+                    <option value="Formative Test -II">Formative Test -II</option>
+                    <option value="Periodic -II">Periodic -II</option>
+                    <option value="Term -II">Term -II</option>
+                </select>
+            </div>
+            <div>
+                <label class="small fw-bold">CLASS</label>
+                <select id="examClass" class="form-select" onchange="fetchSubjects(); fetchStudents();">
+                    <option value="">-- Select --</option>
+                    <option value="Pre-Nursery">Pre-Nursery</option>
+                    <option value="Nursery">Nursery</option>
+                    <option value="LKG">LKG</option>
+                    <option value="UKG">UKG</option>
+                    <option value="1">Class 1</option>
+                    <option value="2">Class 2</option>
+                    <option value="3">Class 3</option>
+                    <option value="4">Class 4</option>
+                    <option value="5">Class 5</option>
+                    <option value="6">Class 6</option>
+                    <option value="7">Class 7</option>
+                    <option value="8">Class 8</option>
+                    <option value="9">Class 9</option>
+                    <option value="10">Class 10</option>
+                    <option value="11">Class 11</option>
+                    <option value="12">Class 12</option>
+                </select>
+            </div>
+            <div>
+                <label class="small fw-bold">SECTION</label>
+                <select id="sSection" class="form-select" onchange="fetchStudents();">
+                    <option value="A">Section A</option>
+                    <option value="B">Section B</option>
+                    <option value="C">Section C</option>
+                    <option value="D">Section D</option>
+                </select>
+            </div>
+            <div>
+                <label class="small fw-bold">SUBJECT</label>
+                <select id="subjectSelect" class="form-select subject-highlight" onchange="updateMaxMarks(); loadExistingMarks();">
+                    <option value="">-- Select Subject --</option>
+                </select>
+            </div>
+        </div>
+
+        <div style="overflow-x: auto;">
+            <table class="marks-table">
+                <thead>
+                    <tr>
+                        <th>Roll & ID</th>
+                        <th>Photo</th>
+                        <th style="text-align: left;">Student Name</th>
+                        <th id="headerMarks">Obtained Marks</th>
+                        <th class="term-only hidden">Notebook (5)</th>
+                        <th class="term-only hidden">SEA (5)</th>
+                    </tr>
+                </thead>
+                <tbody id="studentBody">
+                    <tr><td colspan="6" class="text-muted p-4">Awaiting filter selection...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="status-msg" class="hidden"></div>
+
+        <button class="royal-btn btn-block btn-lg mt-4" id="saveBtn" onclick="saveMarks()">
+            <i class="fas fa-check-double me-2"></i>COMMIT MARKS TO ARCHIVE
+        </button>
     </div>
-
-    <div class="filter-section">
-        <div>
-            <label>Exam Type</label>
-            <select id="examType" onchange="toggleTermFields(); fetchSubjects();">
-                <option value="">-- Select --</option>
-                <option value="Formative Test -I">Formative Test -I</option>
-                <option value="Periodic Test -I">Periodic Test -I</option>
-                <option value="Term -I">Term -I</option>
-                <option value="Formative Test -II">Formative Test -II</option>
-                <option value="Periodic -II">Periodic -II</option>
-                <option value="Term -II">Term -II</option>
-            </select>
-        </div>
-        <div>
-            <label>Class</label>
-            <select id="examClass" onchange="fetchSubjects(); fetchStudents();">
-                <option value="">-- Select --</option>
-                <option value="Pre-Nursery">Pre-Nursery</option>
-                <option value="Nursery">Nursery</option>
-                <option value="LKG">LKG</option>
-                <option value="UKG">UKG</option>
-                <script>for(let i=1; i<=12; i++) document.write(`<option value="${i}">Class ${i}</option>`);</script>
-            </select>
-        </div>
-        <div>
-            <label>Section</label>
-            <select id="sSection" onchange="fetchStudents();">
-                <option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option>
-            </select>
-        </div>
-        <div>
-            <label>Subject</label>
-            <select id="subjectSelect" class="subject-highlight" onchange="updateMaxMarks(); loadExistingMarks();">
-                <option value="">-- Select Subject --</option>
-            </select>
-        </div>
-    </div>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Roll & ID</th>
-                <th>Photo</th>
-                <th style="text-align: left;">Student Name</th>
-                <th id="headerMarks">Obtained Marks</th>
-                <th class="term-only hidden">Notebook (5)</th>
-                <th class="term-only hidden">SEA (5)</th>
-            </tr>
-        </thead>
-        <tbody id="studentBody">
-            <tr><td colspan="6">Waiting for selection...</td></tr>
-        </tbody>
-    </table>
-
-    <button class="submit-btn" onclick="saveMarks()">SAVE ALL MARKS</button>
-    <div id="status"></div>
 </div>
 
 <script>
@@ -173,7 +180,7 @@ function updateMaxMarks() {
     if(sel.value) {
         currentMax = Number(opt.getAttribute('data-max'));
         document.getElementById('headerMarks').innerText = `Marks (Max: ${currentMax})`;
-        document.getElementById('currentAction').innerHTML = `Entry for: ${sel.value} | Max Marks: ${currentMax}`;
+        document.getElementById('currentAction').innerHTML = `${sel.value} (Max: ${currentMax})`;
         validateAll();
     }
 }
@@ -191,14 +198,13 @@ async function fetchStudents() {
     if(!sClass || !sSection) return;
 
     const tbody = document.getElementById('studentBody');
-    tbody.innerHTML = "<tr><td colspan='6'>Loading Students...</td></tr>";
+    tbody.innerHTML = "<tr><td colspan='6' class='text-center p-4'><i class='fas fa-sync fa-spin'></i> Loading Class List...</td></tr>";
 
     try {
         const snap = await db.collection('students').where('class', '==', sClass).where('section', '==', sSection).get();
         let students = [];
         snap.forEach(doc => students.push(doc.data()));
-        
-        students.sort((a, b) => a.uniqueID - b.uniqueID);
+        students.sort((a, b) => (a.rollNo || a.uniqueID) - (b.rollNo || b.uniqueID));
 
         tbody.innerHTML = "";
         students.forEach(s => {
@@ -206,11 +212,11 @@ async function fetchStudents() {
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>
-                    <span class="roll-no">${s.uniqueID - 1000}</span>
-                    <span class="id-badge">ID: ${s.uniqueID}</span>
+                    <div class="fw-bold text-royal">${s.rollNo || '-'}</div>
+                    <div class="small text-muted">ID: ${s.uniqueID}</div>
                 </td>
                 <td><img src="${s.photo || 'https://via.placeholder.com/50'}" class="std-img"></td>
-                <td style="text-align: left;"><b>${s.name}</b></td>
+                <td style="text-align: left;"><b>${s.name.toUpperCase()}</b></td>
                 <td><input type="number" class="marks-input main-m" data-id="${s.uniqueID}" oninput="validateAll()"></td>
                 <td class="term-only ${isTerm ? '' : 'hidden'}"><input type="number" class="marks-input note-m" max="5"></td>
                 <td class="term-only ${isTerm ? '' : 'hidden'}"><input type="number" class="marks-input sea-m" max="5"></td>
@@ -218,11 +224,9 @@ async function fetchStudents() {
             tbody.appendChild(tr);
         });
         
-        if(document.getElementById('subjectSelect').value) {
-            loadExistingMarks();
-        }
+        if(document.getElementById('subjectSelect').value) loadExistingMarks();
         
-    } catch (e) { alert(e.message); }
+    } catch (e) { alert("Error: " + e.message); }
 }
 
 async function loadExistingMarks() {
@@ -233,7 +237,7 @@ async function loadExistingMarks() {
 
     if(!exam || !cls || !sec || !subject) return;
 
-    document.getElementById('status').innerHTML = "Checking for existing marks...";
+    showStatus("Syncing with archives...", "info");
 
     try {
         const snap = await db.collection('marks_entry')
@@ -254,18 +258,22 @@ async function loadExistingMarks() {
                     if(parentTr.querySelector('.sea-m')) parentTr.querySelector('.sea-m').value = data.sea;
                 }
             });
-            document.getElementById('status').innerHTML = "<span style='color:blue;'>✓ Existing marks loaded for editing.</span>";
+            showStatus("Existing marks loaded for editing.", "success");
         } else {
             document.querySelectorAll('.marks-input').forEach(i => i.value = "");
-            document.getElementById('status').innerHTML = "No previous marks found. Ready for new entry.";
+            showStatus("Ready for fresh entry.", "info");
         }
-    } catch (e) { console.error("Error loading marks: ", e); }
+    } catch (e) { console.error(e); }
 }
 
 async function saveMarks() {
     const subject = document.getElementById('subjectSelect').value;
-    if(!subject) { alert("Select Subject First"); return; }
-    if(document.querySelectorAll('.error').length > 0) { alert("Marks cannot be more than " + currentMax); return; }
+    if(!subject) return alert("Please select a subject first!");
+    if(document.querySelectorAll('.error').length > 0) return alert("Error: Some marks exceed the maximum limit!");
+
+    const btn = document.getElementById('saveBtn');
+    btn.disabled = true;
+    btn.innerText = "Synchronizing Records...";
 
     const batch = db.batch();
     const rows = document.querySelectorAll('#studentBody tr');
@@ -290,9 +298,23 @@ async function saveMarks() {
 
     try {
         await batch.commit();
-        document.getElementById('status').innerHTML = "<span style='color:green;'>✓ Saved/Updated Successfully!</span>";
-    } catch (e) { alert(e.message); }
+        showStatus("Marks committed to archives successfully!", "success");
+        setTimeout(() => location.reload(), 1500);
+    } catch (e) { 
+        alert(e.message); 
+        btn.disabled = false;
+        btn.innerText = "COMMIT MARKS TO ARCHIVE";
+    }
+}
+
+function showStatus(text, type) {
+    const s = document.getElementById('status-msg');
+    s.className = `msg-${type}`;
+    s.innerText = text;
+    s.classList.remove('hidden');
 }
 </script>
+
+<script src="menu.js"></script>
 </body>
 </html>
