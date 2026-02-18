@@ -1,19 +1,15 @@
-// Is file mein aap apna Brand Name badal sakte hain
-const brandConfig = {
-    BRAND_NAME: "THE LALIT INTERNATIONAL SCHOOL", // Yahan apna naya naam likhein (Capital letters mein)
-    LOGO_PATH: "logo.png"
-};
-
-// Ye function HTML mein jahan bhi 'brand-name' class hogi, wahan naam bhar dega
-function updateBrandName() {
-    const elements = document.querySelectorAll('.brand-name-display');
-    elements.forEach(el => {
-        el.innerText = brandConfig.BRAND_NAME;
-    });
-    
-    // Browser tab ka title badalne ke liye
-    document.title = brandConfig.BRAND_NAME + " - Admission System";
+// brand.js
+function applyBranding() {
+    const brandContainer = document.getElementById('brand-header-container');
+    if (brandContainer) {
+        brandContainer.innerHTML = `
+            <img src="logo.png" alt="School Logo" class="school-logo" onerror="this.src='https://via.placeholder.com/110'">
+            <h1>The Lalit International School</h1>
+            <p style="letter-spacing: 5px; font-size: 0.8rem; color: var(--deep-gold);">NURTURING GLOBAL CITIZENS</p>
+        `;
+    }
+    // Browser ka tab title bhi change kar sakte hain
+    // document.title = "TLIS | Imperial Registry";
 }
 
-// Page load hote hi ise chalayein
-window.addEventListener('DOMContentLoaded', updateBrandName);
+document.addEventListener('DOMContentLoaded', applyBranding);
