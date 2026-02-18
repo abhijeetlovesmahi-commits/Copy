@@ -3,12 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile - The Lalit Intl.</title>
+    <title>Student Profile | TLIS Registry</title>
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+
     <style>
         :root { --royal-blue: #002366; --gold: #D4AF37; --light-gold: #FDFBF0; }
-        body { background: var(--light-gold); font-family: 'Georgia', serif; }
+        body { background: var(--light-gold); font-family: 'Montserrat', sans-serif; }
 
         .profile-card { 
             background: white; border-radius: 15px; padding: 30px; 
@@ -18,52 +21,67 @@
         .p-photo { 
             width: 160px; height: 180px; border-radius: 10px; 
             object-fit: cover; border: 3px solid var(--gold); 
-            background: #eee;
+            background: #f8f9fa;
         }
         .section-header { 
             color: var(--royal-blue); border-bottom: 2px solid var(--gold);
-            padding-bottom: 5px; margin-bottom: 20px; font-weight: bold;
+            padding-bottom: 5px; margin-bottom: 20px; font-weight: bold; text-transform: uppercase;
         }
         .edit-input { display: none; }
-        .data-label { font-size: 0.8rem; color: #666; margin-bottom: 2px; }
-        .data-value { font-weight: bold; color: #333; margin-bottom: 15px; }
-        .text-velvet { color: var(--royal-blue); }
+        .data-label { font-size: 0.75rem; color: #888; margin-bottom: 2px; text-transform: uppercase; font-weight: bold; }
+        .data-value { font-weight: 600; color: #333; margin-bottom: 15px; font-size: 1.1rem; }
+        
+        /* Permission restricted elements */
+        #btnEdit, #btnDeleteSection { display: none; }
     </style>
 </head>
 <body>
 
-<div class="main-content container py-5">
-    <button onclick="window.history.back()" class="btn btn-outline-dark mb-4 shadow-sm">
-        <i class="fas fa-arrow-left"></i> Back to List
+<div id="menu-container"></div>
+
+<div class="main-content container py-4">
+    <button onclick="window.location.href='view-students.html'" class="btn btn-outline-dark mb-4 shadow-sm">
+        <i class="fas fa-arrow-left me-2"></i>Back to Registry
     </button>
     
     <div class="profile-card">
         <div class="row">
             <div class="col-md-4 text-center border-end">
-                <img id="pPhoto" src="https://via.placeholder.com/150" class="p-photo mb-3">
-                <h4 id="pNameDisp" class="text-uppercase fw-bold text-velvet">---</h4>
-                <div class="badge bg-dark text-gold p-2 fs-6 mb-3" id="pIdDisp">ID: --</div>
-                <div class="small text-muted" id="timestampDisp"></div>
+                <img id="pPhoto" src="https://via.placeholder.com/150" class="p-photo mb-3 shadow-sm">
+                <h4 id="pNameDisp" class="fw-bold text-royal" style="color: var(--royal-blue);">LOADING...</h4>
+                <div class="badge bg-dark text-white p-2 fs-6 mb-3" id="pIdDisp">ID: --</div>
+                <div class="small text-muted mb-3" id="timestampDisp"></div>
+                
+                <div id="btnDeleteSection" class="mt-4 pt-3 border-top">
+                    <button onclick="deleteStudent()" class="btn btn-sm btn-outline-danger w-100">
+                        <i class="fas fa-trash-alt me-2"></i>Permanently Erase Record
+                    </button>
+                </div>
             </div>
 
             <div class="col-md-8 ps-md-5">
-                <h5 class="section-header"><i class="fas fa-user-graduate me-2"></i>STUDENT ARCHIVE</h5>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="section-header mb-0 flex-grow-1"><i class="fas fa-id-card me-2"></i>Student Archive Details</h5>
+                    <button id="btnEdit" onclick="toggleEdit(true)" class="btn btn-warning btn-sm fw-bold shadow-sm">
+                        <i class="fas fa-edit me-1"></i> EDIT
+                    </button>
+                </div>
                 
-                <div class="row">
-                    <div class="col-6">
+                <div class="row mt-4">
+                    <div class="col-md-6">
                         <p class="data-label">Father's Name</p>
                         <div id="pFatherDisp" class="data-value">--</div>
-                        <input type="text" id="editFather" class="form-control edit-input mb-3 border-gold">
+                        <input type="text" id="editFather" class="form-control edit-input mb-3">
                     </div>
-                    <div class="col-6">
+                    <div class="col-md-6">
                         <p class="data-label">Mobile Number</p>
                         <div id="pMobileDisp" class="data-value">--</div>
-                        <input type="tel" id="editMobile" class="form-control edit-input mb-3 border-gold">
+                        <input type="tel" id="editMobile" class="form-control edit-input mb-3">
                     </div>
-                    <div class="col-6">
+                    <div class="col-md-6">
                         <p class="data-label">Current Class</p>
                         <div id="pClassDisp" class="data-value">--</div>
-                        <select id="editClass" class="form-control edit-input mb-3 border-gold">
+                        <select id="editClass" class="form-control edit-input mb-3">
                             <option value="Pre-Nursery">Pre-Nursery</option>
                             <option value="Nursery">Nursery</option>
                             <option value="LKG">LKG</option>
@@ -71,25 +89,18 @@
                             <script>for(let i=1; i<=12; i++) document.write(`<option value="${i}">${i}</option>`);</script>
                         </select>
                     </div>
-                    <div class="col-6">
+                    <div class="col-md-6">
                         <p class="data-label">Date of Birth</p>
                         <div id="pDobDisp" class="data-value">--</div>
-                        <input type="date" id="editDob" class="form-control edit-input mb-3 border-gold">
+                        <input type="date" id="editDob" class="form-control edit-input mb-3">
                     </div>
                 </div>
 
-                <div class="mt-4 pt-3 border-top">
-                    <button id="btnEdit" onclick="toggleEdit(true)" class="btn btn-warning px-4 fw-bold">
-                        <i class="fas fa-edit"></i> EDIT PROFILE
+                <div id="saveActions" class="mt-4 pt-3 border-top edit-input">
+                    <button id="btnSave" onclick="saveData()" class="btn btn-success px-5 fw-bold shadow">
+                        <i class="fas fa-save me-2"></i>SAVE UPDATED PROFILE
                     </button>
-                    <button id="btnSave" onclick="saveData()" class="btn btn-success edit-input px-4 fw-bold shadow">
-                        <i class="fas fa-save"></i> SAVE CHANGES
-                    </button>
-                    <button id="btnCancel" onclick="toggleEdit(false)" class="btn btn-secondary edit-input ms-2">Cancel</button>
-                    
-                    <button onclick="deleteStudent()" class="btn btn-danger float-end px-4">
-                        <i class="fas fa-trash"></i> DELETE
-                    </button>
+                    <button onclick="toggleEdit(false)" class="btn btn-link text-muted ms-2">Cancel</button>
                 </div>
             </div>
         </div>
@@ -97,21 +108,44 @@
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
 
 <script src="firebase-config.js"></script>
+<script src="brand.js"></script>
+<script src="menu.js"></script>
 
 <script>
-    // URL se Student Unique ID uthana
     const urlParams = new URLSearchParams(window.location.search);
     const studentUID = urlParams.get('id'); 
     let docRefId = null; 
+
+    // 1. Permission Check (Security)
+    firebase.auth().onAuthStateChanged(async user => {
+        if (!user) {
+            window.location.href = "login.html";
+            return;
+        }
+        
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        if (userDoc.exists) {
+            const userData = userDoc.data();
+            // Agar Admin hai ya 'edit_student' permission hai
+            if (userData.role === 'admin' || userData.permissions?.edit_student) {
+                document.getElementById('btnEdit').style.display = 'block';
+            }
+            // Sirf Admin delete kar sakega
+            if (userData.role === 'admin') {
+                document.getElementById('btnDeleteSection').style.display = 'block';
+            }
+        }
+        loadData();
+    });
 
     async function loadData() {
         if(!studentUID) return alert("No Student ID provided!");
 
         try {
-            // Firestore query based on Unique ID
             const q = await db.collection('students').where('uniqueID', '==', Number(studentUID)).get();
             
             if(!q.empty) {
@@ -119,7 +153,6 @@
                 docRefId = doc.id; 
                 const s = doc.data();
 
-                // UI update karna
                 document.getElementById('pPhoto').src = s.photo || 'https://via.placeholder.com/150';
                 document.getElementById('pNameDisp').innerText = s.name;
                 document.getElementById('pIdDisp').innerText = "ID: " + s.uniqueID;
@@ -128,32 +161,27 @@
                 document.getElementById('pClassDisp').innerText = s.class;
                 document.getElementById('pDobDisp').innerText = s.dob;
 
-                // Edit inputs mein purana data bharna
                 document.getElementById('editFather').value = s.father;
                 document.getElementById('editMobile').value = s.mobile;
                 document.getElementById('editClass').value = s.class;
                 document.getElementById('editDob').value = s.dob;
                 
                 if(s.timestamp) {
-                    document.getElementById('timestampDisp').innerText = "Reg. Date: " + s.timestamp.toDate().toLocaleDateString();
+                    document.getElementById('timestampDisp').innerText = "Admitted on: " + s.timestamp.toDate().toLocaleDateString('en-GB', {day: '2-digit', month: 'short', year: 'numeric'});
                 }
             } else {
-                alert("Student Record Not Found in Imperial Registry!");
+                alert("Record not found in Registry!");
             }
-        } catch (e) { console.error("Load Error:", e); }
+        } catch (e) { console.error("Error:", e); }
     }
 
     function toggleEdit(isEditing) {
         document.querySelectorAll('.data-value').forEach(el => el.style.display = isEditing ? 'none' : 'block');
         document.querySelectorAll('.edit-input').forEach(el => el.style.display = isEditing ? 'block' : 'none');
-        document.getElementById('btnEdit').style.display = isEditing ? 'none' : 'inline-block';
-        document.getElementById('btnSave').style.display = isEditing ? 'inline-block' : 'none';
-        document.getElementById('btnCancel').style.display = isEditing ? 'inline-block' : 'none';
+        document.getElementById('btnEdit').style.display = isEditing ? 'none' : 'block';
     }
 
     async function saveData() {
-        if(!docRefId) return;
-
         const updates = {
             father: document.getElementById('editFather').value,
             mobile: document.getElementById('editMobile').value,
@@ -163,25 +191,20 @@
 
         try {
             await db.collection('students').doc(docRefId).update(updates);
-            alert("Imperial Registry Updated Successfully!");
+            alert("Profile Updated Successfully!");
             location.reload();
-        } catch (e) { alert("Error updating: " + e.message); }
+        } catch (e) { alert("Update failed: " + e.message); }
     }
 
     async function deleteStudent() {
-        if(confirm("DANGER: This action will permanently erase the student from the Registry. Proceed?")) {
+        if(confirm("DANGER: This action cannot be undone. Erase this student?")) {
             try {
                 await db.collection('students').doc(docRefId).delete();
-                alert("Record Erased.");
+                alert("Student Record Permanently Removed.");
                 window.location.href = 'view-students.html';
-            } catch (e) { alert("Delete failed: " + e.message); }
+            } catch (e) { alert("Delete error: " + e.message); }
         }
     }
-
-    window.onload = loadData;
 </script>
-
-<script src="menu.js"></script>
-
 </body>
 </html>
