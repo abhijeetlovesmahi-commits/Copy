@@ -1,6 +1,6 @@
 // Is file mein aap apna Brand Name badal sakte hain
 const brandConfig = {
-    BRAND_NAME: "THE LALIT ROYAL SCHOOL", // Yahan apna naya naam likhein (Capital letters mein)
+    BRAND_NAME: "THE LALIT INTERNATIONAL SCHOOL", // Yahan apna naya naam likhein (Capital letters mein)
     LOGO_PATH: "logo.png"
 };
 
