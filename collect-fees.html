@@ -122,34 +122,41 @@
 let activeStudent = null;
 let currentBalance = 0;
 
-// 1. Live Search Students
+// 1. Live Search Students - FIXED logic
 async function liveSearch() {
     const val = document.getElementById('studentSearch').value.toLowerCase();
     const sugg = document.getElementById('searchSuggestions');
     if(val.length < 2) { sugg.style.display='none'; return; }
 
-    const snap = await db.collection('students').get();
-    let html = '';
-    snap.forEach(doc => {
-        const d = doc.data();
-        if(d.name.toLowerCase().includes(val) || d.uniqueID.toString().includes(val)) {
-            html += `<div class="suggestion-item" onclick='selectStudent(${JSON.stringify(d)})'>
-                        <b>${d.name}</b> <span class="text-muted">(ID: ${d.uniqueID})</span><br>
-                        <small>Class: ${d.class}-${d.section || 'A'} | Father: ${d.father}</small>
-                     </div>`;
-        }
-    });
-    sugg.innerHTML = html;
-    sugg.style.display = html ? 'block' : 'none';
+    try {
+        const snap = await db.collection('students').get();
+        let html = '';
+        snap.forEach(doc => {
+            const d = doc.data();
+            const studentName = d.name || "";
+            const studentID = String(d.uniqueID || "");
+
+            if(studentName.toLowerCase().includes(val) || studentID.includes(val)) {
+                // Storing data as string safely to avoid quote issues
+                const safeData = encodeURIComponent(JSON.stringify(d));
+                html += `<div class="suggestion-item" onclick="selectStudent('${safeData}')">
+                            <b>${studentName}</b> <span class="text-muted">(ID: ${studentID})</span><br>
+                            <small>Class: ${d.class}-${d.section || 'A'} | Father: ${d.father}</small>
+                         </div>`;
+            }
+        });
+        sugg.innerHTML = html;
+        sugg.style.display = html ? 'block' : 'none';
+    } catch (e) { console.error("Search error:", e); }
 }
 
-// 2. Select Student & Calculate Dues
-async function selectStudent(s) {
+// 2. Select Student & Calculate Dues - FIXED JSON handling
+async function selectStudent(encodedData) {
+    const s = JSON.parse(decodeURIComponent(encodedData));
     activeStudent = s;
     document.getElementById('studentSearch').value = s.name;
     document.getElementById('searchSuggestions').style.display = 'none';
     
-    // Fee Calculation Logic
     try {
         const mDoc = await db.collection('fee_master').doc(s.class).get();
         const tSnap = await db.collection('fee_transactions').where('studentID', '==', String(s.uniqueID)).get();
@@ -162,11 +169,10 @@ async function selectStudent(s) {
             currentBalance = 0;
         } else {
             const fm = mDoc.data();
-            const curMonthIdx = new Date().getMonth(); 
             const mOrder = ["April", "May", "June", "July", "August", "September", "October", "November", "December", "January", "February", "March"];
             const monthName = new Date().toLocaleString('en-us', {month:'long'});
             let mIdx = mOrder.indexOf(monthName);
-            if(mIdx === -1) mIdx = 11; // Default to March if session ends
+            if(mIdx === -1) mIdx = 11; 
 
             const monthly = Number(fm.tuition || 0) + (s.hostel === 'Yes' ? Number(fm.hostel || 0) : 0) + (s.transport === 'Yes' ? 500 : 0);
             const annual = Number(fm.admission || 0) + Number(fm.development || 0) + Number(fm.exam || 0);
