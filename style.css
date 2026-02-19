@@ -62,10 +62,27 @@ body {
     margin-bottom: 10px;
 }
 
-/* --- LAYOUT ENGINE --- */
+/* --- LAYOUT ENGINE FIX --- */
+body { 
+    background: #f4f4f2; 
+    font-family: 'Poppins', sans-serif; 
+    margin: 0; 
+    padding: 0; 
+    color: var(--text-dark);
+    line-height: 1.6;
+}
+
 .main-content { 
-    padding: 10px 20px 40px; 
-    display: flex; flex-direction: column; align-items: center;
+    /* Padding 100px ko kam karke 20px ya 40px kar dein */
+    padding: 20px 20px 40px; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center;
+}
+
+/* Responsive (Mobile) ke liye bhi padding kam karein */
+@media (max-width: 768px) {
+    .main-content { padding: 20px 10px 20px; }
 }
 
 .royal-card { 
