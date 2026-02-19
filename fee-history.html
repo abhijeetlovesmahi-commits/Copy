@@ -18,13 +18,12 @@
         :root { --royal: #002147; --gold: #D4AF37; --table-border: #000; }
         body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
         
-        /* Branding & Container */
         #ledgerArea { 
             display: none; background: #fff; width: 1000px; margin: 20px auto; 
             padding: 30px; border: 1px solid var(--table-border); box-shadow: 0 0 15px rgba(0,0,0,0.1);
         }
 
-        /* Top Double Row Grid (Matches Image) */
+        /* Top Grid Styles */
         .master-fee-grid {
             display: grid;
             grid-template-columns: repeat(8, 1fr);
@@ -35,8 +34,28 @@
         .fee-col:last-child { border-right: none; }
         .f-label { background: var(--royal); color: #fff; font-size: 10px; font-weight: bold; padding: 4px; border-bottom: 1px solid var(--table-border); }
         .f-base { font-size: 13px; font-weight: 800; padding: 5px 0; background: #fff; }
-        .f-disc-row { background: #fcfcfc; border-top: 1px solid #eee; padding: 5px 0; font-size: 11px; }
-        .disc-field { width: 35px; border: 1px solid #ccc; text-align: center; font-weight: bold; }
+        
+        /* Fixed Discount Cell Margin */
+        .f-disc-row { 
+            background: #fcfcfc; 
+            border-top: 1px solid #eee; 
+            padding: 2px 0; /* Reduced padding */
+            font-size: 11px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2px;
+        }
+        .disc-field { 
+            width: 38px; /* Slightly wider */
+            height: 20px; 
+            border: 1px solid #ccc; 
+            text-align: center; 
+            font-weight: bold; 
+            padding: 0; /* Removed internal padding to show number */
+            margin: 0; 
+            font-size: 12px;
+        }
 
         /* Ledger Table */
         .table-ledger { width: 100%; border-collapse: collapse; border: 1px solid var(--table-border); }
@@ -54,7 +73,7 @@
         @media print {
             .no-print { display: none !important; }
             #ledgerArea { display: block !important; border: none; width: 100%; margin: 0; padding: 0; box-shadow: none; }
-            .disc-field { border: none; }
+            .disc-field { border: none; background: transparent; }
         }
     </style>
 </head>
@@ -64,7 +83,6 @@
 
 <div class="container mt-4 no-print">
     <div id="brand-header-container" class="mb-4"></div>
-    
     <div class="row justify-content-center">
         <div class="col-md-5 d-flex gap-2">
             <input type="text" id="searchID" class="form-control" placeholder="Search Name or ID..." oninput="liveSearch()">
@@ -90,7 +108,7 @@
     </div>
 
     <div class="student-box">
-        <img id="lPhoto" src="" class="stu-img" onerror="this.src='https://via.placeholder.com/100x120?text=No+Photo'">
+        <img id="lPhoto" src="" class="stu-img">
         <div class="stu-info">
             <div>NAME: <b id="lName"></b></div>
             <div>ID: <b id="lID"></b></div>
@@ -102,14 +120,14 @@
     </div>
 
     <div class="master-fee-grid">
-        <div class="fee-col"><div class="f-label">TUITION</div><div class="f-base" id="hTuition">₹0</div><div class="f-disc-row no-print">Disc <input type="number" id="dTuition" class="disc-field" value="0" oninput="calculateLedger()">%</div></div>
-        <div class="fee-col"><div class="f-label">HOSTEL</div><div class="f-base" id="hHostel">₹0</div><div class="f-disc-row no-print">Disc <input type="number" id="dHostel" class="disc-field" value="0" oninput="calculateLedger()">%</div></div>
-        <div class="fee-col"><div class="f-label">TRANS.</div><div class="f-base" id="hTrans">₹0</div><div class="f-disc-row no-print">Disc <input type="number" id="dTrans" class="disc-field" value="0" oninput="calculateLedger()">%</div></div>
-        <div class="fee-col"><div class="f-label">ADM. FEE</div><div class="f-base" id="hAdm">₹0</div><div class="f-disc-row no-print">Disc <input type="number" id="dAdm" class="disc-field" value="0" oninput="calculateLedger()">%</div></div>
-        <div class="fee-col"><div class="f-label">DEVELOPMENT</div><div class="f-base" id="hDev">₹0</div><div class="f-disc-row no-print">Disc <input type="number" id="dDev" class="disc-field" value="0" oninput="calculateLedger()">%</div></div>
-        <div class="fee-col"><div class="f-label">EXAMINATION</div><div class="f-base" id="hExam">₹0</div><div class="f-disc-row no-print">Disc <input type="number" id="dExam" class="disc-field" value="0" oninput="calculateLedger()">%</div></div>
-        <div class="fee-col"><div class="f-label">BOOKS/KIT</div><div class="f-base" id="hBooks">₹0</div><div class="f-disc-row no-print">Disc <input type="number" id="dBooks" class="disc-field" value="0" oninput="calculateLedger()">%</div></div>
-        <div class="fee-col"><div class="f-label">MISC.</div><div class="f-base" id="hMisc">₹0</div><div class="f-disc-row no-print">Disc <input type="number" id="dMisc" class="disc-field" value="0" oninput="calculateLedger()">%</div></div>
+        <div class="fee-col"><div class="f-label">TUITION</div><div class="f-base" id="hTuition">₹0</div><div class="f-disc-row no-print">Disc <input type="number" id="dTuition" class="disc-field" oninput="calculateLedger()">%</div></div>
+        <div class="fee-col"><div class="f-label">HOSTEL</div><div class="f-base" id="hHostel">₹0</div><div class="f-disc-row no-print">Disc <input type="number" id="dHostel" class="disc-field" oninput="calculateLedger()">%</div></div>
+        <div class="fee-col"><div class="f-label">TRANS.</div><div class="f-base" id="hTrans">₹0</div><div class="f-disc-row no-print">Disc <input type="number" id="dTrans" class="disc-field" oninput="calculateLedger()">%</div></div>
+        <div class="fee-col"><div class="f-label">ADM. FEE</div><div class="f-base" id="hAdm">₹0</div><div class="f-disc-row no-print">Disc <input type="number" id="dAdm" class="disc-field" oninput="calculateLedger()">%</div></div>
+        <div class="fee-col"><div class="f-label">DEVELOPMENT</div><div class="f-base" id="hDev">₹0</div><div class="f-disc-row no-print">Disc <input type="number" id="dDev" class="disc-field" oninput="calculateLedger()">%</div></div>
+        <div class="fee-col"><div class="f-label">EXAMINATION</div><div class="f-base" id="hExam">₹0</div><div class="f-disc-row no-print">Disc <input type="number" id="dExam" class="disc-field" oninput="calculateLedger()">%</div></div>
+        <div class="fee-col"><div class="f-label">BOOKS/KIT</div><div class="f-base" id="hBooks">₹0</div><div class="f-disc-row no-print">Disc <input type="number" id="dBooks" class="disc-field" oninput="calculateLedger()">%</div></div>
+        <div class="fee-col"><div class="f-label">MISC.</div><div class="f-base" id="hMisc">₹0</div><div class="f-disc-row no-print">Disc <input type="number" id="dMisc" class="disc-field" oninput="calculateLedger()">%</div></div>
     </div>
 
     <table class="table-ledger">
@@ -144,6 +162,7 @@
 </div>
 
 <script>
+// Logic remains identical to ensure 100% stability
 const months = ["April", "May", "June", "July", "August", "September", "October", "November", "December", "January", "February", "March"];
 let curStu = null;
 let fm = {}; 
@@ -169,7 +188,6 @@ async function loadLedger(s) {
     document.getElementById('ledgerArea').style.display='block';
     document.getElementById('pDate').innerText = new Date().toLocaleDateString('en-GB');
     
-    // UI Profile
     document.getElementById('lName').innerText = s.name.toUpperCase();
     document.getElementById('lID').innerText = s.uniqueID;
     document.getElementById('lClass').innerText = s.class;
@@ -177,18 +195,15 @@ async function loadLedger(s) {
     document.getElementById('lTrans').innerText = s.transportDistance || "NONE";
     document.getElementById('lPhoto').src = s.photo || '';
 
-    // 1. Fetch Fee Master
     const fDoc = await db.collection('fee_master').doc(s.class).get();
     fm = fDoc.exists ? fDoc.data() : {};
     
-    // 2. Fetch Transport Rate (Fixing the missing transport fee)
     let tRate = 0;
     if(s.transport === 'Yes' && s.transportDistance) {
         const tDoc = await db.collection('transport_master').doc(s.transportDistance).get();
         if(tDoc.exists) tRate = tDoc.data().amount;
     }
 
-    // Update Top Row Display
     document.getElementById('hTuition').innerText = "₹"+(fm.tuition||0);
     document.getElementById('hHostel').innerText = "₹"+(s.hostel==='Yes' ? fm.hostel||0 : 0);
     document.getElementById('hTrans').innerText = "₹"+tRate;
@@ -198,7 +213,6 @@ async function loadLedger(s) {
     document.getElementById('hBooks').innerText = "₹"+(fm.books||0);
     document.getElementById('hMisc').innerText = "₹"+(fm.misc||0);
 
-    // Load Discounts
     const d = s.discounts || {};
     const keys = ['Tuition','Hostel','Trans','Adm','Dev','Exam','Books','Misc'];
     keys.forEach(k => document.getElementById('d'+k).value = d[k.toLowerCase()] || 0);
@@ -208,47 +222,31 @@ async function loadLedger(s) {
 
 async function calculateLedger() {
     if(!curStu) return;
-    
     const getD = (id) => Number(document.getElementById(id).value);
     const d = {
         tui: getD('dTuition'), hos: getD('dHostel'), tra: getD('dTrans'),
         adm: getD('dAdm'), dev: getD('dDev'), exa: getD('dExam'), boo: getD('dBooks'), mis: getD('dMisc')
     };
 
-    // Net Annual Calculation
-    const netAnnual = 
-        (Number(fm.admission||0) * (1 - d.adm/100)) +
-        (Number(fm.development||0) * (1 - d.dev/100)) +
-        (Number(fm.exam||0) * (1 - d.exa/100)) +
-        (Number(fm.books||0) * (1 - d.boo/100)) +
-        (Number(fm.misc||0) * (1 - d.mis/100));
+    const netAnnual = (Number(fm.admission||0)*(1-d.adm/100))+(Number(fm.development||0)*(1-d.dev/100))+(Number(fm.exam||0)*(1-d.exa/100))+(Number(fm.books||0)*(1-d.boo/100))+(Number(fm.misc||0)*(1-d.mis/100));
+    const tuiNet = Number(fm.tuition||0)*(1-d.tui/100);
+    const hosNet = (curStu.hostel==='Yes'?Number(fm.hostel||0):0)*(1-d.hos/100);
+    const traNet = Number(document.getElementById('hTrans').innerText.replace('₹',''))*(1-d.tra/100);
 
-    // Net Monthly Rates
-    const tuiNet = Number(fm.tuition||0) * (1 - d.tui/100);
-    const hosNet = (curStu.hostel === 'Yes' ? Number(fm.hostel||0) : 0) * (1 - d.hos/100);
-    const traNet = Number(document.getElementById('hTrans').innerText.replace('₹','')) * (1 - d.tra/100);
-
-    // Fetch Payments
     const tSnap = await db.collection('fee_transactions').where('studentID', '==', String(curStu.uniqueID)).get();
     let pays = []; tSnap.forEach(p => pays.push(p.data()));
 
     let html = '', runBal = 0, tPay = 0, tPaid = 0;
 
-    // Annual Row
     let aPaid = pays.filter(p => p.month === 'Annual').reduce((s, p) => s + Number(p.amount), 0);
     runBal += (netAnnual - aPaid); tPay += netAnnual; tPaid += aPaid;
     html += `<tr><td class="text-left">REGISTRATION & ANNUAL FEE</td><td>-</td><td>-</td><td>-</td><td>₹${Math.round(netAnnual)}</td><td>₹${Math.round(netAnnual)}</td><td>₹${aPaid}</td><td>₹${Math.round(runBal)}</td></tr>`;
 
-    // Months Rows
     months.forEach(m => {
         let mPaid = pays.filter(p => p.month === m).reduce((s, p) => s + Number(p.amount), 0);
         let mTotal = tuiNet + hosNet + traNet;
         runBal += (mTotal - mPaid); tPay += mTotal; tPaid += mPaid;
-        html += `<tr>
-            <td class="text-left">${m.toUpperCase()}</td>
-            <td>₹${Math.round(tuiNet)}</td><td>${hosNet?'₹'+Math.round(hosNet):'-'}</td><td>${traNet?'₹'+Math.round(traNet):'-'}</td><td>-</td>
-            <td>₹${Math.round(mTotal)}</td><td>₹${mPaid}</td><td>₹${Math.round(runBal)}</td>
-        </tr>`;
+        html += `<tr><td class="text-left">${m.toUpperCase()}</td><td>₹${Math.round(tuiNet)}</td><td>${hosNet?'₹'+Math.round(hosNet):'-'}</td><td>${traNet?'₹'+Math.round(traNet):'-'}</td><td>-</td><td>₹${Math.round(mTotal)}</td><td>₹${mPaid}</td><td>₹${Math.round(runBal)}</td></tr>`;
     });
 
     document.getElementById('lBody').innerHTML = html;
@@ -256,13 +254,11 @@ async function calculateLedger() {
     document.getElementById('tPaid').innerText = "₹" + tPaid;
     document.getElementById('tBalance').innerText = "₹" + Math.round(runBal);
 
-    // Auto-Save Discounts to Student Record
     db.collection('students').doc(curStu.uniqueID.toString()).update({
         discounts: { tuition: d.tui, hostel: d.hos, trans: d.tra, adm: d.adm, dev: d.dev, exam: d.exa, books: d.boo, misc: d.mis }
     });
 }
 </script>
-
 <script src="menu.js"></script>
 </body>
 </html>
