@@ -52,8 +52,7 @@
 
 <div class="main-content">
     <div class="royal-card no-print">
-        <div class="header" id="brand-header-container">
-            </div>
+        <div class="header" id="brand-header-container"></div>
 
         <div class="collection-card">
             <h3 class="brand-font text-center mb-4" style="color: var(--royal-blue);">Student Fee Collection</h3>
@@ -122,60 +121,47 @@
 let activeStudent = null;
 let currentBalance = 0;
 
-// 1. LIVE SEARCH LOGIC - UPDATED & FIXED
+// Firebase check
+const database = firebase.firestore();
+
 async function liveSearch() {
     const val = document.getElementById('studentSearch').value.toLowerCase();
     const sugg = document.getElementById('searchSuggestions');
-    
-    if(val.length < 2) { 
-        sugg.style.display = 'none'; 
-        return; 
-    }
+    if(val.length < 2) { sugg.style.display='none'; return; }
 
     try {
-        const snap = await db.collection('students').get();
+        const snap = await database.collection('students').get();
         let html = '';
-        
         snap.forEach(doc => {
             const d = doc.data();
-            const sName = d.name || "";
-            const sID = String(d.uniqueID || "");
+            const n = d.name.toLowerCase();
+            const id = String(d.uniqueID);
             
-            if(sName.toLowerCase().includes(val) || sID.includes(val)) {
-                // Stringify and encode to pass safely in onclick
-                const studentString = encodeURIComponent(JSON.stringify(d));
-                html += `
-                    <div class="suggestion-item" onclick="selectStudent('${studentString}')">
-                        <b>${sName}</b> <span class="text-muted">(ID: ${sID})</span><br>
-                        <small>Class: ${d.class}-${d.section || 'A'} | Father: ${d.father}</small>
-                    </div>`;
+            if(n.includes(val) || id.includes(val)) {
+                // Safely passing data
+                const sData = encodeURIComponent(JSON.stringify(d));
+                html += `<div class="suggestion-item" onclick="selectStudent('${sData}')">
+                            <b>${d.name}</b> <span class="text-muted">(ID: ${d.uniqueID})</span><br>
+                            <small>Class: ${d.class}-${d.section || 'A'} | Father: ${d.father}</small>
+                         </div>`;
             }
         });
-
-        if(html) {
-            sugg.innerHTML = html;
-            sugg.style.display = 'block';
-        } else {
-            sugg.style.display = 'none';
-        }
-    } catch (e) {
-        console.error("Search Error: ", e);
+        sugg.innerHTML = html;
+        sugg.style.display = html ? 'block' : 'none';
+    } catch (err) {
+        console.error("Search error:", err);
     }
 }
 
-// 2. SELECT STUDENT LOGIC - FIXED
 async function selectStudent(encodedData) {
     const s = JSON.parse(decodeURIComponent(encodedData));
     activeStudent = s;
-    
-    // UI Update
     document.getElementById('studentSearch').value = s.name;
     document.getElementById('searchSuggestions').style.display = 'none';
     
-    // Fee Calculation
     try {
-        const mDoc = await db.collection('fee_master').doc(s.class).get();
-        const tSnap = await db.collection('fee_transactions').where('studentID', '==', String(s.uniqueID)).get();
+        const mDoc = await database.collection('fee_master').doc(s.class).get();
+        const tSnap = await database.collection('fee_transactions').where('studentID', '==', String(s.uniqueID)).get();
         
         let paid = 0; 
         tSnap.forEach(d => paid += Number(d.data().amount));
@@ -196,14 +182,10 @@ async function selectStudent(encodedData) {
             const expected = annual + (monthly * (mIdx + 1));
             currentBalance = expected - paid;
         }
-        
         document.getElementById('dueAmount').innerText = `₹ ${currentBalance.toFixed(2)}`;
-    } catch (e) { 
-        console.error("Calculation Error: ", e); 
-    }
+    } catch (e) { console.error(e); }
 }
 
-// 3. Submit Transaction
 async function submitPayment() {
     if(!activeStudent) return alert("Select a student first!");
     const amt = document.getElementById('payAmt').value;
@@ -214,7 +196,7 @@ async function submitPayment() {
     if(!amt || amt <= 0) return alert("Enter valid amount!");
 
     btn.disabled = true;
-    btn.innerText = "Processing Payment...";
+    btn.innerText = "Processing...";
 
     const paymentData = {
         studentID: String(activeStudent.uniqueID),
@@ -227,7 +209,7 @@ async function submitPayment() {
     };
 
     try {
-        await db.collection('fee_transactions').add(paymentData);
+        await database.collection('fee_transactions').add(paymentData);
         generateReceipt(paymentData, activeStudent);
         alert("Payment Recorded!");
         document.getElementById('payAmt').value = "";
@@ -236,7 +218,6 @@ async function submitPayment() {
     btn.innerText = "CONFIRM PAYMENT & GENERATE RECEIPT";
 }
 
-// 4. Generate Royal Receipt
 function generateReceipt(p, s) {
     const receipt = `
     <div class="receipt-card">
@@ -245,12 +226,10 @@ function generateReceipt(p, s) {
             <h2 class="brand-font" style="color:var(--royal-blue); margin:0;">THE LALIT INTERNATIONAL SCHOOL</h2>
             <p style="font-size:12px; letter-spacing:2px; color:var(--gold);">OFFICIAL FEE RECEIPT | SESSION 2025-26</p>
         </div>
-
         <div style="display:flex; justify-content:space-between; margin-bottom:20px; font-size:13px; font-weight:bold;">
             <span>No: TLIS-${Date.now().toString().slice(-6)}</span>
             <span>Date: ${p.date}</span>
         </div>
-
         <table class="receipt-table">
             <tr><td><b>Student Name:</b></td><td>${s.name.toUpperCase()}</td></tr>
             <tr><td><b>Admission ID:</b></td><td>${s.uniqueID}</td></tr>
@@ -259,19 +238,15 @@ function generateReceipt(p, s) {
             <tr><td><b>Payment Month:</b></td><td>${p.month}</td></tr>
             <tr><td><b>Payment Mode:</b></td><td>${p.mode}</td></tr>
         </table>
-
         <div style="margin-top:30px; padding:20px; background:var(--royal-blue); color:var(--gold); display:flex; justify-content:space-between; border-radius:10px;">
             <h3 style="margin:0;">AMOUNT PAID:</h3>
             <h3 style="margin:0;">₹ ${p.amount.toLocaleString('en-IN')}</h3>
         </div>
-
         <p style="margin-top:15px; text-align:right;"><b>Remaining Dues:</b> ₹ ${(currentBalance - p.amount).toFixed(2)}</p>
-
         <div style="margin-top:60px; display:flex; justify-content:space-between;">
             <div style="text-align:center; width:150px; border-top:1px solid #000; padding-top:10px; font-size:12px;">Authorized Signatory</div>
             <div style="text-align:center; width:150px; border-top:1px solid #000; padding-top:10px; font-size:12px;">Office Seal</div>
         </div>
-
         <div class="text-center no-print mt-5">
             <button class="royal-btn btn-sm me-2" onclick="window.print()"><i class="fas fa-print"></i> Print Receipt</button>
             <button class="royal-btn btn-sm" style="background:#25D366; border:none;" onclick="shareWhatsApp('${s.contact || s.pContact}', '${s.name}', '${p.amount}')">
@@ -279,7 +254,6 @@ function generateReceipt(p, s) {
             </button>
         </div>
     </div>`;
-    
     document.getElementById('receiptArea').innerHTML = receipt;
     document.getElementById('receiptArea').style.display = 'block';
     window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
