@@ -10,37 +10,26 @@
     <link rel="stylesheet" href="style.css">
     
     <style>
-        /* Logo & Profile Photo Styles */
+        :root { --royal: #002147; --gold: #D4AF37; }
         .school-logo-main { width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px; }
         .student-profile-img { 
             width: 120px; height: 120px; border-radius: 10px; border: 3px solid var(--gold); 
             object-fit: cover; margin-bottom: 10px; background: #f0f0f0;
         }
-
         .portal-container {
             max-width: 850px; margin: 20px auto; background: #fff;
             border: 2px solid var(--gold); border-radius: 20px; padding: 30px;
-            box-shadow: var(--shadow-lg);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
-
-        .search-inner-box {
-            background: #fdfbf0; border: 1px dashed var(--gold);
-            padding: 25px; border-radius: 15px; margin-bottom: 20px;
-        }
-
-        .btn-search-black {
-            background: #1a1a1a; color: #fff; width: 100%; padding: 12px; 
-            border-radius: 10px; font-weight: bold; border: none; transition: 0.3s;
-        }
-
+        .search-inner-box { background: #fdfbf0; border: 1px dashed var(--gold); padding: 25px; border-radius: 15px; margin-bottom: 20px; }
+        .btn-search-black { background: #1a1a1a; color: #fff; width: 100%; padding: 12px; border-radius: 10px; font-weight: bold; border: none; }
         #feeDetailsForm { display: none; margin-top: 20px; border-top: 2px solid #eee; padding-top: 20px; }
 
-        /* Receipt Print Styles */
         @media print {
-            .no-print, #menu-container, .btn-print-action { display: none !important; }
-            .main-content { padding: 0 !important; margin: 0 !important; }
-            #receiptArea { display: block !important; position: absolute; top: 0; left: 0; width: 100%; }
-            .receipt-card { border: 2px solid #000; box-shadow: none; margin: 0; width: 100%; }
+            .no-print, #menu-container, .btn-print-action, .portal-container, .header { display: none !important; }
+            body { background: white; }
+            #receiptArea { display: block !important; }
+            .receipt-card { border: 2px solid #000; width: 100%; box-shadow: none; margin: 0; }
         }
 
         .receipt-card {
@@ -54,26 +43,22 @@
 <div id="menu-container" class="no-print"></div>
 
 <div class="main-content">
-    <div class="header no-print text-center">
-        <img src="logo.png" class="school-logo-main" alt="School Logo" onerror="this.src='https://via.placeholder.com/100?text=Logo'">
-        <h1 class="brand-font">The Lalit International School</h1>
-        <p style="color: var(--gold); letter-spacing: 2px;">Nurturing Global Citizens</p>
+    <div class="header no-print text-center mt-3">
+        <img src="logo.png" class="school-logo-main" onerror="this.src='https://via.placeholder.com/100'">
+        <h1 class="fw-bold" style="color:var(--royal)">The Lalit International School</h1>
+        <p style="color: var(--gold); letter-spacing: 2px; font-weight: bold;">FEE COLLECTION TERMINAL</p>
     </div>
 
     <div class="portal-container no-print">
-        <h2 class="portal-title text-center mb-4" style="font-family: 'Cinzel'; color: var(--royal-blue);">
-            <i class="fas fa-file-invoice-dollar"></i> Fee Collection Portal
-        </h2>
-
-        <div class="search-inner-box position-relative">
+        <div class="search-inner-box">
             <div class="row g-3">
                 <div class="col-md-7">
-                    <label class="fw-bold small mb-1">ADMISSION ID OR NAME</label>
-                    <input type="text" id="studentSearch" class="form-control" placeholder="Search..." oninput="liveSearch()" autocomplete="off">
-                    <div id="searchSuggestions" style="position:absolute; width:95%; z-index:100; background:white; border:1px solid #ddd; display:none;"></div>
+                    <label class="fw-bold small mb-1">FIND STUDENT</label>
+                    <input type="text" id="studentSearch" class="form-control" placeholder="Enter Name or Admission ID..." oninput="liveSearch()">
+                    <div id="searchSuggestions" class="list-group shadow" style="position:absolute; width:90%; z-index:100; display:none;"></div>
                 </div>
                 <div class="col-md-5">
-                    <label class="fw-bold small mb-1">FEES UP TO</label>
+                    <label class="fw-bold small mb-1">UP TO MONTH</label>
                     <select id="calcMonth" class="form-select" onchange="if(activeStudent) calculateDue(activeStudent)">
                         <option>April</option><option>May</option><option>June</option>
                         <option>July</option><option>August</option><option>September</option>
@@ -82,35 +67,34 @@
                     </select>
                 </div>
             </div>
-            <button class="btn-search-black mt-3" onclick="document.getElementById('studentSearch').focus()">SEARCH</button>
         </div>
 
         <div id="feeDetailsForm">
             <div class="row g-4 align-items-center">
                 <div class="col-md-4 text-center border-end">
-                    <img id="studentPhoto" src="" class="student-profile-img" alt="Student Photo" onerror="this.src='https://via.placeholder.com/120?text=No+Photo'">
+                    <img id="studentPhoto" src="" class="student-profile-img" onerror="this.src='https://via.placeholder.com/120?text=No+Photo'">
                     <h5 id="displayName" class="fw-bold text-primary mb-0">---</h5>
                     <p id="displayId" class="small text-muted">ID: ---</p>
                 </div>
                 <div class="col-md-8">
                     <div class="row g-3">
                         <div class="col-12 text-center">
-                            <p class="text-muted small mb-1">TOTAL OUTSTANDING</p>
-                            <div id="dueAmount" class="fw-bold text-danger" style="font-size: 2rem;">₹ 0.00</div>
+                            <p class="text-muted small mb-1">TOTAL PENDING DUES</p>
+                            <div id="dueAmount" class="fw-bold text-danger" style="font-size: 2.5rem;">₹ 0.00</div>
                         </div>
                         <div class="col-md-6">
-                            <label class="small fw-bold">Amount to Collect</label>
-                            <input type="number" id="payAmt" class="form-control" placeholder="0.00">
+                            <label class="small fw-bold">Amount Received</label>
+                            <input type="number" id="payAmt" class="form-control form-control-lg" placeholder="0.00">
                         </div>
                         <div class="col-md-6">
-                            <label class="small fw-bold">Pay Mode</label>
-                            <select id="payMode" class="form-select">
-                                <option>Cash</option><option>Online</option><option>Cheque</option>
+                            <label class="small fw-bold">Payment Mode</label>
+                            <select id="payMode" class="form-select form-select-lg">
+                                <option>Cash</option><option>Online Transfer</option><option>UPI</option><option>Cheque</option>
                             </select>
                         </div>
                         <div class="col-12">
-                            <button class="royal-btn w-100 py-3" id="submitBtn" onclick="submitPayment()">
-                                <i class="fas fa-check-circle"></i> COLLECT & GENERATE RECEIPT
+                            <button class="btn btn-dark w-100 py-3 fw-bold" onclick="submitPayment()">
+                                <i class="fas fa-print me-2"></i> COLLECT & PRINT RECEIPT
                             </button>
                         </div>
                     </div>
@@ -128,71 +112,71 @@
 
 <script>
 let activeStudent = null;
-let currentBalance = 0;
-const database = firebase.firestore();
+let db = firebase.firestore();
 
-// 1. Live Search
 async function liveSearch() {
     const val = document.getElementById('studentSearch').value.toLowerCase();
     const sugg = document.getElementById('searchSuggestions');
     if(val.length < 2) { sugg.style.display='none'; return; }
 
-    const snap = await database.collection('students').get();
+    const snap = await db.collection('students').get();
     let html = '';
     snap.forEach(doc => {
         const d = doc.data();
         if(d.name.toLowerCase().includes(val) || String(d.uniqueID).includes(val)) {
-            const sData = encodeURIComponent(JSON.stringify(d));
-            html += `<div style="padding:10px; border-bottom:1px solid #eee; cursor:pointer;" onclick="selectStudent('${sData}')">
-                        ${d.name} (${d.uniqueID})
-                     </div>`;
+            html += `<button class="list-group-item list-group-item-action" onclick='selectStudent(${JSON.stringify(d)})'>
+                        <b>${d.uniqueID}</b> - ${d.name} <small class="text-muted">(${d.class})</small>
+                     </button>`;
         }
     });
     sugg.innerHTML = html;
     sugg.style.display = html ? 'block' : 'none';
 }
 
-// 2. Select Student & Load Photo
-function selectStudent(encodedData) {
-    activeStudent = JSON.parse(decodeURIComponent(encodedData));
-    document.getElementById('studentSearch').value = activeStudent.name;
-    document.getElementById('displayName').innerText = activeStudent.name;
-    document.getElementById('displayId').innerText = "ID: " + activeStudent.uniqueID;
-    
-    // Photo handling
-    const photoUrl = activeStudent.photo || activeStudent.imageURL || '';
-    document.getElementById('studentPhoto').src = photoUrl;
-
+function selectStudent(student) {
+    activeStudent = student;
+    document.getElementById('studentSearch').value = student.name;
+    document.getElementById('displayName').innerText = student.name;
+    document.getElementById('displayId').innerText = "Admission ID: " + student.uniqueID;
+    document.getElementById('studentPhoto').src = student.photo || student.imageURL || '';
     document.getElementById('searchSuggestions').style.display = 'none';
     document.getElementById('feeDetailsForm').style.display = 'block';
-    calculateDue(activeStudent);
+    calculateDue(student);
 }
 
-// 3. Ledger Dues Calculation
 async function calculateDue(student) {
-    const targetMonth = document.getElementById('calcMonth').value;
-    const months = ["April", "May", "June", "July", "August", "September", "October", "November", "December", "January", "February", "March"];
-    const targetIdx = months.indexOf(targetMonth);
+    const months = ["April","May","June","July","August","September","October","November","December","January","February","March"];
+    const targetIdx = months.indexOf(document.getElementById('calcMonth').value);
 
-    const mDoc = await database.collection('fee_master').doc(student.class).get();
-    const tSnap = await database.collection('fee_transactions').where('studentID', '==', String(student.uniqueID)).get();
+    const mDoc = await db.collection('fee_master').doc(student.class).get();
+    const tSnap = await db.collection('fee_transactions').where('studentID', '==', String(student.uniqueID)).where('status', '==', 'Paid').get();
     
-    let paid = 0;
-    tSnap.forEach(d => paid += Number(d.data().amount || 0));
+    let totalPaid = 0;
+    tSnap.forEach(d => totalPaid += Number(d.data().amount || 0));
 
     if(mDoc.exists) {
         const fm = mDoc.data();
-        const monthly = Number(fm.tuition || 0) + (student.hostel === 'Yes' ? Number(fm.hostel || 0) : 0) + (student.transport === 'Yes' ? Number(fm.transport || 0) : 0);
-        const annual = Number(fm.admission || 0) + Number(fm.development || 0) + Number(fm.exam || 0);
-        currentBalance = (annual + (monthly * (targetIdx + 1))) - paid;
-        document.getElementById('dueAmount').innerText = `₹ ${currentBalance.toFixed(2)}`;
+        const d = student.discounts || {};
+        
+        // Accurate calculation matching Ledger
+        const tui = (fm.tuition || 0) * (1 - (d.tuition || 0)/100);
+        const hos = (student.hostel === 'Yes' ? (fm.hostel || 0) : 0) * (1 - (d.hostel || 0)/100);
+        const tra = (student.transport === 'Yes' ? (student.transport_fee || 0) : 0) * (1 - (d.trans || 0)/100);
+        
+        const annual = ((fm.admission||0)*(1-(d.adm||0)/100)) + ((fm.development||0)*(1-(d.dev||0)/100)) + ((fm.exam||0)*(1-(d.exa||0)/100)) + ((fm.books||0)*(1-(d.books||0)/100)) + ((fm.misc||0)*(1-(d.mis||0)/100));
+        
+        const monthlyTotal = tui + hos + tra;
+        const totalDue = annual + (monthlyTotal * (targetIdx + 1));
+        const balance = totalDue - totalPaid;
+        
+        document.getElementById('dueAmount').innerText = `₹ ${Math.round(balance)}`;
+        document.getElementById('payAmt').value = Math.round(balance);
     }
 }
 
-// 4. Submit & Generate Receipt
 async function submitPayment() {
     const amt = document.getElementById('payAmt').value;
-    if(!amt || amt <= 0) return alert("Enter amount");
+    if(!amt || amt <= 0) return alert("Please enter amount");
 
     const paymentData = {
         studentID: String(activeStudent.uniqueID),
@@ -201,34 +185,39 @@ async function submitPayment() {
         month: document.getElementById('calcMonth').value,
         mode: document.getElementById('payMode').value,
         date: new Date().toLocaleDateString('en-GB'),
+        status: 'Paid', // Admin direct entry is auto-paid
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
     };
 
     try {
-        await database.collection('fee_transactions').add(paymentData);
-        alert("Payment Recorded!");
+        await db.collection('fee_transactions').add(paymentData);
+        alert("Fee Collected Successfully!");
         renderReceipt(paymentData, activeStudent);
-    } catch (e) { alert(e.message); }
+    } catch (e) { alert("Error: " + e.message); }
 }
 
-// 5. Receipt Rendering with Print Button
 function renderReceipt(p, s) {
     const receiptHTML = `
     <div class="receipt-card">
-        <div class="text-center">
+        <div class="text-center mb-3">
             <img src="logo.png" style="width:70px;" onerror="this.src='https://via.placeholder.com/70'">
-            <h3 class="brand-font mb-0">THE LALIT INTERNATIONAL SCHOOL</h3>
-            <p class="small text-muted">Official Fee Receipt</p>
+            <h3 class="fw-bold m-0">THE LALIT INTERNATIONAL SCHOOL</h3>
+            <p class="small">FEE PAYMENT RECEIPT</p>
         </div>
-        <table class="table table-bordered mt-3">
-            <tr><td><b>Student:</b> ${s.name}</td><td><b>ID:</b> ${s.uniqueID}</td></tr>
-            <tr><td><b>Class:</b> ${s.class}</td><td><b>Date:</b> ${p.date}</td></tr>
-            <tr><td colspan="2" class="text-center bg-light"><b>Amount Paid: ₹ ${p.amount}</b></td></tr>
+        <div class="row small mb-3">
+            <div class="col-6">Receipt No: <b>#${Math.floor(Math.random()*10000)}</b></div>
+            <div class="col-6 text-end">Date: <b>${p.date}</b></div>
+        </div>
+        <table class="table table-bordered small">
+            <tr><td>Student Name</td><td><b>${s.name}</b></td></tr>
+            <tr><td>Student ID</td><td><b>${s.uniqueID}</b></td></tr>
+            <tr><td>Class</td><td><b>${s.class}</b></td></tr>
+            <tr><td>Payment Mode</td><td><b>${p.mode}</b></td></tr>
+            <tr class="table-dark text-white"><td colspan="2" class="text-center"><b>TOTAL PAID: ₹ ${p.amount}</b></td></tr>
         </table>
-        <div class="text-center mt-4 btn-print-action">
-            <button class="btn btn-dark" onclick="window.print()">
-                <i class="fas fa-print"></i> PRINT RECEIPT
-            </button>
+        <p class="text-center mt-3 small text-muted italic">This is a computer generated receipt.</p>
+        <div class="text-center mt-3 btn-print-action">
+            <button class="btn btn-dark" onclick="window.print()">PRINT RECEIPT</button>
         </div>
     </div>`;
     document.getElementById('receiptArea').innerHTML = receiptHTML;
