@@ -10,53 +10,58 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        /* --- UI STYLING --- */
-        #ledgerArea { display: none; background: #fff; padding: 0; }
+        /* --- UI & SEARCH FIX --- */
+        #ledgerArea { display: none; background: #fff; }
         
-        /* Search Box Fix */
-        .search-box-wrapper { display: flex; gap: 0; max-width: 600px; margin: 0 auto 30px; }
-        .search-input-royal { border-radius: 30px 0 0 30px !important; flex-grow: 1; border-right: none; }
+        .search-box-wrapper { display: flex; max-width: 600px; margin: 20px auto; filter: drop-shadow(var(--shadow-sm)); }
+        .search-input-royal { border-radius: 30px 0 0 30px !important; border-right: none !important; margin-bottom: 0 !important; }
         .search-btn { 
             background: var(--royal-blue); color: var(--gold); border: 2px solid var(--gold);
-            border-radius: 0 30px 30px 0; padding: 0 25px; cursor: pointer;
+            border-radius: 0 30px 30px 0; padding: 0 25px; transition: 0.3s;
         }
 
-        /* Annual Breakdown Box */
+        /* Annual Breakdown Layout */
         .annual-breakdown-box {
             display: grid; grid-template-columns: repeat(6, 1fr);
-            border: 2px solid #000; margin-bottom: 10px; background: #f9f9f9;
+            border: 1.5px solid #000; margin: 5px 0; background: #fcfcfc;
         }
-        .break-cell { border-right: 1px solid #000; padding: 5px; text-align: center; font-size: 11px; }
+        .break-cell { border-right: 1px solid #000; padding: 3px; text-align: center; font-size: 10px; line-height: 1.2; }
         .break-cell:last-child { border-right: none; background: var(--royal-blue); color: #fff; font-weight: bold; }
-        .break-label { display: block; font-weight: bold; color: var(--royal-blue); border-bottom: 1px solid #ddd; margin-bottom: 2px; }
+        .break-label { display: block; font-weight: 800; color: var(--royal-blue); border-bottom: 1px solid #000; font-size: 9px; margin-bottom: 2px; }
 
-        /* Ledger Table for Professional Look */
-        .table-ledger { width: 100%; border-collapse: collapse; border: 2px solid #000; }
-        .table-ledger th { background: var(--royal-blue) !important; color: #fff !important; border: 1px solid #000; padding: 8px; font-size: 12px; text-transform: uppercase; }
-        .table-ledger td { border: 1px solid #000; padding: 8px; font-size: 13px; font-weight: 600; text-align: center; vertical-align: middle; }
-        .month-col { text-align: left !important; padding-left: 15px !important; background: #f2f2f2; }
+        /* Ledger Table Design */
+        .table-ledger { width: 100%; border-collapse: collapse; border: 1.5px solid #000; }
+        .table-ledger th { background: var(--royal-blue) !important; color: #fff !important; border: 1px solid #000; padding: 5px; font-size: 11px; }
+        .table-ledger td { border: 1px solid #000; padding: 4px; font-size: 11.5px; font-weight: 700; text-align: center; color: #000; }
+        .month-col { text-align: left !important; padding-left: 10px !important; background: #f5f5f5; }
 
-        /* --- PRINT ENGINE (CRITICAL) --- */
+        /* Signature Section */
+        .sig-section { display: none; margin-top: 30px; justify-content: space-between; padding: 0 20px; }
+        .sig-box { border-top: 1px solid #000; width: 150px; text-align: center; font-size: 12px; font-weight: bold; padding-top: 5px; }
+
+        /* --- SINGLE PAGE PRINT ENGINE --- */
         @media print {
             @page { size: A4 portrait; margin: 5mm; }
-            html, body { height: 100%; margin: 0 !important; padding: 0 !important; background: #fff; }
-            #menu-container, .no-print, .payment-block, .search-box-wrapper, header { display: none !important; }
+            html, body { height: 100%; overflow: hidden; background: #fff; }
+            #menu-container, .no-print, header, .payment-block { display: none !important; }
             
             #ledgerArea { 
-                display: flex !important; flex-direction: column;
-                height: 98vh; /* Poore page par stretch */
-                padding: 10px; border: none;
+                display: block !important; 
+                height: 98vh; 
+                width: 100%;
+                box-sizing: border-box;
             }
-            .main-content { padding: 0 !important; margin: 0 !important; width: 100% !important; max-width: 100% !important; }
-            .royal-card { border: none !important; box-shadow: none !important; width: 100% !important; padding: 0 !important; }
-            
-            .table-ledger { flex-grow: 1; margin-bottom: 0; }
-            .table-ledger td { height: 1.2cm; } /* Auto stretch cells */
-            
-            .student-strip { border: 2px solid #000 !important; background: #fff !important; }
-        }
+            .royal-card { border: none !important; box-shadow: none !important; width: 100% !important; padding: 0 !important; background: none !important; }
+            .royal-card::after { display: none; }
+            .main-content { padding: 0 !important; margin: 0 !important; }
 
-        .payment-block { background: var(--light-gold); border: 2px solid var(--gold); border-radius: 12px; padding: 20px; margin-top: 20px; }
+            /* Table height adjustment to fit page */
+            .table-ledger { height: 75%; table-layout: fixed; }
+            .table-ledger td { height: auto; }
+            
+            .sig-section { display: flex !important; }
+            .student-strip { background: #fff !important; border: 1.5px solid #000 !important; }
+        }
     </style>
 </head>
 <body>
@@ -68,30 +73,30 @@
         <header id="brand-header-container" class="header no-print"></header>
 
         <div class="search-box-wrapper no-print">
-            <input type="text" id="searchID" class="search-input-royal" placeholder="Search Student Name or ID..." oninput="liveSearch()">
+            <input type="text" id="searchID" class="search-input-royal" placeholder="Enter Student Name or Admission ID..." oninput="liveSearch()">
             <button class="search-btn" onclick="liveSearch()"><i class="fas fa-search"></i></button>
             <div id="searchSuggestions"></div>
         </div>
 
         <div id="ledgerArea">
-            <div class="d-flex justify-content-between align-items-center border-bottom border-3 mb-2 pb-2">
+            <div class="d-flex justify-content-between align-items-center border-bottom border-dark pb-2 mb-2">
                 <div class="d-flex align-items-center">
-                    <img src="logo.png" class="receipt-logo" style="width:80px;">
-                    <div class="ms-3">
-                        <h1 class="brand-font" style="margin:0; font-size: 26px; color: var(--royal-blue);">THE LALIT INTERNATIONAL SCHOOL</h1>
-                        <p class="m-0 fw-bold">MASTER LEDGER STATEMENT | SESSION 2025-26</p>
+                    <img src="logo.png" style="width:70px; margin-right: 15px;">
+                    <div>
+                        <h1 id="pName" class="brand-font" style="margin:0; font-size: 24px;">THE LALIT INTERNATIONAL SCHOOL</h1>
+                        <p class="m-0 fw-bold small">MASTER LEDGER STATEMENT | SESSION 2025-26</p>
                     </div>
                 </div>
-                <div class="text-end">
-                    <p class="m-0"><b>Print Date:</b> <span id="pDate"></span></p>
-                    <p class="m-0 small">Official Document</p>
+                <div class="text-end small">
+                    <b>Date:</b> <span id="pDate"></span><br>
+                    <span>Official Registry Copy</span>
                 </div>
             </div>
 
             <div class="student-strip d-flex align-items-center p-2 mb-2 border border-dark">
-                <img id="lPhoto" src="https://via.placeholder.com/85x105" style="width:85px; height:105px; border:1px solid #000; object-fit: cover;">
-                <div class="ms-3 flex-grow-1" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 13px;">
-                    <div>NAME: <b id="lName" class="fs-6"></b></div>
+                <img id="lPhoto" src="" style="width:85px; height:105px; border:1px solid #000; object-fit: cover;">
+                <div class="ms-3 flex-grow-1" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; font-size: 12px;">
+                    <div>NAME: <b id="lName"></b></div>
                     <div>ID: <b id="lID"></b></div>
                     <div>CLASS: <b id="lClass"></b></div>
                     <div>FATHER: <b id="lFather"></b></div>
@@ -100,13 +105,12 @@
                 </div>
             </div>
 
-            <div class="annual-breakdown-box" id="lBreakdown">
-                </div>
+            <div class="annual-breakdown-box" id="lBreakdown"></div>
 
             <table class="table-ledger">
                 <thead>
                     <tr>
-                        <th style="width: 18%;">PARTICULARS</th>
+                        <th style="width: 20%;">PARTICULARS</th>
                         <th>TUITION</th>
                         <th>HOSTEL</th>
                         <th>TRANS.</th>
@@ -118,8 +122,8 @@
                 </thead>
                 <tbody id="lBody"></tbody>
                 <tfoot>
-                    <tr style="background: var(--royal-blue); color: white;">
-                        <td colspan="5" class="text-end pe-3">NET SESSION TOTAL</td>
+                    <tr style="background: var(--royal-blue); color: #fff;">
+                        <td colspan="5" class="text-end pe-2">SESSION CUMULATIVE TOTAL</td>
                         <td id="totalPay"></td>
                         <td id="totalPaid"></td>
                         <td id="totalDue"></td>
@@ -127,30 +131,24 @@
                 </tfoot>
             </table>
 
+            <div class="sig-section">
+                <div class="sig-box">Accountant</div>
+                <div class="sig-box">Parent/Guardian</div>
+                <div class="sig-box">Principal</div>
+            </div>
+
             <div class="mt-4 text-center no-print d-flex justify-content-center gap-2">
                 <button class="royal-btn" onclick="window.print()"><i class="fas fa-print"></i> PRINT LEDGER</button>
-                <button class="royal-btn btn-success" onclick="togglePaymentBlock()"><i class="fas fa-plus"></i> ADD PAYMENT</button>
-                <button class="royal-btn btn-info" onclick="showHistory()"><i class="fas fa-history"></i> HISTORY</button>
+                <button class="royal-btn btn-success" onclick="togglePay()"><i class="fas fa-wallet"></i> ADD FEE</button>
             </div>
 
-            <div id="paymentBlock" class="payment-block no-print" style="display:none;">
+            <div id="payBlock" class="no-print mt-3 p-3 border border-warning rounded" style="display:none; background:#fffcf0;">
                 <div class="row g-2">
-                    <div class="col-md-4">
-                        <select id="payMonth" class="form-select">
-                            <option>Registration</option>
-                            <script>months.forEach(m => document.write(`<option>${m}</option>`))</script>
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <input type="number" id="payAmount" class="form-control" placeholder="Enter Amount">
-                    </div>
-                    <div class="col-md-4">
-                        <button class="btn btn-dark w-100 fw-bold" onclick="submitPayment()">POST TO LEDGER</button>
-                    </div>
+                    <div class="col-md-4"><select id="payM" class="form-select"><option>Registration</option><script>months.forEach(m=>document.write(`<option>${m}</option>`))</script></select></div>
+                    <div class="col-md-4"><input type="number" id="payA" class="form-control" placeholder="Amount (₹)"></div>
+                    <div class="col-md-4"><button class="btn btn-dark w-100 fw-bold" onclick="savePay()">SUBMIT</button></div>
                 </div>
             </div>
-
-            <div id="historySection" class="no-print mt-3"></div>
         </div>
     </div>
 </div>
@@ -163,7 +161,7 @@
 
 <script>
     const months = ["April", "May", "June", "July", "August", "September", "October", "November", "December", "January", "February", "March"];
-    let currentStudent = null;
+    let curStu = null;
 
     async function liveSearch() {
         const val = document.getElementById('searchID').value.toLowerCase();
@@ -181,7 +179,7 @@
     }
 
     async function loadLedger(s) {
-        currentStudent = s;
+        curStu = s;
         document.getElementById('searchSuggestions').style.display='none';
         document.getElementById('ledgerArea').style.display='block';
         document.getElementById('pDate').innerText = new Date().toLocaleDateString('en-GB');
@@ -191,11 +189,10 @@
         document.getElementById('lClass').innerText = s.class;
         document.getElementById('lFather').innerText = s.father || "N/A";
         document.getElementById('lTrans').innerText = s.transportDistance || "NONE";
-        document.getElementById('lPhoto').src = s.photo || 'https://via.placeholder.com/85x105';
+        document.getElementById('lPhoto').src = s.photo || 'https://via.placeholder.com/85';
 
         const mDoc = await db.collection('fee_master').doc(s.class).get();
         const fm = mDoc.exists ? mDoc.data() : {};
-        
         let tRate = 0;
         if(s.transport === 'Yes') {
             const tSnap = await db.collection('transport_master').get();
@@ -204,37 +201,35 @@
         }
 
         const transSnap = await db.collection('fee_transactions').where('studentID', '==', String(s.uniqueID)).get();
-        let payData = [];
-        transSnap.forEach(d => payData.push(d.data()));
+        let payData = []; transSnap.forEach(d => payData.push(d.data()));
 
-        // Annual Breakdown Display
-        const adm = Number(fm.admission||0), dev = Number(fm.development||0), exm = Number(fm.exam||0), bks = Number(fm.books||0), msc = Number(fm.misc||0);
-        const annualTotal = adm + dev + exm + bks + msc;
+        const adm=Number(fm.admission||0), dev=Number(fm.development||0), exm=Number(fm.exam||0), bks=Number(fm.books||0), msc=Number(fm.misc||0);
+        const annualT = adm+dev+exm+bks+msc;
 
         document.getElementById('lBreakdown').innerHTML = `
             <div class="break-cell"><span class="break-label">ADMISSION</span>₹${adm}</div>
-            <div class="break-cell"><span class="break-label">DEVELOPMENT</span>₹${dev}</div>
+            <div class="break-cell"><span class="break-label">DEV. FEE</span>₹${dev}</div>
             <div class="break-cell"><span class="break-label">EXAM FEE</span>₹${exm}</div>
             <div class="break-cell"><span class="break-label">BOOKS/UNI</span>₹${bks}</div>
             <div class="break-cell"><span class="break-label">MISC</span>₹${msc}</div>
-            <div class="break-cell"><span class="break-label">ANNUAL TOTAL</span>₹${annualTotal}</div>
+            <div class="break-cell"><span class="break-label">TOTAL ANNUAL</span>₹${annualT}</div>
         `;
 
-        let html = '', gPay = 0, gPaid = 0, runningBalance = 0;
+        let html = '', gPay = 0, gPaid = 0, rb = 0;
         const mT = Number(fm.tuition||0), mH = (s.hostel==='Yes'?Number(fm.hostel||0):0), mTr = tRate;
 
         // Registration Row
-        const aPaid = payData.filter(p => ["Admission", "Registration", "Annual"].includes(p.month)).reduce((sum, p) => sum + Number(p.amount), 0);
-        runningBalance = annualTotal - aPaid;
-        html += `<tr><td class="month-col">REGISTRATION & ANNUAL</td><td>-</td><td>-</td><td>-</td><td>₹${annualTotal}</td><td>₹${annualTotal}</td><td>₹${aPaid}</td><td>₹${runningBalance}</td></tr>`;
-        gPay += annualTotal; gPaid += aPaid;
+        const aP = payData.filter(p => ["Admission", "Registration", "Annual"].includes(p.month)).reduce((sum, p) => sum + Number(p.amount), 0);
+        rb = annualT - aP;
+        html += `<tr><td class="month-col">REGISTRATION & ANNUAL</td><td>-</td><td>-</td><td>-</td><td>₹${annualT}</td><td>₹${annualT}</td><td>₹${aP}</td><td>₹${rb}</td></tr>`;
+        gPay += annualT; gPaid += aP;
 
         months.forEach(m => {
             const total = mT + mH + mTr;
-            const monthPaid = payData.filter(p => p.month === m).reduce((acc, curr) => acc + Number(curr.amount), 0);
-            runningBalance = (runningBalance + total) - monthPaid;
-            html += `<tr><td class="month-col">${m.toUpperCase()}</td><td>₹${mT}</td><td>${mH?'₹'+mH:'-'}</td><td>${mTr?'₹'+mTr:'-'}</td><td>-</td><td>₹${total}</td><td>₹${monthPaid}</td><td>₹${runningBalance}</td></tr>`;
-            gPay += total; gPaid += monthPaid;
+            const mP = payData.filter(p => p.month === m).reduce((acc, c) => acc + Number(c.amount), 0);
+            rb = (rb + total) - mP;
+            html += `<tr><td class="month-col">${m.toUpperCase()}</td><td>₹${mT}</td><td>${mH?'₹'+mH:'-'}</td><td>${mTr?'₹'+mTr:'-'}</td><td>-</td><td>₹${total}</td><td>₹${mP}</td><td>₹${rb}</td></tr>`;
+            gPay += total; gPaid += mP;
         });
 
         document.getElementById('lBody').innerHTML = html;
@@ -243,34 +238,13 @@
         document.getElementById('totalDue').innerText = `₹${gPay-gPaid}`;
     }
 
-    function togglePaymentBlock() {
-        const b = document.getElementById('paymentBlock');
-        b.style.display = b.style.display === 'none' ? 'block' : 'none';
-    }
-
-    async function submitPayment() {
-        const amt = document.getElementById('payAmount').value;
-        const month = document.getElementById('payMonth').value;
-        if(!amt || !currentStudent) return alert("Enter amount!");
-        await db.collection('fee_transactions').add({
-            studentID: String(currentStudent.uniqueID),
-            amount: Number(amt),
-            month: month,
-            date: new Date().toISOString().split('T')[0]
-        });
-        alert("Payment Recorded!");
-        loadLedger(currentStudent);
-    }
-
-    async function showHistory() {
-        const transSnap = await db.collection('fee_transactions').where('studentID', '==', String(currentStudent.uniqueID)).get();
-        let h = `<div class="card p-3"><h5>Payment Logs</h5><table class="table table-sm">`;
-        transSnap.forEach(d => {
-            const p = d.data();
-            h += `<tr><td>${p.date}</td><td>${p.month}</td><td><b>₹${p.amount}</b></td></tr>`;
-        });
-        h += `</table></div>`;
-        document.getElementById('historySection').innerHTML = h;
+    function togglePay() { const b = document.getElementById('payBlock'); b.style.display = b.style.display === 'none' ? 'block' : 'none'; }
+    async function savePay() {
+        const amt = document.getElementById('payA').value;
+        const mon = document.getElementById('payM').value;
+        if(!amt) return alert("Enter Amount");
+        await db.collection('fee_transactions').add({ studentID: String(curStu.uniqueID), amount: Number(amt), month: mon, date: new Date().toISOString().split('T')[0] });
+        alert("Payment Added!"); loadLedger(curStu);
     }
 </script>
 </body>
