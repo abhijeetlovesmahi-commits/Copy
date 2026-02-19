@@ -3,49 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Ledger & Demand Center | The Lalit Intl.</title>
+    <title>Professional Master Ledger | The Lalit Intl.</title>
     
     <link rel="stylesheet" href="style.css"> 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        :root { --royal: #002147; --gold: #ffd700; --soft-bg: #f4f7f6; }
+        :root { --royal: #002147; --gold: #D4AF37; }
+        body { background: #f0f2f5; font-family: 'Segoe UI', sans-serif; }
         
-        #ledgerArea { display: none; background: #fff; min-height: 100vh; flex-direction: column; padding: 20px; }
-        
-        /* Buttons Styling */
-        .btn-group-royal { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap; }
-        .btn-action { 
-            background: var(--royal); color: var(--gold); border: 2px solid var(--gold);
-            padding: 10px 20px; font-weight: bold; border-radius: 8px; transition: 0.3s;
-        }
-        .btn-action:hover { background: var(--gold); color: var(--royal); transform: translateY(-2px); }
-
-        /* Discount Input */
-        .disc-input { 
-            width: 60px; border: 1px solid #ccc; border-radius: 4px; 
-            text-align: center; font-weight: bold; color: #d32f2f;
+        #ledgerArea { 
+            display: none; background: #fff; width: 1000px; margin: 20px auto; 
+            padding: 40px; box-shadow: 0 0 20px rgba(0,0,0,0.1); border: 1px solid #ccc;
         }
 
-        /* Demand Slip Styling */
-        #demandSlipContainer { display: none; padding: 20px; background: #eee; }
-        .slip-card { 
-            background: white; width: 100%; max-width: 800px; margin: 20px auto; 
-            border: 2px solid var(--royal); padding: 15px; position: relative;
+        /* Top Fee Heads Row (Like Image) */
+        .fee-master-summary { 
+            display: grid; grid-template-columns: repeat(6, 1fr); 
+            border: 1px solid #000; margin-bottom: 10px; text-align: center;
         }
-        .slip-header { display: flex; align-items: center; border-bottom: 2px solid var(--royal); padding-bottom: 10px; }
-        .wa-btn { background: #25D366; color: white; border: none; padding: 5px 15px; border-radius: 20px; font-size: 12px; }
+        .fee-head-box { border-right: 1px solid #000; }
+        .fee-head-box:last-child { border-right: none; }
+        .fh-title { background: #f8f9fa; font-size: 10px; font-weight: bold; border-bottom: 1px solid #000; padding: 2px; }
+        .fh-val { font-size: 13px; font-weight: bold; padding: 5px; }
+        .fh-disc { font-size: 11px; color: #d32f2f; padding-bottom: 5px; }
 
-        /* Ledger Table Fixes */
-        .table-ledger { width: 100%; border: 2px solid #000; table-layout: fixed; }
-        .table-ledger th { background: var(--royal) !important; color: #fff !important; font-size: 12px; text-align: center; }
-        .table-ledger td { border: 1px solid #000; padding: 8px; font-size: 12px; text-align: center; font-weight: bold; }
-        
+        /* Table Styling */
+        .table-ledger { width: 100%; border-collapse: collapse; border: 1px solid #000; margin-top: 5px; }
+        .table-ledger th { 
+            background: #f8f9fa !important; color: #666; font-size: 11px; 
+            text-transform: uppercase; border: 1px solid #000; padding: 8px;
+        }
+        .table-ledger td { border: 1px solid #000; padding: 6px; font-size: 12px; text-align: center; font-weight: 600; }
+        .text-left { text-align: left !important; padding-left: 10px !important; }
+
+        /* Student Info Strip */
+        .student-strip { display: flex; border: 1px solid #000; padding: 15px; margin-bottom: 20px; align-items: center; }
+        .stu-photo { width: 100px; height: 120px; border: 1px solid #000; object-fit: cover; margin-right: 20px; }
+        .stu-details { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; flex-grow: 1; font-size: 12px; }
+
+        .btn-action-group { display: flex; gap: 10px; justify-content: center; margin: 20px 0; }
+        .royal-btn { background: var(--royal); color: var(--gold); border: 2px solid var(--gold); padding: 8px 20px; font-weight: bold; }
+
         @media print {
             .no-print { display: none !important; }
-            #ledgerArea, #demandSlipContainer { display: block !important; padding: 0; }
-            .slip-card { page-break-after: always; border: 1px solid #000; }
+            #ledgerArea { display: block !important; box-shadow: none; border: none; width: 100%; margin: 0; padding: 10px; }
+            body { background: white; }
         }
     </style>
 </head>
@@ -53,292 +57,216 @@
 
 <div id="menu-container" class="no-print"></div>
 
-<div class="main-content">
-    <div class="royal-card">
-        <header id="brand-header-container" class="header no-print"></header>
-
-        <div class="search-box-wrapper no-print" style="display: flex; max-width: 600px; margin: 20px auto;">
-            <input type="text" id="searchID" class="form-control" style="border-radius: 30px 0 0 30px;" placeholder="Search Student Name or ID..." oninput="liveSearch()">
-            <button class="btn-action" style="border-radius: 0 30px 30px 0;" onclick="liveSearch()"><i class="fas fa-search"></i></button>
-            <div id="searchSuggestions" style="position:absolute; background:white; z-index:100; width:100%; max-width:500px; box-shadow:0 5px 15px rgba(0,0,0,0.2); display:none;"></div>
+<div class="container mt-4 no-print">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <input type="text" id="searchID" class="form-control" placeholder="Search Student Name or ID..." oninput="liveSearch()">
+            <div id="searchSuggestions" class="list-group position-absolute w-100" style="z-index: 1000; display:none;"></div>
         </div>
+    </div>
 
-        <div class="btn-group-royal no-print">
-            <button class="btn-action" onclick="calculateLedger()"><i class="fas fa-sync"></i> GET AMOUNT</button>
-            <button class="btn-action" onclick="window.print()"><i class="fas fa-print"></i> PRINT LEDGER</button>
-            <button class="btn-action" onclick="showHistory()"><i class="fas fa-history"></i> STATEMENT</button>
-            <button class="btn-action" style="background:#8e44ad;" onclick="openDemandModal()"><i class="fas fa-file-invoice-dollar"></i> GENERATE DEMAND SLIP</button>
-        </div>
-
-        <div id="ledgerArea">
-            <div class="d-flex justify-content-between align-items-center border-bottom border-dark pb-2 mb-2">
-                <div class="d-flex align-items-center">
-                    <img src="logo.png" style="width:70px; margin-right: 15px;">
-                    <div>
-                        <h1 class="brand-font" style="margin:0; font-size: 24px; color: #002147;">THE LALIT INTERNATIONAL SCHOOL</h1>
-                        <p class="m-0 fw-bold small">OFFICIAL MASTER LEDGER | SESSION 2025-26</p>
-                    </div>
-                </div>
-                <div class="text-end small"><b>Date:</b> <span id="pDate"></span></div>
-            </div>
-
-            <div class="student-strip d-flex align-items-center p-2 mb-2 border border-dark">
-                <img id="lPhoto" src="" style="width:90px; height:110px; border:1px solid #000; object-fit: cover;">
-                <div class="ms-3 flex-grow-1" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 13px;">
-                    <div>NAME: <b id="lName"></b></div>
-                    <div>ID: <b id="lID"></b></div>
-                    <div>CLASS: <b id="lClass"></b></div>
-                    <div>FATHER: <b id="lFather"></b></div>
-                    <div>TRANSPORT: <b id="lTrans"></b></div>
-                    <div>WA: <b id="lWA"></b></div>
-                </div>
-            </div>
-
-            <table class="table-ledger">
-                <thead>
-                    <tr>
-                        <th style="width: 20%;">PARTICULARS</th>
-                        <th>BASE FEE</th>
-                        <th class="no-print">DISC %</th>
-                        <th>NET PAYABLE</th>
-                        <th>PAID</th>
-                        <th>BALANCE</th>
-                    </tr>
-                </thead>
-                <tbody id="lBody"></tbody>
-                <tfoot>
-                    <tr style="background: #002147; color: white;">
-                        <td colspan="3" class="text-end pe-3">SESSION TOTAL</td>
-                        <td id="totalPay"></td>
-                        <td id="totalPaid"></td>
-                        <td id="totalDue"></td>
-                    </tr>
-                </tfoot>
-            </table>
-
-            <div class="sig-section d-flex justify-content-between mt-5 no-print" style="display:none;">
-                <div style="border-top:1px solid #000; width:150px; text-align:center;">Accountant</div>
-                <div style="border-top:1px solid #000; width:150px; text-align:center;">Principal</div>
-            </div>
-        </div>
-
-        <div id="demandSlipContainer" class="no-print">
-            <div class="d-flex justify-content-between mb-4">
-                <h3>DEMAND SLIP CENTER</h3>
-                <button class="btn btn-danger" onclick="closeDemandSlips()">CLOSE</button>
-            </div>
-            <div id="slipsList"></div>
-        </div>
+    <div class="btn-action-group">
+        <button class="royal-btn" onclick="calculateLedger()"><i class="fas fa-calculator"></i> GET AMOUNT</button>
+        <button class="royal-btn" onclick="window.print()"><i class="fas fa-print"></i> PRINT LEDGER</button>
+        <button class="royal-btn" onclick="openDemandModal()"><i class="fas fa-file-invoice"></i> DEMAND SLIP</button>
     </div>
 </div>
 
-<div class="modal fade" id="demandModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header"><h5>Generate Demand Slips</h5></div>
-            <div class="modal-body">
-                <label>Select Month</label>
-                <select id="dmMonth" class="form-control mb-3">
-                    <script>
-                        const mNames = ["April", "May", "June", "July", "August", "September", "October", "November", "December", "January", "February", "March"];
-                        mNames.forEach(m => document.write(`<option value="${m}">${m}</option>`));
-                    </script>
-                </select>
-                <label>Class Filter</label>
-                <select id="dmClass" class="form-control mb-3">
-                    <option value="All">All Classes</option>
-                    <script>for(let i=1; i<=12; i++) document.write(`<option value="${i}">${i}</option>`);</script>
-                </select>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" onclick="processDemandSlips()">GENERATE NOW</button>
+<div id="ledgerArea">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex align-items-center">
+            <img src="logo.png" style="width:60px; margin-right:15px;">
+            <div>
+                <h2 style="margin:0; color:var(--royal); font-weight:800; font-size: 26px;">THE LALIT INTERNATIONAL SCHOOL</h2>
+                <p class="m-0 small fw-bold text-uppercase">Master Ledger Statement | Session 2025-26</p>
             </div>
         </div>
+        <div class="text-end small">
+            <b>Print Date:</b> <span id="pDate"></span><br>
+            <span style="color:#777">Official Registry Copy</span>
+        </div>
+    </div>
+
+    <div class="student-strip">
+        <img id="lPhoto" src="" class="stu-photo">
+        <div class="stu-details">
+            <div>NAME: <b id="lName"></b></div>
+            <div>ID: <b id="lID"></b></div>
+            <div>CLASS: <b id="lClass"></b></div>
+            <div>FATHER: <b id="lFather"></b></div>
+            <div>TRANSPORT: <b id="lTrans"></b></div>
+            <div>STATUS: <b style="color:green" id="lStatus">ACTIVE</b></div>
+        </div>
+    </div>
+
+    <div class="fee-master-summary">
+        <div class="fee-head-box"><div class="fh-title">ADM</div><div class="fh-val" id="hAdm">₹0</div><div class="fh-disc no-print">Disc: <input type="number" id="dAdm" class="small-input" value="0" onchange="calculateLedger()">%</div></div>
+        <div class="fee-head-box"><div class="fh-title">DEV</div><div class="fh-val" id="hDev">₹0</div><div class="fh-disc no-print">Disc: <input type="number" id="dDev" class="small-input" value="0" onchange="calculateLedger()">%</div></div>
+        <div class="fee-head-box"><div class="fh-title">EXAM</div><div class="fh-val" id="hExam">₹0</div><div class="fh-disc no-print">Disc: <input type="number" id="dExam" class="small-input" value="0" onchange="calculateLedger()">%</div></div>
+        <div class="fee-head-box"><div class="fh-title">BOOKS</div><div class="fh-val" id="hBooks">₹0</div><div class="fh-disc no-print">Disc: <input type="number" id="dBooks" class="small-input" value="0" onchange="calculateLedger()">%</div></div>
+        <div class="fee-head-box"><div class="fh-title">MISC</div><div class="fh-val" id="hMisc">₹0</div><div class="fh-disc no-print">Disc: <input type="number" id="dMisc" class="small-input" value="0" onchange="calculateLedger()">%</div></div>
+        <div class="fee-head-box"><div class="fh-title">ANNUAL</div><div class="fh-val" id="hAnnualTotal">₹0</div><div class="fh-disc">Net Annual</div></div>
+    </div>
+
+    <table class="table-ledger">
+        <thead>
+            <tr>
+                <th style="width:25%">PARTICULARS</th>
+                <th>TUITION</th>
+                <th>HOSTEL</th>
+                <th>TRANS.</th>
+                <th>ANNUAL</th>
+                <th>PAYABLE</th>
+                <th>PAID</th>
+                <th>BALANCE</th>
+            </tr>
+        </thead>
+        <tbody id="lBody"></tbody>
+        <tfoot>
+            <tr style="background:#f8f9fa">
+                <td colspan="5" class="text-end pe-3">NET TOTAL</td>
+                <td id="tPayable">₹0</td>
+                <td id="tPaid">₹0</td>
+                <td id="tBalance">₹0</td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div class="row mt-5">
+        <div class="col-4 text-center small"><hr style="width:70%; margin:auto;">Accountant</div>
+        <div class="col-4 text-center small"><hr style="width:70%; margin:auto;">Parent/Guardian</div>
+        <div class="col-4 text-center small"><hr style="width:70%; margin:auto;">Principal</div>
     </div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
-<script src="brand.js"></script>
-<script src="menu.js"></script>
 
 <script>
-    const months = ["April", "May", "June", "July", "August", "September", "October", "November", "December", "January", "February", "March"];
-    let curStu = null;
-    let transportRate = 0;
-    let feeMasterData = {};
+const months = ["April", "May", "June", "July", "August", "September", "October", "November", "December", "January", "February", "March"];
+let curStu = null;
+let fm = {}; // Fee Master
 
-    async function liveSearch() {
-        const val = document.getElementById('searchID').value.toLowerCase();
-        const sugg = document.getElementById('searchSuggestions');
-        if(val.length < 2) { sugg.style.display='none'; return; }
-        const snap = await db.collection('students').get();
-        let html = '';
-        snap.forEach(doc => {
-            const d = doc.data();
-            if(d.name.toLowerCase().includes(val) || d.uniqueID.toString().includes(val)) {
-                html += `<div class="p-2 border-bottom suggestion-item" style="cursor:pointer;" onclick='loadLedger(${JSON.stringify(d)})'>${d.name} (${d.uniqueID})</div>`;
-            }
-        });
-        sugg.innerHTML = html; sugg.style.display='block';
-    }
-
-    async function loadLedger(s) {
-        curStu = s;
-        document.getElementById('searchSuggestions').style.display='none';
-        document.getElementById('ledgerArea').style.display='flex';
-        document.getElementById('pDate').innerText = new Date().toLocaleDateString('en-GB');
-        
-        document.getElementById('lName').innerText = s.name.toUpperCase();
-        document.getElementById('lID').innerText = s.uniqueID;
-        document.getElementById('lClass').innerText = s.class;
-        document.getElementById('lFather').innerText = s.father || "N/A";
-        document.getElementById('lTrans').innerText = s.transportDistance || "NONE";
-        document.getElementById('lWA').innerText = s.whatsapp || "N/A";
-        document.getElementById('lPhoto').src = s.photo || '';
-
-        // Fetch Base Rates
-        const fDoc = await db.collection('fee_master').doc(s.class).get();
-        feeMasterData = fDoc.exists ? fDoc.data() : {};
-
-        // Fetch Transport Rate
-        transportRate = 0;
-        if(s.transport === 'Yes' && s.transportDistance) {
-            const tDoc = await db.collection('transport_master').doc(s.transportDistance).get();
-            if(tDoc.exists) transportRate = tDoc.data().amount;
+async function liveSearch() {
+    const val = document.getElementById('searchID').value.toLowerCase();
+    const sugg = document.getElementById('searchSuggestions');
+    if(val.length < 2) { sugg.style.display='none'; return; }
+    const snap = await db.collection('students').get();
+    let html = '';
+    snap.forEach(doc => {
+        const d = doc.data();
+        if(d.name.toLowerCase().includes(val) || d.uniqueID.toString().includes(val)) {
+            html += `<button class="list-group-item list-group-item-action" onclick='loadLedger(${JSON.stringify(d)})'>${d.name} (${d.uniqueID})</button>`;
         }
+    });
+    sugg.innerHTML = html; sugg.style.display='block';
+}
 
-        calculateLedger();
+async function loadLedger(s) {
+    curStu = s;
+    document.getElementById('searchSuggestions').style.display='none';
+    document.getElementById('ledgerArea').style.display='block';
+    document.getElementById('pDate').innerText = new Date().toLocaleDateString('en-GB');
+    
+    // Set Profile
+    document.getElementById('lName').innerText = s.name.toUpperCase();
+    document.getElementById('lID').innerText = s.uniqueID;
+    document.getElementById('lClass').innerText = s.class;
+    document.getElementById('lFather').innerText = s.father || "N/A";
+    document.getElementById('lTrans').innerText = s.transportDistance || "NO";
+    document.getElementById('lPhoto').src = s.photo || '';
+
+    // Fetch Fee Master for this Class
+    const fDoc = await db.collection('fee_master').doc(s.class).get();
+    fm = fDoc.exists ? fDoc.data() : {};
+    
+    // Set Top Box Values
+    document.getElementById('hAdm').innerText = "₹" + (fm.admission || 0);
+    document.getElementById('hDev').innerText = "₹" + (fm.development || 0);
+    document.getElementById('hExam').innerText = "₹" + (fm.exam || 0);
+    document.getElementById('hBooks').innerText = "₹" + (fm.books || 0);
+    document.getElementById('hMisc').innerText = "₹" + (fm.misc || 0);
+
+    // Load saved discounts if any
+    document.getElementById('dAdm').value = s.discounts?.adm || 0;
+    document.getElementById('dDev').value = s.discounts?.dev || 0;
+    document.getElementById('dExam').value = s.discounts?.exam || 0;
+    document.getElementById('dBooks').value = s.discounts?.books || 0;
+    document.getElementById('dMisc').value = s.discounts?.misc || 0;
+
+    calculateLedger();
+}
+
+async function calculateLedger() {
+    if(!curStu) return;
+    
+    // Calculate Annual Net Total
+    const dAdm = Number(document.getElementById('dAdm').value);
+    const dDev = Number(document.getElementById('dDev').value);
+    const dExam = Number(document.getElementById('dExam').value);
+    const dBooks = Number(document.getElementById('dBooks').value);
+    const dMisc = Number(document.getElementById('dMisc').value);
+
+    const netAnnual = 
+        (Number(fm.admission||0) * (1 - dAdm/100)) +
+        (Number(fm.development||0) * (1 - dDev/100)) +
+        (Number(fm.exam||0) * (1 - dExam/100)) +
+        (Number(fm.books||0) * (1 - dBooks/100)) +
+        (Number(fm.misc||0) * (1 - dMisc/100));
+
+    document.getElementById('hAnnualTotal').innerText = "₹" + Math.round(netAnnual);
+
+    // Fetch Transport Rate
+    let tRate = 0;
+    if(curStu.transport === 'Yes' && curStu.transportDistance) {
+        const tDoc = await db.collection('transport_master').doc(curStu.transportDistance).get();
+        if(tDoc.exists) tRate = tDoc.data().amount;
     }
 
-    async function calculateLedger() {
-        if(!curStu) return;
-        const transSnap = await db.collection('fee_transactions').where('studentID', '==', String(curStu.uniqueID)).get();
-        let payData = []; transSnap.forEach(d => payData.push(d.data()));
+    // Fetch Paid Transactions
+    const tSnap = await db.collection('fee_transactions').where('studentID', '==', String(curStu.uniqueID)).get();
+    let payments = []; tSnap.forEach(d => payments.push(d.data()));
 
-        let html = '', gPay = 0, gPaid = 0, rb = 0;
+    let html = '', runningBal = 0, totalPayable = 0, totalPaid = 0;
 
-        // 1. Annual Head
-        const annualBase = Number(feeMasterData.admission||0) + Number(feeMasterData.development||0) + Number(feeMasterData.exam||0);
-        html += renderRow("ANNUAL & ADMISSION", annualBase, "Annual", payData);
+    // 1. Registration & Annual Row
+    let annualPaid = payments.filter(p => p.month === 'Annual').reduce((s, p) => s + Number(p.amount), 0);
+    runningBal += (netAnnual - annualPaid);
+    totalPayable += netAnnual; totalPaid += annualPaid;
+    html += `<tr>
+        <td class="text-left">REGISTRATION & ANNUAL</td>
+        <td>-</td><td>-</td><td>-</td><td>₹${Math.round(netAnnual)}</td>
+        <td>₹${Math.round(netAnnual)}</td><td>₹${annualPaid}</td><td>₹${Math.round(runningBal)}</td>
+    </tr>`;
 
-        // 2. Monthly Rows
-        const monthlyBase = Number(feeMasterData.tuition||0) + Number(feeMasterData.hostel||0) + transportRate;
-        months.forEach(m => {
-            html += renderRow(m.toUpperCase(), monthlyBase, m, payData);
-        });
+    // 2. Monthly Rows
+    const tuiBase = Number(fm.tuition || 0);
+    const hosBase = (curStu.hostel === 'Yes') ? Number(fm.hostel || 0) : 0;
+    
+    months.forEach(m => {
+        let mPaid = payments.filter(p => p.month === m).reduce((s, p) => s + Number(p.amount), 0);
+        let mPayable = tuiBase + hosBase + tRate;
+        runningBal += (mPayable - mPaid);
+        totalPayable += mPayable; totalPaid += mPaid;
 
-        document.getElementById('lBody').innerHTML = html;
-        document.getElementById('totalPay').innerText = `₹${gPay}`;
-        document.getElementById('totalPaid').innerText = `₹${gPaid}`;
-        document.getElementById('totalDue').innerText = `₹${gPay-gPaid}`;
+        html += `<tr>
+            <td class="text-left">${m.toUpperCase()}</td>
+            <td>₹${tuiBase}</td><td>${hosBase?'₹'+hosBase:'-'}</td><td>${tRate?'₹'+tRate:'-'}</td><td>-</td>
+            <td>₹${mPayable}</td><td>₹${mPaid}</td><td>₹${Math.round(runningBal)}</td>
+        </tr>`;
+    });
 
-        function renderRow(head, base, monthKey, payments) {
-            let dKey = head.includes("ANNUAL") ? "Annual" : monthKey;
-            let dPerc = curStu.discounts?.[dKey] || 0;
-            let net = base - (base * dPerc / 100);
-            let paid = payments.filter(p => p.month === monthKey).reduce((s, p) => s + Number(p.amount), 0);
-            rb = (rb + net) - paid;
-            gPay += net; gPaid += paid;
+    document.getElementById('lBody').innerHTML = html;
+    document.getElementById('tPayable').innerText = "₹" + Math.round(totalPayable);
+    document.getElementById('tPaid').innerText = "₹" + totalPaid;
+    document.getElementById('tBalance').innerText = "₹" + Math.round(runningBal);
 
-            return `<tr>
-                <td style="text-align:left; padding-left:10px;">${head}</td>
-                <td>₹${base}</td>
-                <td class="no-print"><input type="number" class="disc-input" value="${dPerc}" onchange="updateDiscount('${dKey}', this.value)"> %</td>
-                <td>₹${net}</td>
-                <td>₹${paid}</td>
-                <td style="background:#f9f9f9">₹${rb}</td>
-            </tr>`;
-        }
-    }
-
-    async function updateDiscount(key, val) {
-        await db.collection('students').doc(curStu.uniqueID.toString()).update({
-            [`discounts.${key}`]: Number(val)
-        });
-        curStu.discounts = curStu.discounts || {};
-        curStu.discounts[key] = Number(val);
-        calculateLedger();
-    }
-
-    function openDemandModal() { new bootstrap.Modal(document.getElementById('demandModal')).show(); }
-
-    async function processDemandSlips() {
-        const month = document.getElementById('dmMonth').value;
-        const cls = document.getElementById('dmClass').value;
-        const slipsList = document.getElementById('slipsList');
-        slipsList.innerHTML = "Processing Slips...";
-        document.getElementById('demandSlipContainer').style.display = 'block';
-        document.getElementById('ledgerArea').style.display = 'none';
-
-        let q = db.collection('students');
-        if(cls !== "All") q = q.where('class', '==', cls);
-        const sSnap = await q.get();
-
-        let slipsHtml = '';
-        for (const doc of sSnap.docs) {
-            const s = doc.data();
-            // Calculation logic for each student (simplified for performance)
-            const mDoc = await db.collection('fee_master').doc(s.class).get();
-            const fm = mDoc.data() || {};
-            let tRate = 0;
-            if(s.transport === 'Yes') {
-                const tD = await db.collection('transport_master').doc(s.transportDistance).get();
-                tRate = tD.exists ? tD.data().amount : 0;
-            }
-
-            const monthlyBase = (Number(fm.tuition||0) + Number(fm.hostel||0) + tRate);
-            const dPerc = s.discounts?.[month] || 0;
-            const netMonth = monthlyBase - (monthlyBase * dPerc / 100);
-
-            slipsHtml += `
-                <div class="slip-card">
-                    <div class="slip-header">
-                        <img src="logo.png" width="50">
-                        <div class="ms-3">
-                            <h5 class="m-0">${brandName || 'THE LALIT INTERNATIONAL'}</h5>
-                            <small>FEE DEMAND NOTICE - ${month.toUpperCase()} 2025</small>
-                        </div>
-                        <img src="${s.photo}" style="width:50px; height:60px; margin-left:auto; border:1px solid #000;">
-                    </div>
-                    <div class="row mt-2 small fw-bold">
-                        <div class="col-6">NAME: ${s.name}</div>
-                        <div class="col-3">ID: ${s.uniqueID}</div>
-                        <div class="col-3">CLASS: ${s.class}</div>
-                    </div>
-                    <table class="table table-bordered table-sm mt-2" style="font-size:11px;">
-                        <tr class="bg-light"><th>PARTICULARS</th><th>AMOUNT</th></tr>
-                        <tr><td>MONTHLY FEE (${month})</td><td>₹${netMonth}</td></tr>
-                        <tr><td>PREVIOUS DUE</td><td>CALCULATING...</td></tr>
-                        <tr class="table-dark"><td><b>TOTAL PAYABLE</b></td><td><b>₹${netMonth}</b></td></tr>
-                    </table>
-                    <div class="d-flex justify-content-between">
-                        <button class="wa-btn" onclick="sendWA('${s.whatsapp}', '${s.name}', '${month}', '${netMonth}')">
-                            <i class="fab fa-whatsapp"></i> SEND TO PARENT
-                        </button>
-                        <small>Please pay before 10th of ${month}.</small>
-                    </div>
-                </div>`;
-        }
-        slipsList.innerHTML = slipsHtml;
-    }
-
-    function sendWA(num, name, mon, amt) {
-        if(!num) return alert("No Number!");
-        const msg = encodeURIComponent(`Dear Parent, Demand Slip for ${name} for ${mon} is generated. Total Payable: ₹${amt}. Please clear dues. - The Lalit Intl.`);
-        window.open(`https://wa.me/91${num}?text=${msg}`, '_blank');
-    }
-
-    function closeDemandSlips() {
-        document.getElementById('demandSlipContainer').style.display = 'none';
-        document.getElementById('ledgerArea').style.display = 'flex';
-    }
-
-    function showHistory() {
-        // Purana transaction logic yahan aayega
-        alert("Transaction History feature active!");
-    }
+    // Save Discounts to Student Record (Auto-save)
+    await db.collection('students').doc(curStu.uniqueID.toString()).update({
+        discounts: { adm: dAdm, dev: dDev, exam: dExam, books: dBooks, misc: dMisc }
+    });
+}
 </script>
 </body>
 </html>
