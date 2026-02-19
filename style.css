@@ -1,34 +1,127 @@
-/* --- AAPKA ORIGINAL CSS (100% SAME) --- */
+/* --- THE LALIT INTERNATIONAL SCHOOL - MASTER UNIVERSAL FRAMEWORK --- 
+   Theme: Royal Luxury (Blue & Gold)
+   Logo Fix & Search Integration Included
+*/
+
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Poppins:wght@300;400;500;600;700&display=swap');
 
 :root {
-    --royal-blue: #002366; --royal-blue-light: #003399; --gold: #D4AF37; --deep-gold: #aa8a2e;
-    --light-gold: #fdfbf0; --success: #27ae60; --danger: #c0392b; --warning: #f39c12;
-    --info: #2980b9; --paper-white: #ffffff; --text-dark: #1a1a1a; --text-muted: #555555;
-    --border-color: #e0d0b0; --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
-    --shadow-md: 0 10px 30px rgba(0,0,0,0.1); --shadow-lg: 0 15px 40px rgba(0,0,0,0.15);
+    /* Core Palette */
+    --royal-blue: #002366;
+    --royal-blue-light: #003399;
+    --gold: #D4AF37;
+    --deep-gold: #aa8a2e;
+    --light-gold: #fdfbf0;
+    
+    /* Functional Colors */
+    --success: #27ae60;
+    --danger: #c0392b;
+    --warning: #f39c12;
+    --info: #2980b9;
+    
+    /* Neutrals */
+    --paper-white: #ffffff;
+    --text-dark: #1a1a1a;
+    --text-muted: #555555;
+    --border-color: #e0d0b0;
+    
+    /* Elevation & Effects */
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+    --shadow-md: 0 10px 30px rgba(0,0,0,0.1);
+    --shadow-lg: 0 15px 40px rgba(0,0,0,0.15);
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
-body { background: #f4f4f2; font-family: 'Poppins', sans-serif; margin: 0; padding: 0; color: var(--text-dark); line-height: 1.6; }
-.main-content { padding: 100px 20px 40px; display: flex; flex-direction: column; align-items: center; }
-.royal-card { width: 100%; max-width: 1300px; background: var(--paper-white); background-image: url('https://www.transparenttextures.com/patterns/cream-paper.png'); border: 1px solid var(--border-color); border-radius: 15px; padding: clamp(20px, 5%, 50px); box-shadow: var(--shadow-md); position: relative; overflow: hidden; }
-.royal-card::after { content: ""; position: absolute; top: 15px; left: 15px; right: 15px; bottom: 15px; border: 1px solid rgba(212, 175, 55, 0.3); pointer-events: none; border-radius: 10px; }
+
+body { 
+    background: #f4f4f2; 
+    font-family: 'Poppins', sans-serif; 
+    margin: 0; padding: 0; 
+    color: var(--text-dark);
+    line-height: 1.6;
+}
+
+/* --- LOGO SYSTEM (FIXED SIZE) --- */
+.school-logo { 
+    width: 120px; 
+    height: 120px; 
+    object-fit: contain; 
+    display: block;
+    margin: 0 auto 15px;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1)); 
+    transition: var(--transition); 
+}
+.school-logo:hover { transform: scale(1.05); }
+
+/* Receipt Specific Logo */
+.receipt-logo {
+    width: 80px !important;
+    height: 80px !important;
+    object-fit: contain;
+    margin-bottom: 10px;
+}
+
+/* --- LAYOUT ENGINE --- */
+.main-content { 
+    padding: 100px 20px 40px; 
+    display: flex; flex-direction: column; align-items: center;
+}
+
+.royal-card { 
+    width: 100%; max-width: 1300px;
+    background: var(--paper-white);
+    background-image: url('https://www.transparenttextures.com/patterns/cream-paper.png');
+    border: 1px solid var(--border-color);
+    border-radius: 15px;
+    padding: clamp(20px, 5%, 50px);
+    box-shadow: var(--shadow-md);
+    position: relative;
+    overflow: hidden;
+}
+
+.royal-card::after {
+    content: ""; position: absolute;
+    top: 15px; left: 15px; right: 15px; bottom: 15px;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    pointer-events: none; border-radius: 10px;
+}
+
+/* --- NAVIGATION & MENU SPACE --- */
 #menu-container { position: fixed; top: 0; width: 100%; z-index: 9999; }
+
+/* --- HEADERS --- */
 .header { text-align: center; margin-bottom: 40px; border-bottom: 3px double var(--gold); padding-bottom: 25px; }
 h1, .brand-font { font-family: 'Cinzel', serif; color: var(--royal-blue); margin: 0; text-transform: uppercase; }
 h2 { font-family: 'Cinzel', serif; color: var(--royal-blue); text-align: center; margin: 30px 0; position: relative; padding-bottom: 10px; width: 100%; }
 h2::after { content: ""; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 80px; height: 3px; background: var(--gold); }
 
-/* --- NEW SEARCH BAR STYLES (Aapke theme ke match) --- */
+/* --- ADVANCED BUTTON SYSTEM --- */
+.royal-btn {
+    background: var(--royal-blue); color: var(--gold);
+    border: 1px solid var(--gold); padding: 12px 28px;
+    font-weight: 600; cursor: pointer; transition: var(--transition);
+    text-transform: uppercase; letter-spacing: 1.5px;
+    border-radius: 5px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    text-decoration: none;
+}
+
+.royal-btn:hover { background: var(--gold); color: var(--royal-blue); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4); }
+.royal-btn:active { transform: translateY(-1px); }
+.royal-btn:disabled { background: #d1d1d1; border-color: #bbb; color: #777; cursor: not-allowed; transform: none; box-shadow: none; }
+
+.btn-block { width: 100%; display: flex; }
+.btn-sm { padding: 8px 16px; font-size: 12px; }
+.btn-danger { background: var(--danger); color: white; border-color: #a93226; }
+.btn-success { background: var(--success); color: white; border-color: #1e8449; }
+
+/* --- SEARCH BOX STYLING --- */
 .search-box-wrapper {
     position: relative;
     max-width: 600px;
-    margin: 0 auto 40px;
+    margin: 0 auto 30px;
     width: 100%;
 }
-
 .search-input-royal {
     width: 100%;
     padding: 15px 25px;
@@ -36,34 +129,88 @@ h2::after { content: ""; position: absolute; bottom: 0; left: 50%; transform: tr
     border: 2px solid var(--gold);
     border-radius: 30px;
     font-size: 16px;
-    box-shadow: var(--shadow-sm);
     outline: none;
     transition: var(--transition);
 }
+.search-input-royal:focus { border-color: var(--royal-blue); box-shadow: 0 0 15px rgba(212, 175, 55, 0.2); }
 
-.search-input-royal:focus {
-    border-color: var(--royal-blue);
-    box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+/* --- FORM ARCHITECTURE --- */
+.form-section {
+    background: rgba(253, 251, 240, 0.6);
+    border-left: 6px solid var(--gold);
+    padding: 25px; margin-bottom: 30px; border-radius: 8px;
+    box-shadow: var(--shadow-sm);
+}
+.section-title { font-weight: 700; color: var(--royal-blue); display: block; margin-bottom: 20px; text-transform: uppercase; font-size: 0.95rem; letter-spacing: 1px; }
+.input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+.input-group { display: flex; flex-direction: column; gap: 8px; }
+
+input, select, textarea {
+    width: 100%; padding: 14px 16px; border: 1px solid #d1d1d1;
+    border-bottom: 3px solid var(--gold); border-radius: 6px;
+    font-size: 15px; transition: var(--transition); background: white;
 }
 
-.search-icon-btn {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: var(--royal-blue);
-    color: var(--gold);
-    border: none;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    cursor: pointer;
-}
-
-/* Aapki Profiles Grid ki styling (Ensure display works) */
+/* --- DATA VISUALIZATION (ID CARDS) --- */
 .profile-grid-custom {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 25px;
+    gap: 25px; margin-top: 30px;
     width: 100%;
+}
+.custom-id-card {
+    background: white; border: 1px solid var(--gold); border-radius: 12px;
+    padding: 18px; display: flex; align-items: center; gap: 20px;
+    cursor: pointer; transition: var(--transition);
+    position: relative; overflow: hidden;
+}
+.custom-id-card::before { content: ""; position: absolute; left: 0; top: 0; height: 100%; width: 5px; background: var(--royal-blue); }
+.custom-id-card:hover { transform: scale(1.03) translateY(-5px); box-shadow: var(--shadow-lg); border-color: var(--royal-blue); }
+
+.id-photo { width: 85px; height: 105px; object-fit: cover; border: 2px solid var(--gold); border-radius: 6px; }
+.id-info h4 { margin: 0 0 5px 0; color: var(--royal-blue); font-size: 1.1rem; }
+.id-info p { margin: 2px 0; font-size: 13px; color: var(--text-muted); }
+
+.status-badge {
+    display: inline-block; padding: 4px 10px; border-radius: 20px;
+    font-size: 10px; font-weight: 700; text-transform: uppercase; margin-top: 8px;
+}
+
+/* --- FEE COLLECTION SPECIFIC --- */
+.due-badge { 
+    background: #fff5f5; color: #c0392b; border: 2px solid #c0392b; 
+    padding: 15px; border-radius: 8px; font-weight: bold; font-size: 1.4rem; text-align: center;
+}
+#searchSuggestions { 
+    background: white; border: 1px solid var(--gold); position: absolute; 
+    width: 100%; z-index: 1000; max-height: 250px; overflow-y: auto; display: none; 
+    border-radius: 0 0 10px 10px; box-shadow: var(--shadow-lg);
+}
+.suggestion-item { padding: 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: 0.2s; }
+.suggestion-item:hover { background: var(--light-gold); color: var(--royal-blue); }
+
+/* --- RECEIPT SYSTEM --- */
+#receiptArea { display: none; margin-top: 30px; width: 100%; }
+.receipt-card {
+    width: 100%; max-width: 600px; background: white; border: 4px double var(--gold); 
+    padding: 30px; margin: 20px auto; position: relative;
+    background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+}
+.receipt-header { text-align: center; border-bottom: 2px solid var(--royal-blue); padding-bottom: 15px; margin-bottom: 20px; }
+.receipt-table { width: 100%; margin-top: 20px; border-collapse: collapse; }
+.receipt-table td { padding: 10px; border: 1px solid #f0f0f0; font-size: 14px; }
+
+/* --- RESPONSIVE & PRINT --- */
+@media print {
+    .no-print, #menu-container { display: none !important; }
+    .main-content { padding: 0 !important; margin: 0 !important; }
+    .receipt-card { border: 2px solid #000; width: 100%; box-shadow: none; margin: 0; }
+    #receiptArea { display: block !important; }
+}
+
+@media (max-width: 768px) {
+    .main-content { padding: 80px 10px 20px; }
+    .royal-card { padding: 20px; }
+    .input-grid { grid-template-columns: 1fr; }
+    .school-logo { width: 90px; height: 90px; }
 }
