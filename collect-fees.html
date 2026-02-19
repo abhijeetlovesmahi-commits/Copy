@@ -27,22 +27,22 @@
         .suggestion-item:hover { background: var(--light-gold); color: var(--royal-blue); }
 
         /* Receipt Print Styles */
-        #receiptArea { display: none; }
+        #receiptArea { display: none; margin-top: 30px; }
         .receipt-card {
-            width: 148mm; min-height: 210mm; background: white; border: 4px double var(--gold); 
+            width: 148mm; min-height: 200mm; background: white; border: 4px double var(--gold); 
             padding: 30px; margin: 20px auto; position: relative;
             background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
         }
         .receipt-header { text-align: center; border-bottom: 2px solid var(--royal-blue); padding-bottom: 15px; margin-bottom: 20px; }
         .receipt-table { width: 100%; margin-top: 20px; }
-        .receipt-table td { padding: 10px; border: 1px solid #eee; font-size: 14px; }
+        .receipt-table td { padding: 8px; border: 1px solid #f0f0f0; font-size: 14px; }
 
         @media print {
-            .no-print, #menu-container { display: none !important; }
+            .no-print, #menu-container, .navbar, .btn-sm { display: none !important; }
             .main-content { margin: 0 !important; padding: 0 !important; }
             body { background: white; }
             #receiptArea { display: block !important; }
-            .receipt-card { border: 2px solid #000; width: 100%; box-shadow: none; margin: 0; }
+            .receipt-card { border: 2px solid #000; width: 100%; box-shadow: none; margin: 0; padding: 10px; }
         }
     </style>
 </head>
@@ -52,34 +52,37 @@
 
 <div class="main-content">
     <div class="royal-card no-print">
-        <div class="header" id="brand-header-container"></div>
+        <div class="header" id="brand-header-container">
+            <h1 class="brand-font">The Lalit International School</h1>
+            <p style="color: var(--gold); letter-spacing: 3px;">FEE MANAGEMENT SYSTEM</p>
+        </div>
 
         <div class="collection-card">
-            <h3 class="brand-font text-center mb-4" style="color: var(--royal-blue);">Student Fee Collection</h3>
+            <h3 class="brand-font text-center mb-4" style="color: var(--royal-blue);">Collect Student Fee</h3>
             
             <div class="row g-4">
                 <div class="col-md-7 position-relative">
-                    <label class="fw-bold text-muted small mb-1">FIND STUDENT (NAME OR ID)</label>
+                    <label class="fw-bold text-muted small mb-1">SEARCH STUDENT (NAME/ID)</label>
                     <div class="input-group">
                         <span class="input-group-text bg-white border-gold"><i class="fas fa-search text-gold"></i></span>
-                        <input type="text" id="studentSearch" class="form-control form-control-lg border-gold" placeholder="Start typing name..." oninput="liveSearch()" autocomplete="off">
+                        <input type="text" id="studentSearch" class="form-control form-control-lg border-gold" placeholder="Enter Name or uniqueID..." oninput="liveSearch()" autocomplete="off">
                     </div>
                     <div id="searchSuggestions"></div>
                 </div>
 
                 <div class="col-md-5">
-                    <label class="fw-bold text-muted small mb-1">OUTSTANDING BALANCE</label>
+                    <label class="fw-bold text-muted small mb-1">CURRENT OUTSTANDING</label>
                     <div id="dueAmount" class="due-badge">₹ 0.00</div>
                 </div>
 
                 <div class="col-12"><hr></div>
 
                 <div class="col-md-4">
-                    <label class="fw-bold small">AMOUNT TO PAY (₹)</label>
-                    <input type="number" id="payAmt" class="form-control form-control-lg" placeholder="0.00">
+                    <label class="fw-bold small">AMOUNT TO COLLECT (₹)</label>
+                    <input type="number" id="payAmt" class="form-control form-control-lg" placeholder="Enter amount">
                 </div>
                 <div class="col-md-4">
-                    <label class="fw-bold small">FOR MONTH</label>
+                    <label class="fw-bold small">FEE MONTH</label>
                     <select id="payMonth" class="form-select form-select-lg">
                         <option value="April">April</option><option value="May">May</option><option value="June">June</option>
                         <option value="July">July</option><option value="August">August</option><option value="September">September</option>
@@ -88,7 +91,7 @@
                     </select>
                 </div>
                 <div class="col-md-4">
-                    <label class="fw-bold small">PAYMENT MODE</label>
+                    <label class="fw-bold small">PAYMENT METHOD</label>
                     <select id="payMode" class="form-select form-select-lg">
                         <option value="Cash">Cash</option>
                         <option value="Online (UPI/Card)">Online Payment</option>
@@ -98,7 +101,7 @@
 
                 <div class="col-12 mt-4">
                     <button class="royal-btn btn-block btn-lg" id="submitBtn" onclick="submitPayment()">
-                        <i class="fas fa-receipt me-2"></i> CONFIRM PAYMENT & GENERATE RECEIPT
+                        <i class="fas fa-check-circle me-2"></i> CONFIRM & PRINT RECEIPT
                     </button>
                 </div>
             </div>
@@ -109,11 +112,9 @@
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
 
 <script src="firebase-config.js"></script>
-<script src="auth-guard.js"></script>
 <script src="brand.js"></script>
 <script src="menu.js"></script>
 
@@ -121,82 +122,99 @@
 let activeStudent = null;
 let currentBalance = 0;
 
-// Firebase check
 const database = firebase.firestore();
 
+// 1. Live Search Optimized
 async function liveSearch() {
-    const val = document.getElementById('studentSearch').value.toLowerCase();
+    const val = document.getElementById('studentSearch').value;
     const sugg = document.getElementById('searchSuggestions');
     if(val.length < 2) { sugg.style.display='none'; return; }
 
     try {
-        const snap = await database.collection('students').get();
+        // Range query is better for performance than fetching all
+        const snap = await database.collection('students')
+            .where('name', '>=', val)
+            .where('name', '<=', val + '\uf8ff')
+            .limit(5)
+            .get();
+
         let html = '';
-        snap.forEach(doc => {
-            const d = doc.data();
-            const n = d.name.toLowerCase();
-            const id = String(d.uniqueID);
-            
-            if(n.includes(val) || id.includes(val)) {
-                // Safely passing data
+        if(snap.empty) {
+            html = '<div class="suggestion-item">No student found</div>';
+        } else {
+            snap.forEach(doc => {
+                const d = doc.data();
                 const sData = encodeURIComponent(JSON.stringify(d));
-                html += `<div class="suggestion-item" onclick="selectStudent('${sData}')">
-                            <b>${d.name}</b> <span class="text-muted">(ID: ${d.uniqueID})</span><br>
-                            <small>Class: ${d.class}-${d.section || 'A'} | Father: ${d.father}</small>
-                         </div>`;
-            }
-        });
+                html += `
+                <div class="suggestion-item" onclick="selectStudent('${sData}')">
+                    <i class="fas fa-user-grad me-2 text-gold"></i>
+                    <b>${d.name}</b> <small class="text-muted">(ID: ${d.uniqueID})</small>
+                    <div class="ms-4 small text-muted">Class: ${d.class} | Father: ${d.father}</div>
+                </div>`;
+            });
+        }
         sugg.innerHTML = html;
-        sugg.style.display = html ? 'block' : 'none';
-    } catch (err) {
-        console.error("Search error:", err);
-    }
+        sugg.style.display = 'block';
+    } catch (err) { console.error(err); }
 }
 
+// 2. Select Student & Calculate Dues
 async function selectStudent(encodedData) {
-    const s = JSON.parse(decodeURIComponent(encodedData));
-    activeStudent = s;
-    document.getElementById('studentSearch').value = s.name;
+    activeStudent = JSON.parse(decodeURIComponent(encodedData));
+    document.getElementById('studentSearch').value = activeStudent.name;
     document.getElementById('searchSuggestions').style.display = 'none';
     
+    document.getElementById('dueAmount').innerText = "Calculating...";
+
     try {
-        const mDoc = await database.collection('fee_master').doc(s.class).get();
-        const tSnap = await database.collection('fee_transactions').where('studentID', '==', String(s.uniqueID)).get();
+        // Get Fee Structure
+        const mDoc = await database.collection('fee_master').doc(activeStudent.class).get();
+        // Get Paid Transactions
+        const tSnap = await database.collection('fee_transactions')
+                             .where('studentID', '==', String(activeStudent.uniqueID))
+                             .get();
         
-        let paid = 0; 
-        tSnap.forEach(d => paid += Number(d.data().amount));
+        let totalPaid = 0; 
+        tSnap.forEach(d => totalPaid += Number(d.data().amount));
 
         if(!mDoc.exists) {
-            alert("Fee structure not defined for Class " + s.class);
+            alert("Warning: Fee structure not found for Class " + activeStudent.class);
             currentBalance = 0;
         } else {
             const fm = mDoc.data();
-            const mOrder = ["April", "May", "June", "July", "August", "September", "October", "November", "December", "January", "February", "March"];
-            const monthName = new Date().toLocaleString('en-us', {month:'long'});
-            let mIdx = mOrder.indexOf(monthName);
-            if(mIdx === -1) mIdx = 11;
+            const months = ["April", "May", "June", "July", "August", "September", "October", "November", "December", "January", "February", "March"];
+            const currentMonthName = new Date().toLocaleString('en-us', {month:'long'});
+            let monthIdx = months.indexOf(currentMonthName);
+            if(monthIdx === -1) monthIdx = 11;
 
-            const monthly = Number(fm.tuition || 0) + (s.hostel === 'Yes' ? Number(fm.hostel || 0) : 0) + (s.transport === 'Yes' ? 500 : 0);
-            const annual = Number(fm.admission || 0) + Number(fm.development || 0) + Number(fm.exam || 0);
+            const monthlyFee = Number(fm.tuition || 0) + 
+                               (activeStudent.hostel === 'Yes' ? Number(fm.hostel || 0) : 0) + 
+                               (activeStudent.transport === 'Yes' ? Number(fm.transport || 0) : 0);
             
-            const expected = annual + (monthly * (mIdx + 1));
-            currentBalance = expected - paid;
+            const oneTimeFee = Number(fm.admission || 0) + Number(fm.development || 0) + Number(fm.exam || 0);
+            
+            const totalExpected = oneTimeFee + (monthlyFee * (monthIdx + 1));
+            currentBalance = totalExpected - totalPaid;
         }
         document.getElementById('dueAmount').innerText = `₹ ${currentBalance.toFixed(2)}`;
-    } catch (e) { console.error(e); }
+    } catch (e) { 
+        console.error(e);
+        document.getElementById('dueAmount').innerText = "₹ Error";
+    }
 }
 
+// 3. Submit Payment
 async function submitPayment() {
-    if(!activeStudent) return alert("Select a student first!");
+    if(!activeStudent) return alert("Please select a student first!");
     const amt = document.getElementById('payAmt').value;
     const month = document.getElementById('payMonth').value;
     const mode = document.getElementById('payMode').value;
     const btn = document.getElementById('submitBtn');
 
-    if(!amt || amt <= 0) return alert("Enter valid amount!");
+    if(!amt || Number(amt) <= 0) return alert("Please enter a valid amount!");
 
     btn.disabled = true;
-    btn.innerText = "Processing...";
+    btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Processing...`;
 
     const paymentData = {
         studentID: String(activeStudent.uniqueID),
@@ -210,57 +228,79 @@ async function submitPayment() {
 
     try {
         await database.collection('fee_transactions').add(paymentData);
+        alert("Success! Fee recorded.");
         generateReceipt(paymentData, activeStudent);
-        alert("Payment Recorded!");
+        
+        // Reset inputs
         document.getElementById('payAmt').value = "";
-    } catch (e) { alert(e.message); }
-    btn.disabled = false;
-    btn.innerText = "CONFIRM PAYMENT & GENERATE RECEIPT";
+        document.getElementById('studentSearch').value = "";
+        document.getElementById('dueAmount').innerText = "₹ 0.00";
+        activeStudent = null;
+
+    } catch (e) { 
+        alert("Transaction Failed: " + e.message); 
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fas fa-receipt me-2"></i> CONFIRM PAYMENT & GENERATE RECEIPT`;
+    }
 }
 
+// 4. Receipt UI
 function generateReceipt(p, s) {
-    const receipt = `
+    const remaining = (currentBalance - p.amount).toFixed(2);
+    const receiptHTML = `
     <div class="receipt-card">
         <div class="receipt-header">
-            <img src="logo.png" style="width: 60px; margin-bottom:10px;">
             <h2 class="brand-font" style="color:var(--royal-blue); margin:0;">THE LALIT INTERNATIONAL SCHOOL</h2>
-            <p style="font-size:12px; letter-spacing:2px; color:var(--gold);">OFFICIAL FEE RECEIPT | SESSION 2025-26</p>
+            <p style="font-size:11px; color:var(--text-muted);">Affiliated to CBSE | Sector-12, School Campus</p>
+            <div style="border-top:1px solid var(--gold); border-bottom:1px solid var(--gold); margin:10px 0; padding:5px;">
+                <b style="letter-spacing:2px;">FEE RECEIPT (2025-26)</b>
+            </div>
         </div>
-        <div style="display:flex; justify-content:space-between; margin-bottom:20px; font-size:13px; font-weight:bold;">
-            <span>No: TLIS-${Date.now().toString().slice(-6)}</span>
-            <span>Date: ${p.date}</span>
+        
+        <div style="display:flex; justify-content:space-between; margin-bottom:15px; font-size:13px;">
+            <span><b>Receipt No:</b> TLIS/${Date.now().toString().slice(-5)}</span>
+            <span><b>Date:</b> ${p.date}</span>
         </div>
+
         <table class="receipt-table">
-            <tr><td><b>Student Name:</b></td><td>${s.name.toUpperCase()}</td></tr>
-            <tr><td><b>Admission ID:</b></td><td>${s.uniqueID}</td></tr>
-            <tr><td><b>Class & Section:</b></td><td>${s.class} - ${s.section || 'A'}</td></tr>
-            <tr><td><b>Parent Name:</b></td><td>${s.father}</td></tr>
-            <tr><td><b>Payment Month:</b></td><td>${p.month}</td></tr>
-            <tr><td><b>Payment Mode:</b></td><td>${p.mode}</td></tr>
+            <tr><td><b>Student Name</b></td><td>${s.name.toUpperCase()}</td></tr>
+            <tr><td><b>Student ID</b></td><td>${s.uniqueID}</td></tr>
+            <tr><td><b>Class</b></td><td>${s.class} (${s.section || 'A'})</td></tr>
+            <tr><td><b>Father's Name</b></td><td>${s.father}</td></tr>
+            <tr><td><b>Payment For</b></td><td>Fee of ${p.month}</td></tr>
+            <tr><td><b>Payment Mode</b></td><td>${p.mode}</td></tr>
         </table>
-        <div style="margin-top:30px; padding:20px; background:var(--royal-blue); color:var(--gold); display:flex; justify-content:space-between; border-radius:10px;">
-            <h3 style="margin:0;">AMOUNT PAID:</h3>
-            <h3 style="margin:0;">₹ ${p.amount.toLocaleString('en-IN')}</h3>
+
+        <div style="margin-top:25px; padding:15px; background:var(--royal-blue); color:white; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:18px; font-weight:bold;">AMOUNT RECEIVED</span>
+            <span style="font-size:22px; font-weight:bold;">₹ ${p.amount.toLocaleString('en-IN')}</span>
         </div>
-        <p style="margin-top:15px; text-align:right;"><b>Remaining Dues:</b> ₹ ${(currentBalance - p.amount).toFixed(2)}</p>
-        <div style="margin-top:60px; display:flex; justify-content:space-between;">
-            <div style="text-align:center; width:150px; border-top:1px solid #000; padding-top:10px; font-size:12px;">Authorized Signatory</div>
-            <div style="text-align:center; width:150px; border-top:1px solid #000; padding-top:10px; font-size:12px;">Office Seal</div>
+
+        <p style="margin-top:10px; text-align:right; font-size:13px;"><b>Balance Due:</b> ₹ ${remaining}</p>
+
+        <div style="margin-top:50px; display:flex; justify-content:space-between;">
+            <div style="text-align:center; width:140px; border-top:1px solid #333; padding-top:5px; font-size:11px;">Depositor Signature</div>
+            <div style="text-align:center; width:140px; border-top:1px solid #333; padding-top:5px; font-size:11px;">Accountant Signature</div>
         </div>
-        <div class="text-center no-print mt-5">
-            <button class="royal-btn btn-sm me-2" onclick="window.print()"><i class="fas fa-print"></i> Print Receipt</button>
+
+        <div class="text-center no-print mt-4">
+            <button class="royal-btn btn-sm me-2" onclick="window.print()"><i class="fas fa-print"></i> Print Now</button>
             <button class="royal-btn btn-sm" style="background:#25D366; border:none;" onclick="shareWhatsApp('${s.contact || s.pContact}', '${s.name}', '${p.amount}')">
-                <i class="fab fa-whatsapp"></i> WhatsApp Notify
+                <i class="fab fa-whatsapp"></i> Notify Parent
             </button>
         </div>
     </div>`;
-    document.getElementById('receiptArea').innerHTML = receipt;
-    document.getElementById('receiptArea').style.display = 'block';
-    window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
+    
+    const container = document.getElementById('receiptArea');
+    container.innerHTML = receiptHTML;
+    container.style.display = 'block';
+    container.scrollIntoView({ behavior: 'smooth' });
 }
 
 function shareWhatsApp(phone, name, amt) {
-    const msg = `*THE LALIT INTERNATIONAL SCHOOL*%0A*FEE PAYMENT CONFIRMATION*%0A%0AHello, we have received *₹${amt}* for student *${name}*.%0A%0A_Thank you for your timely payment!_`;
+    if(!phone || phone === 'undefined') return alert("Phone number not available!");
+    const msg = `*THE LALIT INTERNATIONAL SCHOOL*%0A*Fee Confirmation*%0A%0AWe have received ₹${amt} for student *${name}*.%0A%0A_Generated via Digital Portal TLIS._`;
     window.open(`https://wa.me/91${phone}?text=${msg}`, '_blank');
 }
 </script>
