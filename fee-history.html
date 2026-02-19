@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Ledger - The Lalit International</title>
+    <title>Master Ledger - Financial Portal</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -12,7 +12,7 @@
         body { background-color: var(--soft-bg); font-family: 'Times New Roman', serif; color: var(--royal-blue); margin: 0; }
 
         .main-header { background: white; padding: 20px; border-bottom: 4px solid var(--gold); text-align: center; }
-        .school-title-main { font-family: 'Georgia', serif; font-weight: 900; letter-spacing: 2px; color: var(--royal-blue); font-size: 2rem; }
+        .school-title-main { font-family: 'Georgia', serif; font-weight: 900; letter-spacing: 2px; color: var(--royal-blue); font-size: 2rem; text-transform: uppercase; }
         
         .content-wrap { max-width: 1050px; margin: auto; padding: 20px; }
 
@@ -22,7 +22,7 @@
         }
 
         .print-header { border-bottom: 3px double var(--gold); padding-bottom: 10px; margin-bottom: 10px; }
-        .school-name-print { font-family: 'Georgia', serif; font-weight: 900; color: var(--royal-blue); font-size: 24px; margin: 0; }
+        .school-name-print { font-family: 'Georgia', serif; font-weight: 900; color: var(--royal-blue); font-size: 24px; margin: 0; text-transform: uppercase; }
 
         .student-strip { display: flex; align-items: center; border: 1px solid #000; padding: 8px; background: #fffcf0; margin-bottom: 10px; gap: 15px; }
         .student-strip img { width: 70px; height: 90px; border: 1.5px solid var(--royal-blue); object-fit: cover; }
@@ -52,8 +52,8 @@
 <body>
 
 <div class="main-header no-print">
-    <img src="logo.png" style="width: 70px;">
-    <h1 class="school-title-main">THE LALIT INTERNATIONAL SCHOOL</h1>
+    <img src="logo.png" class="brand-logo" style="width: 70px;">
+    <h1 id="brand-name-main" class="school-title-main">LOADING...</h1>
     <p class="text-muted small">Financial Ledger Archive Portal</p>
 </div>
 
@@ -69,9 +69,9 @@
     <div id="ledgerArea">
         <div class="print-header d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center">
-                <img src="logo.png" style="width: 55px; margin-right: 12px;">
+                <img src="logo.png" class="brand-logo" style="width: 55px; margin-right: 12px;">
                 <div>
-                    <h2 class="school-name-print">THE LALIT INTERNATIONAL SCHOOL</h2>
+                    <h2 id="brand-name-print" class="school-name-print">LOADING...</h2>
                     <span class="small fw-bold">Academic Session 2025-26 | Ledger Statement</span>
                 </div>
             </div>
@@ -124,11 +124,20 @@
 
 <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
-
 <script src="firebase-config.js"></script>
+<script src="brand.js"></script> <script src="menu.js"></script>
 
 <script>
     const months = ["April", "May", "June", "July", "August", "September", "October", "November", "December", "January", "February", "March"];
+
+    // Function to apply branding from brand.js if available
+    window.onload = function() {
+        if (typeof brandName !== 'undefined') {
+            document.getElementById('brand-name-main').innerText = brandName;
+            document.getElementById('brand-name-print').innerText = brandName;
+            document.title = `Master Ledger - ${brandName}`;
+        }
+    };
 
     async function liveSearch() {
         const val = document.getElementById('searchID').value.toLowerCase();
@@ -213,6 +222,5 @@
         document.getElementById('totalDue').innerText = `₹${gPay-gPaid}`;
     }
 </script>
-<script src="menu.js"></script>
 </body>
 </html>
