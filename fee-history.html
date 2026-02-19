@@ -3,141 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Ledger - Financial Portal</title>
+    <title>Master Ledger & Payments</title>
     
     <link rel="stylesheet" href="style.css"> 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        /* CSS FIXES */
-        #ledgerArea { display: none; margin-top: 30px; }
+        /* --- CSS FIXES --- */
+        #ledgerArea { display: none; margin-top: 20px; }
         
-        /* Search Box Icon Fix */
-        .search-box-wrapper { position: relative; max-width: 600px; margin: 0 auto 30px; }
-        .search-input-royal { padding-right: 120px !important; } /* Space for button */
-        .search-btn-inside { 
-            position: absolute; right: 5px; top: 5px; bottom: 5px; 
-            border-radius: 25px; padding: 0 20px;
+        /* Search Bar Fix */
+        .search-box-wrapper { position: relative; display: flex; gap: 10px; }
+        .search-input-royal { padding-right: 15px !important; flex-grow: 1; }
+        .search-btn { 
+            background: var(--royal-blue); color: var(--gold); 
+            border: 2px solid var(--gold); border-radius: 30px; 
+            padding: 0 25px; cursor: pointer; transition: 0.3s;
         }
 
-        /* Payment & History Blocks */
-        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-        .payment-card { background: #fffdf0; border: 2px solid var(--gold); border-radius: 12px; padding: 20px; }
-        .history-card { background: #f0f4ff; border: 2px solid var(--royal-blue); border-radius: 12px; padding: 20px; }
+        /* Payment Block Styling */
+        .payment-block {
+            background: var(--light-gold); border: 2px solid var(--gold);
+            border-radius: 12px; padding: 20px; margin-top: 20px;
+        }
 
-        /* Print Fixes */
+        /* Print Optimization */
         @media print {
-            .no-print, #menu-container, .main-header, .search-box-wrapper, .action-grid, .btn, button { 
+            header, .no-print, #menu-container, .payment-block, .search-box-wrapper, .royal-btn { 
                 display: none !important; 
             }
             body { background: white; padding: 0; margin: 0; }
-            .royal-card { border: none; box-shadow: none; padding: 0; width: 100%; }
-            #ledgerArea { display: block !important; }
-            .print-header { display: flex !important; border-bottom: 2px solid #000; }
+            .royal-card { border: none; box-shadow: none; padding: 0; width: 100%; max-width: 100%; }
+            .main-content { padding: 0 !important; margin: 0 !important; }
+            #ledgerArea { display: block !important; width: 100%; }
+            .table-ledger { font-size: 11px; width: 100%; table-layout: fixed; }
+            @page { size: A4 portrait; margin: 10mm; }
         }
 
-        /* Statement Table */
-        .statement-table { font-size: 12px; width: 100%; margin-top: 10px; }
-        .statement-table th { background: #eee; padding: 5px; border: 1px solid #ddd; }
-        .statement-table td { padding: 5px; border: 1px solid #ddd; }
+        /* History Table */
+        .history-table { font-size: 13px; margin-top: 15px; }
     </style>
 </head>
 <body>
 
-<div id="menu-container" class="no-print"></div>
+<div id="menu-container"></div>
 
 <div class="main-content">
     <div class="royal-card">
-        
         <header id="brand-header-container" class="header no-print"></header>
 
-        <div class="search-box-wrapper no-print">
-            <input type="text" id="searchID" class="search-input-royal" placeholder="Enter Student ID or Name..." oninput="liveSearch()">
-            <button class="royal-btn search-btn-inside" onclick="liveSearch()">
-                <i class="fas fa-search"></i>
-            </button>
+        <div class="search-box-wrapper no-print mb-4">
+            <input type="text" id="searchID" class="search-input-royal" placeholder="Enter Student Name or ID..." oninput="liveSearch()">
+            <button class="search-btn" onclick="liveSearch()"><i class="fas fa-search"></i></button>
             <div id="searchSuggestions"></div>
         </div>
 
         <div id="ledgerArea">
+            <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                <div class="d-flex align-items-center">
+                    <img src="logo.png" class="receipt-logo" style="width:70px;">
+                    <div class="ms-3">
+                        <h2 id="print-brand-name" class="brand-font" style="margin:0; font-size: 22px;">THE LALIT INTERNATIONAL SCHOOL</h2>
+                        <small>Student Master Ledger Statement | 2025-26</small>
+                    </div>
+                </div>
+                <div class="text-end"><b>Date:</b> <span id="pDate"></span></div>
+            </div>
+
             <div class="student-strip">
-                <img id="lPhoto" class="id-photo" src="" alt="Student">
-                <div class="student-details-grid flex-grow-1" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <img id="lPhoto" class="id-photo" src="https://via.placeholder.com/85x105" alt="Student">
+                <div class="student-details-grid flex-grow-1" style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; font-size: 13px;">
                     <div>NAME: <b id="lName"></b></div>
                     <div>ID: <b id="lID"></b></div>
                     <div>CLASS: <b id="lClass"></b></div>
-                    <div>STATUS: <span class="status-badge btn-success">ACTIVE</span></div>
+                    <div>FATHER: <b id="lFather"></b></div>
+                    <div>TRANSPORT: <b id="lTrans"></b></div>
+                    <div>STATUS: <span class="text-success fw-bold">ACTIVE</span></div>
                 </div>
-            </div>
-
-            <div class="action-grid no-print">
-                <div class="payment-card">
-                    <h6 class="brand-font"><i class="fas fa-wallet text-gold"></i> QUICK PAYMENT</h6>
-                    <div class="input-group mt-2">
-                        <select id="payMonth" class="form-select border-gold">
-                            <option value="">Select Month/Type</option>
-                            <option value="Admission">Admission Fee</option>
-                            <option value="April">April</option>
-                            <option value="May">May</option>
-                            <option value="June">June</option>
-                            <option value="July">July</option>
-                            <option value="August">August</option>
-                            <option value="September">September</option>
-                            <option value="October">October</option>
-                            <option value="November">November</option>
-                            <option value="December">December</option>
-                            <option value="January">January</option>
-                            <option value="February">February</option>
-                            <option value="March">March</option>
-                        </select>
-                        <input type="number" id="payAmount" class="form-control border-gold" placeholder="Amount">
-                        <button class="btn btn-dark" onclick="processPayment()">PAY</button>
-                    </div>
-                </div>
-                <div class="history-card text-center">
-                    <h6 class="brand-font"><i class="fas fa-history text-primary"></i> TRANSACTION LOG</h6>
-                    <button class="royal-btn btn-sm mt-2" onclick="toggleStatement()">VIEW HISTORY STATEMENT</button>
-                </div>
-            </div>
-
-            <div id="statementBox" class="no-print mt-3 mb-3 p-3 border" style="display:none; background:#fff;">
-                <h6>Payment History</h6>
-                <table class="statement-table" id="statementTable">
-                    <thead><tr><th>Date</th><th>Description</th><th>Amount</th><th>Method</th></tr></thead>
-                    <tbody id="statementBody"></tbody>
-                </table>
             </div>
 
             <div class="breakdown-row" id="lBreakdown"></div>
-            <div class="table-responsive">
-                <table class="table-ledger">
-                    <thead>
-                        <tr>
-                            <th>PARTICULARS</th>
-                            <th>TUITION</th>
-                            <th>HOSTEL</th>
-                            <th>TRANS.</th>
-                            <th>ANNUAL</th>
-                            <th>PAYABLE</th>
-                            <th>PAID</th>
-                            <th>BALANCE</th>
-                        </tr>
-                    </thead>
-                    <tbody id="lBody"></tbody>
-                    <tfoot>
-                        <tr style="background: var(--gold); color: var(--royal-blue); font-weight: bold;">
-                            <td colspan="5" class="text-end px-3">SESSION GRAND TOTAL</td>
-                            <td id="totalPay"></td>
-                            <td id="totalPaid"></td>
-                            <td id="totalDue"></td>
-                        </tr>
-                    </tfoot>
-                </table>
+
+            <table class="table-ledger">
+                <thead>
+                    <tr>
+                        <th style="width: 20%;">MONTH</th>
+                        <th>TUITION</th>
+                        <th>HOSTEL</th>
+                        <th>TRANS.</th>
+                        <th>ANNUAL</th>
+                        <th>PAYABLE</th>
+                        <th>PAID</th>
+                        <th>BALANCE</th>
+                    </tr>
+                </thead>
+                <tbody id="lBody"></tbody>
+                <tfoot>
+                    <tr style="background: var(--royal-blue); color: var(--gold);">
+                        <td colspan="5" class="text-end px-2">GRAND TOTAL</td>
+                        <td id="totalPay"></td>
+                        <td id="totalPaid"></td>
+                        <td id="totalDue"></td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <div class="mt-4 text-center no-print d-flex justify-content-center gap-3">
+                <button class="royal-btn" onclick="window.print()"><i class="fas fa-print"></i> PRINT LEDGER</button>
+                <button class="royal-btn btn-success" onclick="togglePaymentBlock()"><i class="fas fa-hand-holding-usd"></i> GET PAYMENT</button>
+                <button class="royal-btn btn-info" onclick="showHistory()"><i class="fas fa-history"></i> STATEMENT</button>
             </div>
 
-            <div class="mt-4 text-center no-print">
-                <button class="royal-btn" onclick="window.print()"><i class="fas fa-print"></i> PRINT LEDGER</button>
+            <div id="paymentBlock" class="payment-block no-print" style="display:none;">
+                <h4 class="brand-font mb-3" style="font-size: 1.2rem;">Quick Payment Entry</h4>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label>Select Month</label>
+                        <select id="payMonth" class="form-control">
+                            <option>Admission</option>
+                            <script>months.forEach(m => document.write(`<option>${m}</option>`))</script>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label>Amount (₹)</label>
+                        <input type="number" id="payAmount" class="form-control" placeholder="0.00">
+                    </div>
+                    <div class="col-md-4">
+                        <label>&nbsp;</label>
+                        <button class="royal-btn btn-block" onclick="submitPayment()">POST PAYMENT</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="historySection" class="no-print mt-4" style="display:none;">
+                <h4 class="brand-font border-bottom pb-2">Payment History</h4>
+                <div id="historyBody"></div>
             </div>
         </div>
     </div>
@@ -150,42 +151,40 @@
 <script src="menu.js"></script>
 
 <script>
-    let currentStudent = null;
     const months = ["April", "May", "June", "July", "August", "September", "October", "November", "December", "January", "February", "March"];
+    let currentStudent = null;
 
     async function liveSearch() {
         const val = document.getElementById('searchID').value.toLowerCase();
         const sugg = document.getElementById('searchSuggestions');
         if(val.length < 2) { sugg.style.display='none'; return; }
-        
         const snap = await db.collection('students').get();
         let html = '';
         snap.forEach(doc => {
             const d = doc.data();
             if(d.name.toLowerCase().includes(val) || d.uniqueID.toString().includes(val)) {
-                html += `<div class="suggestion-item" onclick='loadLedger(${JSON.stringify(d)})'>
-                            <b>${d.name}</b> <small>(${d.uniqueID})</small>
-                         </div>`;
+                html += `<div class="suggestion-item" onclick='loadLedger(${JSON.stringify(d)})'>${d.name} (${d.uniqueID})</div>`;
             }
         });
-        sugg.innerHTML = html; 
-        sugg.style.display = html ? 'block' : 'none';
+        sugg.innerHTML = html; sugg.style.display='block';
     }
 
     async function loadLedger(s) {
         currentStudent = s;
         document.getElementById('searchSuggestions').style.display='none';
         document.getElementById('ledgerArea').style.display='block';
+        document.getElementById('pDate').innerText = new Date().toLocaleDateString('en-GB');
         
-        document.getElementById('lName').innerText = s.name;
+        document.getElementById('lName').innerText = s.name.toUpperCase();
         document.getElementById('lID').innerText = s.uniqueID;
         document.getElementById('lClass').innerText = s.class;
-        document.getElementById('lPhoto').src = s.photo || 'https://via.placeholder.com/100';
+        document.getElementById('lFather').innerText = s.father || "N/A";
+        document.getElementById('lTrans').innerText = s.transportDistance || "NONE";
+        document.getElementById('lPhoto').src = s.photo || 'https://via.placeholder.com/85x105';
 
         const mDoc = await db.collection('fee_master').doc(s.class).get();
         const fm = mDoc.exists ? mDoc.data() : {};
         
-        // Transport calculation
         let tRate = 0;
         if(s.transport === 'Yes') {
             const tSnap = await db.collection('transport_master').get();
@@ -193,18 +192,18 @@
             tSnap.forEach(d => { if(d.id.trim().replace(/\s+/g, '').toLowerCase() === bSlab) tRate = Number(d.data().amount || 0); });
         }
 
-        const transSnap = await db.collection('fee_transactions').where("studentID", "==", String(s.uniqueID)).get();
+        const transSnap = await db.collection('fee_transactions').where('studentID', '==', String(s.uniqueID)).get();
         let payData = [];
         transSnap.forEach(d => payData.push(d.data()));
 
-        // Fill Ledger
-        renderLedgerTable(fm, s, tRate, payData);
-        renderStatement(payData);
-    }
-
-    function renderLedgerTable(fm, s, tRate, payData) {
         const annualTotal = Number(fm.admission||0) + Number(fm.development||0) + Number(fm.exam||0) + Number(fm.books||0) + Number(fm.misc||0);
-        document.getElementById('lBreakdown').innerHTML = `<div class="break-item">ANNUAL FEES TOTAL: ₹${annualTotal}</div>`;
+        document.getElementById('lBreakdown').innerHTML = `
+            <div class="break-item">Adm: ₹${fm.admission||0}</div>
+            <div class="break-item">Dev: ₹${fm.development||0}</div>
+            <div class="break-item">Exam: ₹${fm.exam||0}</div>
+            <div class="break-item">Books: ₹${fm.books||0}</div>
+            <div class="break-item" style="background:var(--gold); color:var(--royal-blue)">TOTAL: ₹${annualTotal}</div>
+        `;
 
         let html = '', gPay = 0, gPaid = 0, runningBalance = 0;
         const mT = Number(fm.tuition||0), mH = (s.hostel==='Yes'?Number(fm.hostel||0):0), mTr = tRate;
@@ -212,15 +211,14 @@
         // Registration Row
         const aPaid = payData.filter(p => ["Admission", "Exam", "Books", "Annual", "Development", "Registration"].includes(p.month)).reduce((sum, p) => sum + Number(p.amount), 0);
         runningBalance = annualTotal - aPaid;
-        html += `<tr><td style="text-align:left;">ANNUAL/REG.</td><td>-</td><td>-</td><td>-</td><td>₹${annualTotal}</td><td>₹${annualTotal}</td><td>₹${aPaid}</td><td>₹${runningBalance}</td></tr>`;
+        html += `<tr><td>REGISTRATION</td><td>-</td><td>-</td><td>-</td><td>₹${annualTotal}</td><td>₹${annualTotal}</td><td>₹${aPaid}</td><td>₹${runningBalance}</td></tr>`;
         gPay += annualTotal; gPaid += aPaid;
 
-        // Monthly Rows
         months.forEach(m => {
             const total = mT + mH + mTr;
             const monthPaid = payData.filter(p => p.month === m).reduce((acc, curr) => acc + Number(curr.amount), 0);
             runningBalance = (runningBalance + total) - monthPaid;
-            html += `<tr><td style="text-align:left;">${m.toUpperCase()}</td><td>₹${mT}</td><td>${mH||'-'}</td><td>${mTr||'-'}</td><td>-</td><td>₹${total}</td><td>₹${monthPaid}</td><td>₹${runningBalance}</td></tr>`;
+            html += `<tr><td>${m.toUpperCase()}</td><td>₹${mT}</td><td>${mH?'₹'+mH:'-'}</td><td>${mTr?'₹'+mTr:'-'}</td><td>-</td><td>₹${total}</td><td>₹${monthPaid}</td><td>₹${runningBalance}</td></tr>`;
             gPay += total; gPaid += monthPaid;
         });
 
@@ -230,40 +228,44 @@
         document.getElementById('totalDue').innerText = `₹${gPay-gPaid}`;
     }
 
-    async function processPayment() {
+    function togglePaymentBlock() {
+        const block = document.getElementById('paymentBlock');
+        block.style.display = block.style.display === 'none' ? 'block' : 'none';
+    }
+
+    async function submitPayment() {
+        const amt = document.getElementById('payAmount').value;
         const month = document.getElementById('payMonth').value;
-        const amount = document.getElementById('payAmount').value;
+        if(!amt || !currentStudent) return alert("Please enter amount");
 
-        if(!month || !amount || !currentStudent) { alert("Please fill details"); return; }
-
-        const newTx = {
+        const payload = {
             studentID: String(currentStudent.uniqueID),
-            studentName: currentStudent.name,
+            name: currentStudent.name,
+            amount: Number(amt),
             month: month,
-            amount: Number(amount),
             date: new Date().toISOString().split('T')[0],
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         };
 
-        try {
-            await db.collection('fee_transactions').add(newTx);
-            alert("Payment Successful!");
-            loadLedger(currentStudent); // Refresh instantly
-            document.getElementById('payAmount').value = '';
-        } catch(e) { alert("Error: " + e.message); }
+        await db.collection('fee_transactions').add(payload);
+        alert("Payment Updated!");
+        document.getElementById('payAmount').value = '';
+        loadLedger(currentStudent); // Auto Refresh Ledger
     }
 
-    function renderStatement(payData) {
-        let html = '';
-        payData.sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(p => {
-            html += `<tr><td>${p.date}</td><td>${p.month} Fee</td><td>₹${p.amount}</td><td>Cash/Online</td></tr>`;
+    async function showHistory() {
+        const histDiv = document.getElementById('historySection');
+        histDiv.style.display = 'block';
+        const transSnap = await db.collection('fee_transactions').where('studentID', '==', String(currentStudent.uniqueID)).orderBy('date', 'desc').get();
+        
+        let h = `<table class="table history-table"><thead><tr><th>Date</th><th>Month</th><th>Amount</th></tr></thead><tbody>`;
+        transSnap.forEach(d => {
+            const p = d.data();
+            h += `<tr><td>${p.date}</td><td>${p.month}</td><td><b>₹${p.amount}</b></td></tr>`;
         });
-        document.getElementById('statementBody').innerHTML = html;
-    }
-
-    function toggleStatement() {
-        const box = document.getElementById('statementBox');
-        box.style.display = box.style.display === 'none' ? 'block' : 'none';
+        h += `</tbody></table>`;
+        document.getElementById('historyBody').innerHTML = h;
+        histDiv.scrollIntoView({ behavior: 'smooth' });
     }
 </script>
 </body>
