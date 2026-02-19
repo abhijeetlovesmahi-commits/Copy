@@ -122,41 +122,57 @@
 let activeStudent = null;
 let currentBalance = 0;
 
-// 1. Live Search Students - FIXED logic
+// 1. LIVE SEARCH LOGIC - UPDATED & FIXED
 async function liveSearch() {
     const val = document.getElementById('studentSearch').value.toLowerCase();
     const sugg = document.getElementById('searchSuggestions');
-    if(val.length < 2) { sugg.style.display='none'; return; }
+    
+    if(val.length < 2) { 
+        sugg.style.display = 'none'; 
+        return; 
+    }
 
     try {
         const snap = await db.collection('students').get();
         let html = '';
+        
         snap.forEach(doc => {
             const d = doc.data();
-            const studentName = d.name || "";
-            const studentID = String(d.uniqueID || "");
-
-            if(studentName.toLowerCase().includes(val) || studentID.includes(val)) {
-                // Storing data as string safely to avoid quote issues
-                const safeData = encodeURIComponent(JSON.stringify(d));
-                html += `<div class="suggestion-item" onclick="selectStudent('${safeData}')">
-                            <b>${studentName}</b> <span class="text-muted">(ID: ${studentID})</span><br>
-                            <small>Class: ${d.class}-${d.section || 'A'} | Father: ${d.father}</small>
-                         </div>`;
+            const sName = d.name || "";
+            const sID = String(d.uniqueID || "");
+            
+            if(sName.toLowerCase().includes(val) || sID.includes(val)) {
+                // Stringify and encode to pass safely in onclick
+                const studentString = encodeURIComponent(JSON.stringify(d));
+                html += `
+                    <div class="suggestion-item" onclick="selectStudent('${studentString}')">
+                        <b>${sName}</b> <span class="text-muted">(ID: ${sID})</span><br>
+                        <small>Class: ${d.class}-${d.section || 'A'} | Father: ${d.father}</small>
+                    </div>`;
             }
         });
-        sugg.innerHTML = html;
-        sugg.style.display = html ? 'block' : 'none';
-    } catch (e) { console.error("Search error:", e); }
+
+        if(html) {
+            sugg.innerHTML = html;
+            sugg.style.display = 'block';
+        } else {
+            sugg.style.display = 'none';
+        }
+    } catch (e) {
+        console.error("Search Error: ", e);
+    }
 }
 
-// 2. Select Student & Calculate Dues - FIXED JSON handling
+// 2. SELECT STUDENT LOGIC - FIXED
 async function selectStudent(encodedData) {
     const s = JSON.parse(decodeURIComponent(encodedData));
     activeStudent = s;
+    
+    // UI Update
     document.getElementById('studentSearch').value = s.name;
     document.getElementById('searchSuggestions').style.display = 'none';
     
+    // Fee Calculation
     try {
         const mDoc = await db.collection('fee_master').doc(s.class).get();
         const tSnap = await db.collection('fee_transactions').where('studentID', '==', String(s.uniqueID)).get();
@@ -172,7 +188,7 @@ async function selectStudent(encodedData) {
             const mOrder = ["April", "May", "June", "July", "August", "September", "October", "November", "December", "January", "February", "March"];
             const monthName = new Date().toLocaleString('en-us', {month:'long'});
             let mIdx = mOrder.indexOf(monthName);
-            if(mIdx === -1) mIdx = 11; 
+            if(mIdx === -1) mIdx = 11;
 
             const monthly = Number(fm.tuition || 0) + (s.hostel === 'Yes' ? Number(fm.hostel || 0) : 0) + (s.transport === 'Yes' ? 500 : 0);
             const annual = Number(fm.admission || 0) + Number(fm.development || 0) + Number(fm.exam || 0);
@@ -182,7 +198,9 @@ async function selectStudent(encodedData) {
         }
         
         document.getElementById('dueAmount').innerText = `₹ ${currentBalance.toFixed(2)}`;
-    } catch (e) { console.error(e); }
+    } catch (e) { 
+        console.error("Calculation Error: ", e); 
+    }
 }
 
 // 3. Submit Transaction
