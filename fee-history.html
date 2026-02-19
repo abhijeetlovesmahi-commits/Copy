@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Professional Master Ledger | The Lalit Intl.</title>
+    <title>Master Ledger Professional | The Lalit Intl.</title>
     
     <link rel="stylesheet" href="style.css"> 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -11,45 +11,47 @@
     
     <style>
         :root { --royal: #002147; --gold: #D4AF37; }
-        body { background: #f0f2f5; font-family: 'Segoe UI', sans-serif; }
+        body { background: #f0f2f5; font-family: 'Segoe UI', sans-serif; color: #333; }
         
         #ledgerArea { 
-            display: none; background: #fff; width: 1000px; margin: 20px auto; 
-            padding: 40px; box-shadow: 0 0 20px rgba(0,0,0,0.1); border: 1px solid #ccc;
+            display: none; background: #fff; width: 1050px; margin: 20px auto; 
+            padding: 35px; border: 1px solid #000; position: relative;
         }
 
-        /* Top Fee Heads Row (Like Image) */
-        .fee-master-summary { 
-            display: grid; grid-template-columns: repeat(6, 1fr); 
-            border: 1px solid #000; margin-bottom: 10px; text-align: center;
+        /* Double Row Fee Summary */
+        .master-fee-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            border: 1px solid #000;
+            margin-bottom: 20px;
+            background: #fff;
         }
-        .fee-head-box { border-right: 1px solid #000; }
-        .fee-head-box:last-child { border-right: none; }
-        .fh-title { background: #f8f9fa; font-size: 10px; font-weight: bold; border-bottom: 1px solid #000; padding: 2px; }
-        .fh-val { font-size: 13px; font-weight: bold; padding: 5px; }
-        .fh-disc { font-size: 11px; color: #d32f2f; padding-bottom: 5px; }
+        .fee-col { border-right: 1px solid #000; text-align: center; }
+        .fee-col:last-child { border-right: none; }
+        .f-label { background: var(--royal); color: var(--gold); font-size: 9px; font-weight: bold; padding: 4px; border-bottom: 1px solid #000; }
+        .f-base { font-size: 13px; font-weight: 800; padding: 5px 0; color: #000; }
+        .f-disc-row { background: #fff9e6; border-top: 1px dashed #ccc; padding: 5px 0; }
+        .disc-field { width: 45px; border: 1px solid #aaa; text-align: center; font-weight: bold; font-size: 11px; }
 
-        /* Table Styling */
-        .table-ledger { width: 100%; border-collapse: collapse; border: 1px solid #000; margin-top: 5px; }
-        .table-ledger th { 
-            background: #f8f9fa !important; color: #666; font-size: 11px; 
-            text-transform: uppercase; border: 1px solid #000; padding: 8px;
-        }
-        .table-ledger td { border: 1px solid #000; padding: 6px; font-size: 12px; text-align: center; font-weight: 600; }
-        .text-left { text-align: left !important; padding-left: 10px !important; }
+        /* Table Styling matching Image */
+        .table-ledger { width: 100%; border-collapse: collapse; border: 1px solid #000; }
+        .table-ledger th { background: #f2f2f2 !important; font-size: 11px; border: 1px solid #000; padding: 10px; text-transform: uppercase; }
+        .table-ledger td { border: 1px solid #000; padding: 8px; font-size: 12px; text-align: center; font-weight: 600; }
+        .text-left { text-align: left !important; padding-left: 12px !important; }
 
-        /* Student Info Strip */
-        .student-strip { display: flex; border: 1px solid #000; padding: 15px; margin-bottom: 20px; align-items: center; }
-        .stu-photo { width: 100px; height: 120px; border: 1px solid #000; object-fit: cover; margin-right: 20px; }
-        .stu-details { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; flex-grow: 1; font-size: 12px; }
+        /* Student Strip */
+        .student-box { display: flex; border: 1px solid #000; padding: 15px; margin-bottom: 15px; align-items: center; }
+        .stu-img { width: 110px; height: 130px; border: 1px solid #000; object-fit: cover; margin-right: 20px; }
+        .stu-info { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; flex-grow: 1; font-size: 13px; }
 
-        .btn-action-group { display: flex; gap: 10px; justify-content: center; margin: 20px 0; }
-        .royal-btn { background: var(--royal); color: var(--gold); border: 2px solid var(--gold); padding: 8px 20px; font-weight: bold; }
+        .action-btns { display: flex; gap: 12px; justify-content: center; margin: 20px 0; }
+        .btn-royal { background: var(--royal); color: var(--gold); border: 2px solid var(--gold); padding: 10px 25px; font-weight: bold; transition: 0.3s; }
+        .btn-royal:hover { background: var(--gold); color: var(--royal); }
 
         @media print {
             .no-print { display: none !important; }
-            #ledgerArea { display: block !important; box-shadow: none; border: none; width: 100%; margin: 0; padding: 10px; }
-            body { background: white; }
+            #ledgerArea { display: block !important; border: none; width: 100%; margin: 0; padding: 0; }
+            .f-disc-row input { border: none; background: transparent; }
         }
     </style>
 </head>
@@ -57,55 +59,88 @@
 
 <div id="menu-container" class="no-print"></div>
 
-<div class="container mt-4 no-print">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <input type="text" id="searchID" class="form-control" placeholder="Search Student Name or ID..." oninput="liveSearch()">
-            <div id="searchSuggestions" class="list-group position-absolute w-100" style="z-index: 1000; display:none;"></div>
+<div class="container mt-4 no-print text-center">
+    <div class="row justify-content-center mb-3">
+        <div class="col-md-5">
+            <input type="text" id="searchID" class="form-control" placeholder="🔍 Student Name or ID..." oninput="liveSearch()">
+            <div id="searchSuggestions" class="list-group position-absolute w-100" style="z-index: 1000; display:none; box-shadow: 0 5px 15px rgba(0,0,0,0.2);"></div>
         </div>
     </div>
-
-    <div class="btn-action-group">
-        <button class="royal-btn" onclick="calculateLedger()"><i class="fas fa-calculator"></i> GET AMOUNT</button>
-        <button class="royal-btn" onclick="window.print()"><i class="fas fa-print"></i> PRINT LEDGER</button>
-        <button class="royal-btn" onclick="openDemandModal()"><i class="fas fa-file-invoice"></i> DEMAND SLIP</button>
+    <div class="action-btns">
+        <button class="btn-royal" onclick="calculateLedger()"><i class="fas fa-sync-alt"></i> GET AMOUNT</button>
+        <button class="btn-royal" onclick="window.print()"><i class="fas fa-print"></i> PRINT LEDGER</button>
+        <button class="btn-royal" style="background:#2ecc71; border-color:#27ae60;" onclick="openDemandModal()"><i class="fas fa-paper-plane"></i> DEMAND SLIP</button>
     </div>
 </div>
 
 <div id="ledgerArea">
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
         <div class="d-flex align-items-center">
-            <img src="logo.png" style="width:60px; margin-right:15px;">
+            <img src="logo.png" style="width:75px; margin-right:20px;">
             <div>
-                <h2 style="margin:0; color:var(--royal); font-weight:800; font-size: 26px;">THE LALIT INTERNATIONAL SCHOOL</h2>
-                <p class="m-0 small fw-bold text-uppercase">Master Ledger Statement | Session 2025-26</p>
+                <h1 style="margin:0; color:var(--royal); font-weight:900; font-size: 32px; letter-spacing: -1px;">THE LALIT INTERNATIONAL SCHOOL</h1>
+                <p class="m-0 fw-bold" style="font-size: 14px; color: #555;">MASTER LEDGER STATEMENT | ACADEMIC SESSION 2025-26</p>
             </div>
         </div>
-        <div class="text-end small">
-            <b>Print Date:</b> <span id="pDate"></span><br>
-            <span style="color:#777">Official Registry Copy</span>
+        <div class="text-end">
+            <p class="m-0 small"><b>Print Date:</b> <span id="pDate"></span></p>
+            <p class="m-0" style="font-size: 10px; color:var(--gold); font-weight: bold;">OFFICIAL REGISTRY COPY</p>
         </div>
     </div>
 
-    <div class="student-strip">
-        <img id="lPhoto" src="" class="stu-photo">
-        <div class="stu-details">
+    <div class="student-box">
+        <img id="lPhoto" src="" class="stu-img">
+        <div class="stu-info">
             <div>NAME: <b id="lName"></b></div>
             <div>ID: <b id="lID"></b></div>
             <div>CLASS: <b id="lClass"></b></div>
             <div>FATHER: <b id="lFather"></b></div>
             <div>TRANSPORT: <b id="lTrans"></b></div>
-            <div>STATUS: <b style="color:green" id="lStatus">ACTIVE</b></div>
+            <div>STATUS: <b style="color:green">ACTIVE</b></div>
         </div>
     </div>
 
-    <div class="fee-master-summary">
-        <div class="fee-head-box"><div class="fh-title">ADM</div><div class="fh-val" id="hAdm">₹0</div><div class="fh-disc no-print">Disc: <input type="number" id="dAdm" class="small-input" value="0" onchange="calculateLedger()">%</div></div>
-        <div class="fee-head-box"><div class="fh-title">DEV</div><div class="fh-val" id="hDev">₹0</div><div class="fh-disc no-print">Disc: <input type="number" id="dDev" class="small-input" value="0" onchange="calculateLedger()">%</div></div>
-        <div class="fee-head-box"><div class="fh-title">EXAM</div><div class="fh-val" id="hExam">₹0</div><div class="fh-disc no-print">Disc: <input type="number" id="dExam" class="small-input" value="0" onchange="calculateLedger()">%</div></div>
-        <div class="fee-head-box"><div class="fh-title">BOOKS</div><div class="fh-val" id="hBooks">₹0</div><div class="fh-disc no-print">Disc: <input type="number" id="dBooks" class="small-input" value="0" onchange="calculateLedger()">%</div></div>
-        <div class="fee-head-box"><div class="fh-title">MISC</div><div class="fh-val" id="hMisc">₹0</div><div class="fh-disc no-print">Disc: <input type="number" id="dMisc" class="small-input" value="0" onchange="calculateLedger()">%</div></div>
-        <div class="fee-head-box"><div class="fh-title">ANNUAL</div><div class="fh-val" id="hAnnualTotal">₹0</div><div class="fh-disc">Net Annual</div></div>
+    <div class="master-fee-grid">
+        <div class="fee-col">
+            <div class="f-label">TUITION</div>
+            <div class="f-base" id="hTuition">₹0</div>
+            <div class="f-disc-row">Disc <input type="number" id="dTuition" class="disc-field" onchange="calculateLedger()">%</div>
+        </div>
+        <div class="fee-col">
+            <div class="f-label">HOSTEL</div>
+            <div class="f-base" id="hHostel">₹0</div>
+            <div class="f-disc-row">Disc <input type="number" id="dHostel" class="disc-field" onchange="calculateLedger()">%</div>
+        </div>
+        <div class="fee-col">
+            <div class="f-label">TRANS.</div>
+            <div class="f-base" id="hTrans">₹0</div>
+            <div class="f-disc-row">Disc <input type="number" id="dTrans" class="disc-field" onchange="calculateLedger()">%</div>
+        </div>
+        <div class="fee-col">
+            <div class="f-label">ADM. FEE</div>
+            <div class="f-base" id="hAdm">₹0</div>
+            <div class="f-disc-row">Disc <input type="number" id="dAdm" class="disc-field" onchange="calculateLedger()">%</div>
+        </div>
+        <div class="fee-col">
+            <div class="f-label">DEVELOPMENT</div>
+            <div class="f-base" id="hDev">₹0</div>
+            <div class="f-disc-row">Disc <input type="number" id="dDev" class="disc-field" onchange="calculateLedger()">%</div>
+        </div>
+        <div class="fee-col">
+            <div class="f-label">EXAMINATION</div>
+            <div class="f-base" id="hExam">₹0</div>
+            <div class="f-disc-row">Disc <input type="number" id="dExam" class="disc-field" onchange="calculateLedger()">%</div>
+        </div>
+        <div class="fee-col">
+            <div class="f-label">BOOKS/KIT</div>
+            <div class="f-base" id="hBooks">₹0</div>
+            <div class="f-disc-row">Disc <input type="number" id="dBooks" class="disc-field" onchange="calculateLedger()">%</div>
+        </div>
+        <div class="fee-col">
+            <div class="f-label">MISC.</div>
+            <div class="f-base" id="hMisc">₹0</div>
+            <div class="f-disc-row">Disc <input type="number" id="dMisc" class="disc-field" onchange="calculateLedger()">%</div>
+        </div>
     </div>
 
     <table class="table-ledger">
@@ -123,19 +158,19 @@
         </thead>
         <tbody id="lBody"></tbody>
         <tfoot>
-            <tr style="background:#f8f9fa">
-                <td colspan="5" class="text-end pe-3">NET TOTAL</td>
+            <tr style="background:#f2f2f2; font-weight: 800; font-size: 14px;">
+                <td colspan="5" class="text-end pe-3">NET CONSOLIDATED TOTAL</td>
                 <td id="tPayable">₹0</td>
                 <td id="tPaid">₹0</td>
-                <td id="tBalance">₹0</td>
+                <td id="tBalance" style="color:#d32f2f">₹0</td>
             </tr>
         </tfoot>
     </table>
 
-    <div class="row mt-5">
-        <div class="col-4 text-center small"><hr style="width:70%; margin:auto;">Accountant</div>
-        <div class="col-4 text-center small"><hr style="width:70%; margin:auto;">Parent/Guardian</div>
-        <div class="col-4 text-center small"><hr style="width:70%; margin:auto;">Principal</div>
+    <div class="row mt-5 pt-4">
+        <div class="col-4 text-center"><hr class="mx-4">Accountant</div>
+        <div class="col-4 text-center"><hr class="mx-4">Parent/Guardian</div>
+        <div class="col-4 text-center"><hr class="mx-4">Principal</div>
     </div>
 </div>
 
@@ -146,7 +181,7 @@
 <script>
 const months = ["April", "May", "June", "July", "August", "September", "October", "November", "December", "January", "February", "March"];
 let curStu = null;
-let fm = {}; // Fee Master
+let fm = {};
 
 async function liveSearch() {
     const val = document.getElementById('searchID').value.toLowerCase();
@@ -169,31 +204,37 @@ async function loadLedger(s) {
     document.getElementById('ledgerArea').style.display='block';
     document.getElementById('pDate').innerText = new Date().toLocaleDateString('en-GB');
     
-    // Set Profile
     document.getElementById('lName').innerText = s.name.toUpperCase();
     document.getElementById('lID').innerText = s.uniqueID;
     document.getElementById('lClass').innerText = s.class;
     document.getElementById('lFather').innerText = s.father || "N/A";
-    document.getElementById('lTrans').innerText = s.transportDistance || "NO";
+    document.getElementById('lTrans').innerText = s.transportDistance || "NONE";
     document.getElementById('lPhoto').src = s.photo || '';
 
-    // Fetch Fee Master for this Class
+    // Fetch Rates
     const fDoc = await db.collection('fee_master').doc(s.class).get();
     fm = fDoc.exists ? fDoc.data() : {};
     
-    // Set Top Box Values
-    document.getElementById('hAdm').innerText = "₹" + (fm.admission || 0);
-    document.getElementById('hDev').innerText = "₹" + (fm.development || 0);
-    document.getElementById('hExam').innerText = "₹" + (fm.exam || 0);
-    document.getElementById('hBooks').innerText = "₹" + (fm.books || 0);
-    document.getElementById('hMisc').innerText = "₹" + (fm.misc || 0);
+    let tRate = 0;
+    if(s.transport === 'Yes') {
+        const tDoc = await db.collection('transport_master').doc(s.transportDistance).get();
+        tRate = tDoc.exists ? tDoc.data().amount : 0;
+    }
 
-    // Load saved discounts if any
-    document.getElementById('dAdm').value = s.discounts?.adm || 0;
-    document.getElementById('dDev').value = s.discounts?.dev || 0;
-    document.getElementById('dExam').value = s.discounts?.exam || 0;
-    document.getElementById('dBooks').value = s.discounts?.books || 0;
-    document.getElementById('dMisc').value = s.discounts?.misc || 0;
+    // Set Base Rates in Double Row
+    document.getElementById('hTuition').innerText = "₹"+(fm.tuition||0);
+    document.getElementById('hHostel').innerText = "₹"+(s.hostel==='Yes' ? fm.hostel||0 : 0);
+    document.getElementById('hTrans').innerText = "₹"+tRate;
+    document.getElementById('hAdm').innerText = "₹"+(fm.admission||0);
+    document.getElementById('hDev').innerText = "₹"+(fm.development||0);
+    document.getElementById('hExam').innerText = "₹"+(fm.exam||0);
+    document.getElementById('hBooks').innerText = "₹"+(fm.books||0);
+    document.getElementById('hMisc').innerText = "₹"+(fm.misc||0);
+
+    // Load Saved Discounts
+    const d = s.discounts || {};
+    const keys = ['Tuition','Hostel','Trans','Adm','Dev','Exam','Books','Misc'];
+    keys.forEach(k => document.getElementById('d'+k).value = d[k.toLowerCase()] || 0);
 
     calculateLedger();
 }
@@ -201,70 +242,56 @@ async function loadLedger(s) {
 async function calculateLedger() {
     if(!curStu) return;
     
-    // Calculate Annual Net Total
-    const dAdm = Number(document.getElementById('dAdm').value);
-    const dDev = Number(document.getElementById('dDev').value);
-    const dExam = Number(document.getElementById('dExam').value);
-    const dBooks = Number(document.getElementById('dBooks').value);
-    const dMisc = Number(document.getElementById('dMisc').value);
+    const getVal = (id) => Number(document.getElementById(id).value);
+    const d = {
+        tui: getVal('dTuition'), hos: getVal('dHostel'), tra: getVal('dTrans'),
+        adm: getVal('dAdm'), dev: getVal('dDev'), exa: getVal('dExam'), boo: getVal('dBooks'), mis: getVal('dMisc')
+    };
 
-    const netAnnual = 
-        (Number(fm.admission||0) * (1 - dAdm/100)) +
-        (Number(fm.development||0) * (1 - dDev/100)) +
-        (Number(fm.exam||0) * (1 - dExam/100)) +
-        (Number(fm.books||0) * (1 - dBooks/100)) +
-        (Number(fm.misc||0) * (1 - dMisc/100));
+    // Calculate Annual Total
+    const annPayable = 
+        (Number(fm.admission||0) * (1 - d.adm/100)) +
+        (Number(fm.development||0) * (1 - d.dev/100)) +
+        (Number(fm.exam||0) * (1 - d.exa/100)) +
+        (Number(fm.books||0) * (1 - d.boo/100)) +
+        (Number(fm.misc||0) * (1 - d.mis/100));
 
-    document.getElementById('hAnnualTotal').innerText = "₹" + Math.round(netAnnual);
+    // Calculate Monthly Component
+    const tuiRate = Number(fm.tuition||0) * (1 - d.tui/100);
+    const hosRate = (curStu.hostel === 'Yes' ? Number(fm.hostel||0) : 0) * (1 - d.hos/100);
+    const traRate = Number(document.getElementById('hTrans').innerText.replace('₹','')) * (1 - d.tra/100);
 
-    // Fetch Transport Rate
-    let tRate = 0;
-    if(curStu.transport === 'Yes' && curStu.transportDistance) {
-        const tDoc = await db.collection('transport_master').doc(curStu.transportDistance).get();
-        if(tDoc.exists) tRate = tDoc.data().amount;
-    }
-
-    // Fetch Paid Transactions
+    // Fetch Payments
     const tSnap = await db.collection('fee_transactions').where('studentID', '==', String(curStu.uniqueID)).get();
-    let payments = []; tSnap.forEach(d => payments.push(d.data()));
+    let pays = []; tSnap.forEach(p => pays.push(p.data()));
 
-    let html = '', runningBal = 0, totalPayable = 0, totalPaid = 0;
+    let html = '', runBal = 0, tPay = 0, tPaid = 0;
 
-    // 1. Registration & Annual Row
-    let annualPaid = payments.filter(p => p.month === 'Annual').reduce((s, p) => s + Number(p.amount), 0);
-    runningBal += (netAnnual - annualPaid);
-    totalPayable += netAnnual; totalPaid += annualPaid;
-    html += `<tr>
-        <td class="text-left">REGISTRATION & ANNUAL</td>
-        <td>-</td><td>-</td><td>-</td><td>₹${Math.round(netAnnual)}</td>
-        <td>₹${Math.round(netAnnual)}</td><td>₹${annualPaid}</td><td>₹${Math.round(runningBal)}</td>
-    </tr>`;
+    // 1. Annual Row
+    let aPaid = pays.filter(p => p.month === 'Annual').reduce((s, p) => s + Number(p.amount), 0);
+    runBal += (annPayable - aPaid); tPay += annPayable; tPaid += aPaid;
+    html += `<tr><td class="text-left">REGISTRATION & ANNUAL FEE</td><td>-</td><td>-</td><td>-</td><td>₹${Math.round(annPayable)}</td><td>₹${Math.round(annPayable)}</td><td>₹${aPaid}</td><td>₹${Math.round(runBal)}</td></tr>`;
 
-    // 2. Monthly Rows
-    const tuiBase = Number(fm.tuition || 0);
-    const hosBase = (curStu.hostel === 'Yes') ? Number(fm.hostel || 0) : 0;
-    
+    // 2. Months
     months.forEach(m => {
-        let mPaid = payments.filter(p => p.month === m).reduce((s, p) => s + Number(p.amount), 0);
-        let mPayable = tuiBase + hosBase + tRate;
-        runningBal += (mPayable - mPaid);
-        totalPayable += mPayable; totalPaid += mPaid;
-
+        let mPaid = pays.filter(p => p.month === m).reduce((s, p) => s + Number(p.amount), 0);
+        let mTotal = tuiRate + hosRate + traRate;
+        runBal += (mTotal - mPaid); tPay += mTotal; tPaid += mPaid;
         html += `<tr>
             <td class="text-left">${m.toUpperCase()}</td>
-            <td>₹${tuiBase}</td><td>${hosBase?'₹'+hosBase:'-'}</td><td>${tRate?'₹'+tRate:'-'}</td><td>-</td>
-            <td>₹${mPayable}</td><td>₹${mPaid}</td><td>₹${Math.round(runningBal)}</td>
+            <td>₹${Math.round(tuiRate)}</td><td>${hosRate?'₹'+Math.round(hosRate):'-'}</td><td>${traRate?'₹'+Math.round(traRate):'-'}</td><td>-</td>
+            <td>₹${Math.round(mTotal)}</td><td>₹${mPaid}</td><td>₹${Math.round(runBal)}</td>
         </tr>`;
     });
 
     document.getElementById('lBody').innerHTML = html;
-    document.getElementById('tPayable').innerText = "₹" + Math.round(totalPayable);
-    document.getElementById('tPaid').innerText = "₹" + totalPaid;
-    document.getElementById('tBalance').innerText = "₹" + Math.round(runningBal);
+    document.getElementById('tPayable').innerText = "₹" + Math.round(tPay);
+    document.getElementById('tPaid').innerText = "₹" + tPaid;
+    document.getElementById('tBalance').innerText = "₹" + Math.round(runBal);
 
-    // Save Discounts to Student Record (Auto-save)
-    await db.collection('students').doc(curStu.uniqueID.toString()).update({
-        discounts: { adm: dAdm, dev: dDev, exam: dExam, books: dBooks, misc: dMisc }
+    // Auto-Save Discounts
+    db.collection('students').doc(curStu.uniqueID.toString()).update({
+        discounts: { tuition: d.tui, hostel: d.hos, trans: d.tra, adm: d.adm, dev: d.dev, exam: d.exa, books: d.boo, misc: d.mis }
     });
 }
 </script>
