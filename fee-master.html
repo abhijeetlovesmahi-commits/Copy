@@ -10,131 +10,196 @@
     <link rel="stylesheet" href="style.css">
 
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
     
     <script src="firebase-config.js"></script>
-    <script src="auth-guard.js"></script>
     <script src="brand.js"></script>
 
     <style>
         :root {
-            --royal-blue: #002366; --gold: #D4AF37; --deep-gold: #aa8a2e;
-            --light-gold: #FDFBF0; --white: #ffffff; --accent-purple: #8e44ad;
+            --royal-blue: #002366; 
+            --gold: #D4AF37; 
+            --deep-gold: #aa8a2e;
+            --light-bg: #f8f9fa;
         }
 
-        body { background: #f4f7f6; color: var(--royal-blue); }
+        body { background: var(--light-bg); color: var(--royal-blue); font-family: 'Segoe UI', sans-serif; }
 
         .form-section { 
-            margin-bottom: 30px; border: 1.5px solid var(--gold); 
-            padding: 25px; border-radius: 12px; position: relative; 
-            background: var(--white); box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin-bottom: 30px; 
+            border: 2px solid var(--gold); 
+            padding: 30px; 
+            border-radius: 15px; 
+            position: relative; 
+            background: #ffffff; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
         }
         
-        .transport-section { border-color: var(--accent-purple); }
         .section-title { 
-            position: absolute; top: -14px; left: 20px; background: var(--royal-blue); 
-            padding: 2px 15px; color: var(--gold); border-radius: 20px;
-            font-weight: bold; text-transform: uppercase; font-size: 0.75rem; 
+            position: absolute; 
+            top: -15px; 
+            left: 25px; 
+            background: var(--royal-blue); 
+            padding: 4px 20px; 
+            color: var(--gold); 
+            border-radius: 30px;
+            font-weight: bold; 
+            text-transform: uppercase; 
+            font-size: 0.8rem; 
+            letter-spacing: 1.5px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .input-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); 
+            gap: 20px; 
+        }
+        
+        label { font-size: 0.85rem; font-weight: 700; color: #555; margin-bottom: 5px; display: block; }
+
+        input, select { 
+            width: 100%; 
+            padding: 12px; 
+            border: 1px solid #ddd; 
+            border-bottom: 3px solid var(--gold); 
+            border-radius: 8px; 
+            outline: none; 
+            transition: 0.3s;
+            background: #fff;
+        }
+
+        input:focus { border-color: var(--royal-blue); background: #fdfdfd; }
+
+        .master-table { 
+            font-size: 0.9rem; 
+            background: white; 
+            border-radius: 12px; 
+            overflow: hidden; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .master-table th { 
+            background: var(--royal-blue) !important; 
+            color: var(--gold) !important; 
+            padding: 15px;
+            text-transform: uppercase;
+            border: none;
+        }
+
+        .tag-mo { color: #27ae60; font-weight: bold; } /* Monthly */
+        .tag-an { color: #d35400; font-weight: bold; } /* Annual */
+        
+        .btn-royal { 
+            background: var(--royal-blue); 
+            color: var(--gold); 
+            font-weight: bold; 
+            border: none; 
+            padding: 14px; 
+            border-radius: 10px; 
+            transition: 0.3s;
             letter-spacing: 1px;
         }
 
-        .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px; }
-        
-        input, select { 
-            width: 100%; padding: 10px; border: 1px solid #ddd; 
-            border-bottom: 2px solid var(--gold); border-radius: 4px; outline: none; 
-        }
+        .btn-royal:hover { background: #001a4d; transform: translateY(-2px); color: #fff; }
 
-        .tag-mo { color: #2ecc71; font-weight: bold; } /* Monthly */
-        .tag-an { color: #e67e22; font-weight: bold; } /* Annual */
-        
-        .master-table { font-size: 0.85rem; border-radius: 8px; overflow: hidden; }
-        .master-table th { background: var(--royal-blue); color: var(--gold); text-transform: uppercase; border: none; }
-        
-        .btn-royal { background: var(--royal-blue); color: var(--gold); font-weight: bold; border: none; padding: 12px; width: 100%; border-radius: 6px; }
-        .btn-purple { background: var(--accent-purple); color: white; }
+        .btn-purple { background: #6c5ce7; color: white; }
+        .btn-purple:hover { background: #5849c4; color: #fff; }
+
+        .card-header-custom {
+            color: var(--royal-blue);
+            border-left: 5px solid var(--gold);
+            padding-left: 15px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
 
 <div id="menu-container"></div>
 
-<div class="main-content container py-4">
-    <div id="brand-header-container" class="mb-4"></div>
+<div class="main-content container py-5">
+    <div id="brand-header-container" class="mb-5"></div>
+
+    <section class="form-section">
+        <span class="section-title">Academic Fee Structure</span>
+        <div class="input-grid">
+            <div>
+                <label>Target Class</label>
+                <select id="mClass">
+                    <option value="">-- Select --</option>
+                    <option value="Pre-Nursery">Pre-Nursery</option>
+                    <option value="Nursery">Nursery</option>
+                    <option value="LKG">LKG</option>
+                    <option value="UKG">UKG</option>
+                    <script>for(let i=1; i<=12; i++) document.write(`<option value="${i}">Class ${i}</option>`);</script>
+                </select>
+            </div>
+            <div><label>Admission Fee (An)</label><input type="number" id="mAdmission" placeholder="₹"></div>
+            <div><label>Tuition Fee (Mo)</label><input type="number" id="mTuition" placeholder="₹"></div>
+            <div><label>Development (An)</label><input type="number" id="mDev" placeholder="₹"></div>
+            <div><label>Exam Fee (An)</label><input type="number" id="mExam" placeholder="₹"></div>
+            <div><label>Hostel Fee (Mo)</label><input type="number" id="mHostel" placeholder="₹"></div>
+            <div><label>Books & Kit (An)</label><input type="number" id="mBooks" placeholder="₹"></div>
+            <div><label>Misc. Charges (An)</label><input type="number" id="mMisc" placeholder="₹"></div>
+        </div>
+        <div class="text-end mt-4">
+            <button onclick="saveFeeMaster()" class="btn-royal px-5">
+                <i class="fas fa-save me-2"></i> UPDATE CLASS RATE CARD
+            </button>
+        </div>
+    </section>
 
     <div class="row">
-        <div class="col-12">
-            <section class="form-section" id="academic-form">
-                <span class="section-title">Academic Fee Structure (Annual & Monthly)</span>
-                <div class="input-grid">
-                    <div>
-                        <label class="small fw-bold">Target Class</label>
-                        <select id="mClass">
-                            <option value="">-- Select --</option>
-                            <option value="Pre-Nursery">Pre-Nursery</option>
-                            <option value="Nursery">Nursery</option>
-                            <option value="LKG">LKG</option>
-                            <option value="UKG">UKG</option>
-                            <script>for(let i=1; i<=12; i++) document.write(`<option value="${i}">${i}</option>`);</script>
-                        </select>
-                    </div>
-                    <div><label class="small fw-bold">Admission (An)</label><input type="number" id="mAdmission" placeholder="0"></div>
-                    <div><label class="small fw-bold">Tuition (Mo)</label><input type="number" id="mTuition" placeholder="0"></div>
-                    <div><label class="small fw-bold">Dev. Fee (An)</label><input type="number" id="mDev" placeholder="0"></div>
-                    <div><label class="small fw-bold">Exam Fee (An)</label><input type="number" id="mExam" placeholder="0"></div>
-                    <div><label class="small fw-bold">Hostel (Mo)</label><input type="number" id="mHostel" placeholder="0"></div>
-                    <div><label class="small fw-bold">Books (An)</label><input type="number" id="mBooks" placeholder="0"></div>
-                    <div><label class="small fw-bold">Misc. (An)</label><input type="number" id="mMisc" placeholder="0"></div>
+        <div class="col-md-4">
+            <section class="form-section" style="border-color: #6c5ce7;">
+                <span class="section-title" style="background: #6c5ce7; color: white;">Transport Slabs</span>
+                <div class="mb-3">
+                    <label>Distance Slab</label>
+                    <select id="tSlab">
+                        <option value="">-- Select Distance --</option>
+                        <option value="0-3km">0 - 3 km</option>
+                        <option value="3-6km">3 - 6 km</option>
+                        <option value="6-9km">6 - 9 km</option>
+                        <option value="9-12km">9 - 12 km</option>
+                        <option value="12-15km">12 - 15 km</option>
+                        <option value="15-18km">15 - 18 km</option>
+                        <option value="18-21km">18 - 21 km</option>
+                        <option value="21-24km">21 - 24 km</option>
+                        <option value="24-27km">24 - 27 km</option>
+                        <option value="27-30km">27 - 30 km</option>
+                    </select>
                 </div>
-                <button onclick="saveFeeMaster()" class="btn-royal mt-3 shadow-sm">
-                    <i class="fas fa-save me-2"></i> UPDATE ACADEMIC RATE CARD
-                </button>
-            </section>
-        </div>
-
-        <div class="col-md-5">
-            <section class="form-section transport-section" id="transport-form">
-                <span class="section-title" style="background: var(--accent-purple); color: white;">Transport Slab Control</span>
-                <div class="d-flex gap-2">
-                    <div class="flex-grow-1">
-                        <label class="small fw-bold">Distance Slab</label>
-                        <select id="tSlab">
-                            <option value="">-- Distance --</option>
-                            <option value="0 - 3 km">0 - 3 km</option>
-                            <option value="3 - 6 km">3 - 6 km</option>
-                            <option value="6 - 9 km">6 - 9 km</option>
-                            <option value="9 - 12 km">9 - 12 km</option>
-                            <option value="12 - 15 km">12 - 15 km</option>
-                            <option value="Above 15 km">Above 15 km</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="small fw-bold">Rate (Mo)</label>
-                        <input type="number" id="tAmount" placeholder="₹">
-                    </div>
+                <div class="mb-4">
+                    <label>Monthly Rate</label>
+                    <input type="number" id="tAmount" placeholder="₹ Amount">
                 </div>
-                <button onclick="saveTransportFee()" class="btn-royal btn-purple mt-3 shadow-sm">
+                <button onclick="saveTransportFee()" class="btn-royal btn-purple w-100">
                     <i class="fas fa-bus me-2"></i> SET SLAB RATE
                 </button>
             </section>
         </div>
 
-        <div class="col-md-7">
-             <div class="royal-card p-3 mb-4">
-                <h5 class="brand-font mb-3" style="color: var(--accent-purple);"><i class="fas fa-route me-2"></i>Transport Rate Table</h5>
-                <table class="table table-sm master-table">
-                    <thead>
-                        <tr><th>Slab</th><th>Rate</th><th>Action</th></tr>
-                    </thead>
-                    <tbody id="transportFeeBody"></tbody>
-                </table>
-             </div>
+        <div class="col-md-8">
+            <div class="royal-card p-4 mb-4">
+                <h5 class="card-header-custom"><i class="fas fa-route me-2"></i>Active Transport Rates</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover master-table">
+                        <thead>
+                            <tr><th>Distance Slab</th><th>Monthly Rate</th><th>Action</th></tr>
+                        </thead>
+                        <tbody id="transportFeeBody"></tbody>
+                    </table>
+                </div>
+            </div>
         </div>
+    </div>
 
+    <div class="row mt-4">
         <div class="col-12">
             <div class="royal-card p-4">
-                <h5 class="brand-font mb-3"><i class="fas fa-list-ol me-2"></i>Academic Master Rate Card</h5>
+                <h5 class="card-header-custom"><i class="fas fa-table me-2"></i>Master Academic Rate Card</h5>
                 <div class="table-responsive">
                     <table class="table table-hover master-table align-middle">
                         <thead>
@@ -201,7 +266,7 @@ async function loadData() {
     aSnap.forEach(doc => {
         const d = doc.data();
         aBody.innerHTML += `<tr>
-            <td class="fw-bold">${doc.id}</td>
+            <td class="fw-bold" style="color:var(--royal-blue)">${doc.id}</td>
             <td class="tag-an">₹${d.admission}</td>
             <td class="tag-mo">₹${d.tuition}</td>
             <td>₹${d.development}</td>
@@ -209,8 +274,8 @@ async function loadData() {
             <td class="tag-mo">₹${d.hostel}</td>
             <td>₹${d.books || 0}</td>
             <td>
-                <button class="btn btn-sm btn-warning me-1" onclick="editA('${doc.id}', ${JSON.stringify(d)})"><i class="fas fa-edit"></i></button>
-                <button class="btn btn-sm btn-danger" onclick="deleteAcademic('${doc.id}')"><i class="fas fa-trash"></i></button>
+                <button class="btn btn-sm btn-outline-primary me-1" onclick="editA('${doc.id}', ${JSON.stringify(d)})"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-sm btn-outline-danger" onclick="deleteAcademic('${doc.id}')"><i class="fas fa-trash"></i></button>
             </td>
         </tr>`;
     });
@@ -225,8 +290,8 @@ async function loadData() {
             <td class="fw-bold">${doc.id}</td>
             <td class="tag-mo">₹${d.amount}</td>
             <td>
-                <button class="btn btn-sm btn-warning me-1" onclick="editT('${doc.id}', ${d.amount})"><i class="fas fa-edit"></i></button>
-                <button class="btn btn-sm btn-danger" onclick="deleteTransport('${doc.id}')"><i class="fas fa-trash"></i></button>
+                <button class="btn btn-sm btn-outline-primary me-1" onclick="editT('${doc.id}', ${d.amount})"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-sm btn-outline-danger" onclick="deleteTransport('${doc.id}')"><i class="fas fa-trash"></i></button>
             </td>
         </tr>`;
     });
@@ -255,17 +320,19 @@ function editA(cls, d) {
     document.getElementById('mHostel').value = d.hostel;
     document.getElementById('mBooks').value = d.books;
     document.getElementById('mMisc').value = d.misc;
-    window.scrollTo(0, 0);
+    window.scrollTo({top: 0, behavior: 'smooth'});
 }
 
 function editT(slab, amt) {
     document.getElementById('tSlab').value = slab;
     document.getElementById('tAmount').value = amt;
+    window.scrollTo({top: 200, behavior: 'smooth'});
 }
 
 function clearFields(type) {
     if(type === 'academic') {
-        document.getElementById('academic-form').querySelectorAll('input, select').forEach(i => i.value = "");
+        document.getElementById('mClass').value = "";
+        document.querySelectorAll('#academic-form input').forEach(i => i.value = "");
     } else {
         document.getElementById('tSlab').value = "";
         document.getElementById('tAmount').value = "";
