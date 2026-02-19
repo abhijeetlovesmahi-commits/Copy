@@ -90,7 +90,7 @@
             </section>
 
             <section class="form-section">
-                <span class="section-title">Step 3: Academic & Fee Discount</span>
+                <span class="section-title">Step 3: Academic & Transport</span>
                 <div class="input-grid">
                     <select id="sClass" required>
                         <option value="">Select Enrollment Class</option>
@@ -117,7 +117,6 @@
                         <option value="House C">House C</option>
                         <option value="House D">House D</option>
                     </select>
-                    <input type="number" id="sDiscount" placeholder="Discount Percentage (%)" min="0" max="100">
                     <select id="sHostel">
                         <option value="No">Opt for Hostel? (No)</option>
                         <option value="Yes">Yes (Hosteller)</option>
@@ -135,8 +134,9 @@
                         <option value="12-15km">12 - 15 km</option>
                         <option value="15-18km">15 - 18 km</option>
                         <option value="18-21km">18 - 21 km</option>
-                        <option value="21-25km">21 - 25 km</option>
-                        <option value="25km+">Above 25 km</option>
+                        <option value="21-24km">21 - 24 km</option>
+                        <option value="24-27km">24 - 27 km</option>
+                        <option value="27-30km">27 - 30 km</option>
                     </select>
                 </div>
             </section>
@@ -270,7 +270,6 @@ document.getElementById('admissionForm').addEventListener('submit', async (e) =>
             class: document.getElementById('sClass').value, 
             section: document.getElementById('sSection').value, 
             house: document.getElementById('sHouse').value,
-            discount: document.getElementById('sDiscount').value || "0",
             hostel: document.getElementById('sHostel').value,
             transport: document.getElementById('sTransport').value,
             transportDistance: document.getElementById('sTransportDistance').value,
@@ -317,7 +316,6 @@ function renderList(dataArray) {
             <div class="id-info">
                 <h4>${data.name}</h4>
                 <p><b>ID:</b> ${data.uniqueID} | <b>Class:</b> ${data.class}</p>
-                <p><b>Disc:</b> ${data.discount}%</p>
                 <span class="status-badge" style="background:${data.hostel==='Yes'?'#e8f5e9':'#f3f3f3'}; color:${data.hostel==='Yes'?'#2e7d32':'#666'};">
                     ${data.hostel === 'Yes' ? '🏠 Hosteller' : '🚌 Day Scholar'}
                 </span>
@@ -335,7 +333,7 @@ document.getElementById('searchInput').addEventListener('input', searchStudents)
 
 function showDetails(data) {
     currentViewData = data;
-    hideSecurity(); // Close security box if open from previous
+    hideSecurity(); 
     document.getElementById('modalName').innerText = data.name;
     document.getElementById('modalPhoto').src = data.photo || 'https://via.placeholder.com/150';
     document.getElementById('modalDetails').innerHTML = `
@@ -344,14 +342,12 @@ function showDetails(data) {
         <p><strong>Father's Name:</strong> ${data.father}</p>
         <p><strong>Call:</strong> ${data.contact}</p>
         <p><strong>WhatsApp:</strong> ${data.whatsapp}</p>
-        <p><strong>Discount:</strong> ${data.discount}%</p>
         <p><strong>Address:</strong> ${data.currentAddr}</p>
     `;
     document.getElementById('modalEditBtn').onclick = () => startEdit(data);
     document.getElementById('detailModal').style.display = 'block';
 }
 
-// Security Delete UI Functions
 function showSecurity() {
     document.getElementById('modalBtnGroup').style.display = 'none';
     document.getElementById('securityCheck').style.display = 'block';
@@ -370,7 +366,6 @@ async function confirmDeleteProcess() {
         if(confirm("Are you absolutely sure you want to wipe this record?")) {
             await db.collection('students').doc(currentViewData.uniqueID.toString()).delete();
             closeModal();
-            // Snapshot will auto-reload the list
         }
     } else {
         alert("ID Mismatch! Please enter correct ID to delete.");
@@ -379,21 +374,41 @@ async function confirmDeleteProcess() {
 
 function startEdit(data) {
     closeModal();
+    currentViewData = data;
     window.scrollTo({top: 0, behavior: 'smooth'});
     document.getElementById('formTitle').innerText = "Update Record";
     document.getElementById('editingId').value = data.uniqueID;
     document.getElementById('sName').value = data.name;
     document.getElementById('sDob').value = data.dob;
     document.getElementById('sGender').value = data.gender;
+    document.getElementById('sBlood').value = data.blood || "";
+    document.getElementById('sAadhar').value = data.aadhar || "";
     document.getElementById('sClass').value = data.class;
     document.getElementById('sSection').value = data.section;
-    document.getElementById('sDiscount').value = data.discount;
+    document.getElementById('sHouse').value = data.house || "House A";
+    document.getElementById('sHostel').value = data.hostel;
+    document.getElementById('sTransport').value = data.transport;
+    
+    if(data.transport === 'Yes') {
+        document.getElementById('sTransportDistance').style.display = 'block';
+        document.getElementById('sTransportDistance').value = data.transportDistance;
+    } else {
+        document.getElementById('sTransportDistance').style.display = 'none';
+    }
+
     document.getElementById('pFather').value = data.father;
     document.getElementById('pMother').value = data.mother;
     document.getElementById('pContact').value = data.contact;
     document.getElementById('pWhatsapp').value = data.whatsapp || "";
     document.getElementById('currAddr').value = data.currentAddr;
     document.getElementById('permAddr').value = data.permanentAddr;
+
+    if(data.photo) {
+        const preview = document.getElementById('imgPreview');
+        preview.src = data.photo;
+        preview.style.display = 'block';
+    }
+
     document.getElementById('submitBtn').innerText = "SAVE CHANGES";
     document.getElementById('cancelEdit').style.display = 'inline-block';
 }
@@ -401,7 +416,6 @@ function startEdit(data) {
 function closeModal() { document.getElementById('detailModal').style.display = 'none'; }
 function resetForm() { location.reload(); }
 
-// Close modal when clicking outside content
 window.onclick = function(event) {
     if (event.target == document.getElementById('detailModal')) closeModal();
 }
