@@ -3,216 +3,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Lalit International School - Ledger</title>
+    <title>The Lalit International School - Ledger System</title>
     
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Poppins:wght@300;400;500;600;700&display=swap');
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
+    <style>
+        /* --- CORE THEME (BLUE & GOLD) --- */
         :root {
             --royal-blue: #002366;
             --royal-blue-light: #003399;
             --gold: #D4AF37;
             --deep-gold: #aa8a2e;
             --light-gold: #fdfbf0;
-            --success: #27ae60;
-            --danger: #c0392b;
-            --warning: #f39c12;
-            --info: #2980b9;
             --paper-white: #ffffff;
             --text-dark: #1a1a1a;
             --text-muted: #555555;
             --border-color: #e0d0b0;
-            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
             --shadow-md: 0 10px 30px rgba(0,0,0,0.1);
-            --shadow-lg: 0 15px 40px rgba(0,0,0,0.15);
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
         body { background: #f4f4f2; font-family: 'Poppins', sans-serif; margin: 0; padding: 0; color: var(--text-dark); line-height: 1.6; }
 
-        /* --- LOGO SYSTEM --- */
-        .school-logo { width: 120px; height: 120px; object-fit: contain; display: block; margin: 0 auto 15px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1)); transition: var(--transition); }
-        .receipt-logo { width: 80px !important; height: 80px !important; object-fit: contain; margin-bottom: 10px; }
-
-        /* --- LAYOUT ENGINE --- */
+        /* --- LAYOUT --- */
         .main-content { padding: 40px 20px; display: flex; flex-direction: column; align-items: center; }
-        .royal-card { width: 100%; max-width: 1200px; background: var(--paper-white); background-image: url('https://www.transparenttextures.com/patterns/cream-paper.png'); border: 1px solid var(--border-color); border-radius: 15px; padding: 40px; box-shadow: var(--shadow-md); position: relative; overflow: hidden; }
-        .royal-card::after { content: ""; position: absolute; top: 15px; left: 15px; right: 15px; bottom: 15px; border: 1px solid rgba(212, 175, 55, 0.3); pointer-events: none; border-radius: 10px; }
-
-        /* --- HEADERS --- */
-        .header { text-align: center; margin-bottom: 40px; border-bottom: 3px double var(--gold); padding-bottom: 25px; }
-        h1, .brand-font { font-family: 'Cinzel', serif; color: var(--royal-blue); margin: 0; text-transform: uppercase; letter-spacing: 2px; }
         
-        /* --- SEARCH BOX (Refined) --- */
-        .search-box-wrapper { position: relative; max-width: 700px; margin: 0 auto 40px; width: 100%; z-index: 100; }
-        .search-input-royal { width: 100%; padding: 18px 25px; padding-right: 120px; border: 2px solid var(--gold); border-radius: 50px; font-size: 16px; outline: none; transition: var(--transition); box-shadow: var(--shadow-sm); }
+        .royal-card { 
+            width: 100%; max-width: 1100px; background: var(--paper-white);
+            background-image: url('https://www.transparenttextures.com/patterns/cream-paper.png');
+            border: 1px solid var(--border-color); border-radius: 15px;
+            padding: 40px; box-shadow: var(--shadow-md); position: relative;
+        }
+
+        /* --- LOGO & HEADER --- */
+        .header { text-align: center; margin-bottom: 30px; border-bottom: 3px double var(--gold); padding-bottom: 20px; }
+        .school-logo { width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px; }
+        h1 { font-family: 'Cinzel', serif; color: var(--royal-blue); margin: 0; font-size: 2.2rem; }
+        .sub-header { color: var(--gold); letter-spacing: 3px; font-weight: 600; text-transform: uppercase; font-size: 0.9rem; }
+
+        /* --- NEW SEARCH BOX (UPDATED) --- */
+        .search-container { max-width: 700px; margin: 0 auto 40px; position: relative; }
+        .search-wrapper { position: relative; display: flex; align-items: center; }
+        
+        .search-input-royal {
+            width: 100%; padding: 18px 25px 18px 55px;
+            border: 2px solid var(--gold); border-radius: 50px;
+            font-size: 16px; outline: none; transition: var(--transition);
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.1);
+        }
         .search-input-royal:focus { border-color: var(--royal-blue); box-shadow: 0 0 20px rgba(0, 35, 102, 0.15); }
+        .search-icon { position: absolute; left: 22px; color: var(--royal-blue); font-size: 1.2rem; }
         
-        #searchSuggestions { background: white; border: 1px solid var(--gold); position: absolute; width: 90%; left: 5%; z-index: 1000; max-height: 250px; overflow-y: auto; display: none; border-radius: 0 0 15px 15px; box-shadow: var(--shadow-lg); margin-top: -10px; padding-top: 10px; }
-        .suggestion-item { padding: 12px 20px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; justify-content: space-between; }
-        .suggestion-item:hover { background: var(--light-gold); color: var(--royal-blue); }
+        /* --- LEDGER FORM SECTION --- */
+        .ledger-section { background: rgba(253, 251, 240, 0.6); border-left: 5px solid var(--royal-blue); padding: 20px; margin-bottom: 25px; border-radius: 5px; }
+        .section-title { font-weight: 700; color: var(--royal-blue); display: block; margin-bottom: 15px; text-transform: uppercase; font-size: 0.85rem; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; }
+        
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .input-group { display: flex; flex-direction: column; gap: 5px; }
+        .input-group label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); }
+        
+        input, select { 
+            padding: 12px; border: 1px solid #ccc; border-radius: 4px; 
+            font-family: 'Poppins'; background: #fff;
+        }
 
-        /* --- LEDGER FORM SYSTEM --- */
-        .form-section { background: rgba(253, 251, 240, 0.6); border-left: 6px solid var(--gold); padding: 25px; margin-bottom: 30px; border-radius: 8px; box-shadow: var(--shadow-sm); }
-        .section-title { font-weight: 700; color: var(--royal-blue); display: block; margin-bottom: 20px; text-transform: uppercase; font-size: 0.9rem; letter-spacing: 1.5px; border-bottom: 1px solid rgba(212, 175, 55, 0.2); padding-bottom: 5px; }
-        .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 25px; }
-        .input-group { display: flex; flex-direction: column; gap: 8px; }
-        label { font-size: 13px; font-weight: 600; color: var(--text-muted); }
-        input, select { width: 100%; padding: 12px 15px; border: 1px solid #d1d1d1; border-bottom: 3px solid var(--gold); border-radius: 6px; font-size: 15px; background: white; }
+        /* --- ACCOUNTING TABLE (LEDGER STYLE) --- */
+        .ledger-table-container { overflow-x: auto; margin-top: 20px; }
+        .ledger-table { width: 100%; border-collapse: collapse; background: white; }
+        .ledger-table th { background: var(--royal-blue); color: var(--gold); padding: 12px; font-family: 'Cinzel'; font-size: 0.8rem; border: 1px solid #001a4d; }
+        .ledger-table td { padding: 12px; border: 1px solid #eee; font-size: 0.9rem; }
+        .ledger-table tr:nth-child(even) { background: #fcfaf2; }
+        
+        .text-right { text-align: right; }
+        .font-bold { font-weight: 700; }
+        .amt-due { color: #c0392b; }
+        .amt-paid { color: #27ae60; }
 
         /* --- BUTTONS --- */
-        .royal-btn { background: var(--royal-blue); color: var(--gold); border: 1px solid var(--gold); padding: 12px 25px; font-weight: 600; cursor: pointer; transition: var(--transition); text-transform: uppercase; border-radius: 5px; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
+        .btn-row { display: flex; justify-content: flex-end; gap: 15px; margin-top: 30px; }
+        .royal-btn {
+            background: var(--royal-blue); color: var(--gold);
+            border: 1px solid var(--gold); padding: 12px 25px;
+            font-weight: 600; cursor: pointer; border-radius: 4px;
+            text-transform: uppercase; transition: var(--transition);
+        }
         .royal-btn:hover { background: var(--gold); color: var(--royal-blue); transform: translateY(-2px); }
-        .btn-success { background: var(--success); color: white; border-color: #1e8449; }
-        
-        .due-badge { background: #fff5f5; color: #c0392b; border: 2px solid #c0392b; padding: 10px; border-radius: 8px; font-weight: bold; font-size: 1.2rem; text-align: center; }
+        .btn-print { background: #27ae60; color: white; border-color: #1e8449; }
 
-        /* --- RECEIPT SYSTEM --- */
-        #receiptArea { display: none; margin-top: 30px; }
-        .receipt-card { width: 100%; max-width: 550px; background: white; border: 4px double var(--gold); padding: 30px; margin: 20px auto; background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png'); }
-        .receipt-table { width: 100%; margin-top: 20px; border-collapse: collapse; }
-        .receipt-table td { padding: 10px; border: 1px solid #eee; font-size: 14px; }
-
-        @media print { .no-print { display: none !important; } .main-content { padding: 0; } .royal-card { border: none; box-shadow: none; } #receiptArea { display: block !important; } }
+        /* PRINT SETTINGS */
+        @media print {
+            .no-print, .search-container { display: none !important; }
+            body { background: white; }
+            .royal-card { border: none; box-shadow: none; padding: 0; }
+        }
     </style>
 </head>
 <body>
 
-<main class="main-content">
+<div class="main-content">
     <div class="royal-card">
         
-        <header class="header">
-            <img src="https://cdn-icons-png.flaticon.com/512/2602/2602414.png" alt="Logo" class="school-logo">
-            <h1>The Lalit International School</h1>
-            <p style="color: var(--deep-gold); margin-top: 5px; font-weight: 600;">Account Ledger Management System</p>
-        </header>
+        <div class="header">
+            <img src="https://via.placeholder.com/100" alt="School Logo" class="school-logo"> <h1>The Lalit International School</h1>
+            <div class="sub-header">Student Master Ledger</div>
+        </div>
 
-        <div class="search-box-wrapper no-print">
-            <input type="text" id="mainSearch" class="search-input-royal" placeholder="Search Student by Name or GR Number..." onkeyup="showSuggestions(this.value)">
-            <button class="royal-btn" style="position: absolute; right: 8px; top: 8px; height: 45px; border-radius: 40px;">Search</button>
-            <div id="searchSuggestions">
-                <div class="suggestion-item" onclick="fillData('Karan Sharma', 'GR-1024')">
-                    <span>Karan Sharma</span> <strong>GR-1024</strong>
+        <div class="search-container no-print">
+            <div class="search-wrapper">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input-royal" placeholder="Search Student by ID, Name or Roll Number...">
+            </div>
+        </div>
+
+        <div class="ledger-section">
+            <span class="section-title">Student Details</span>
+            <div class="grid-3">
+                <div class="input-group">
+                    <label>Student Name</label>
+                    <input type="text" value="Rahul Kumar" readonly>
                 </div>
-                <div class="suggestion-item" onclick="fillData('Aditya Singh', 'GR-1088')">
-                    <span>Aditya Singh</span> <strong>GR-1088</strong>
+                <div class="input-group">
+                    <label>Admission No.</label>
+                    <input type="text" value="LIS/2024/105" readonly>
+                </div>
+                <div class="input-group">
+                    <label>Class/Section</label>
+                    <input type="text" value="Grade 5 - A" readonly>
                 </div>
             </div>
         </div>
 
-        <div class="form-section">
-            <span class="section-title">Step 1: Student Ledger Details</span>
-            <div class="input-grid">
-                <div class="input-group">
-                    <label>Student Full Name</label>
-                    <input type="text" id="stuName" placeholder="Enter Name">
-                </div>
-                <div class="input-group">
-                    <label>GR / Admission Number</label>
-                    <input type="text" id="stuGR" placeholder="e.g. 1024">
-                </div>
-                <div class="input-group">
-                    <label>Current Class</label>
-                    <select>
-                        <option>Class 5 - A</option>
-                        <option>Class 6 - B</option>
-                        <option>Class 7 - A</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-
-        <div class="form-section" style="border-left-color: var(--royal-blue);">
-            <span class="section-title">Step 2: Transaction & Fee Record</span>
-            <div class="input-grid">
-                <div class="input-group">
-                    <label>Fee Category</label>
-                    <select id="feeCat">
-                        <option>Monthly Tuition Fee</option>
-                        <option>Examination Fee</option>
-                        <option>Transport Fee</option>
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label>Amount Recieved (₹)</label>
-                    <input type="number" id="amtPaid" placeholder="0.00">
-                </div>
-                <div class="input-group">
-                    <div class="due-badge">
-                        <small style="font-size: 10px; display: block; opacity: 0.8;">CURRENT BALANCE DUE</small>
-                        ₹ <span id="dueAmt">15,400</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div style="display: flex; gap: 15px; justify-content: center;" class="no-print">
-            <button class="royal-btn" style="background: #555;" onclick="location.reload()">Clear Ledger</button>
-            <button class="royal-btn btn-success" onclick="generateReceipt()">Save & Print Receipt</button>
-        </div>
-
-        <div id="receiptArea">
-            <div class="receipt-card">
-                <div class="receipt-header">
-                    <h3 class="brand-font">Official Payment Receipt</h3>
-                    <p style="font-size: 12px;">The Lalit International School</p>
-                </div>
-                <table class="receipt-table">
-                    <tr><td><strong>Student Name:</strong></td><td id="recName">-</td></tr>
-                    <tr><td><strong>GR Number:</strong></td><td id="recGR">-</td></tr>
-                    <tr><td><strong>Fee Type:</strong></td><td id="recType">-</td></tr>
-                    <tr style="background: var(--light-gold); font-weight: bold;">
-                        <td>Amount Paid:</td><td id="recAmt">₹ 0.00</td>
-                    </tr>
+        <div class="ledger-section">
+            <span class="section-title">Fee Transaction History</span>
+            <div class="ledger-table-container">
+                <table class="ledger-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Receipt No.</th>
+                            <th class="text-right">Debit (Fee)</th>
+                            <th class="text-right">Credit (Paid)</th>
+                            <th class="text-right">Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>01-Apr-2024</td>
+                            <td>Annual Admission Fee</td>
+                            <td>-</td>
+                            <td class="text-right">25,000</td>
+                            <td class="text-right">0</td>
+                            <td class="text-right font-bold amt-due">25,000</td>
+                        </tr>
+                        <tr>
+                            <td>05-Apr-2024</td>
+                            <td>First Installment Paid</td>
+                            <td>RCP-9921</td>
+                            <td class="text-right">0</td>
+                            <td class="text-right amt-paid">15,000</td>
+                            <td class="text-right font-bold">10,000</td>
+                        </tr>
+                        <tr>
+                            <td>10-May-2024</td>
+                            <td>Monthly Bus Fee</td>
+                            <td>-</td>
+                            <td class="text-right">2,000</td>
+                            <td class="text-right">0</td>
+                            <td class="text-right font-bold amt-due">12,000</td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr style="background: var(--light-gold);">
+                            <td colspan="5" class="text-right font-bold" style="color: var(--royal-blue);">Net Payable Balance:</td>
+                            <td class="text-right font-bold" style="font-size: 1.1rem; color: #c0392b; border: 2px solid var(--gold);">₹ 12,000</td>
+                        </tr>
+                    </tfoot>
                 </table>
-                <div style="margin-top: 30px; display: flex; justify-content: space-between; font-size: 12px;">
-                    <span>Date: 19-Feb-2026</span>
-                    <span>Authorized Signatory _________</span>
-                </div>
             </div>
+        </div>
+
+        <div class="btn-row no-print">
+            <button class="royal-btn" style="background: #666; border-color: #444; color: white;">Export CSV</button>
+            <button class="royal-btn">Save Changes</button>
+            <button class="royal-btn btn-print" onclick="window.print()">
+                <i class="fas fa-print"></i> Print Ledger
+            </button>
         </div>
 
     </div>
-</main>
-
-<script>
-    // Search Suggestions Logic
-    function showSuggestions(val) {
-        let box = document.getElementById('searchSuggestions');
-        if(val.length > 0) box.style.display = 'block';
-        else box.style.display = 'none';
-    }
-
-    // Fill Data when suggestion clicked
-    function fillData(name, gr) {
-        document.getElementById('stuName').value = name;
-        document.getElementById('stuGR').value = gr;
-        document.getElementById('searchSuggestions').style.display = 'none';
-        document.getElementById('mainSearch').value = name;
-    }
-
-    // Receipt Generation Logic
-    function generateReceipt() {
-        const name = document.getElementById('stuName').value;
-        const gr = document.getElementById('stuGR').value;
-        const amt = document.getElementById('amtPaid').value;
-        const type = document.getElementById('feeCat').value;
-
-        if(!name || !amt) {
-            alert("Kripya Student ka naam aur Amount bharein!");
-            return;
-        }
-
-        document.getElementById('recName').innerText = name;
-        document.getElementById('recGR').innerText = gr;
-        document.getElementById('recAmt').innerText = "₹ " + amt;
-        document.getElementById('recType').innerText = type;
-        
-        document.getElementById('receiptArea').style.display = 'block';
-        window.print();
-    }
-</script>
+</div>
 
 </body>
 </html>
