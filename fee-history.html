@@ -4,120 +4,97 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Master Ledger - Financial Portal</title>
+    
+    <link rel="stylesheet" href="style.css"> 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
-        :root { --royal-blue: #002366; --gold: #C5A021; --soft-bg: #fdfbf0; }
-        
-        body { background-color: var(--soft-bg); font-family: 'Times New Roman', serif; color: var(--royal-blue); margin: 0; }
-
-        .main-header { background: white; padding: 20px; border-bottom: 4px solid var(--gold); text-align: center; }
-        .school-title-main { font-family: 'Georgia', serif; font-weight: 900; letter-spacing: 2px; color: var(--royal-blue); font-size: 2rem; text-transform: uppercase; }
-        
-        .content-wrap { max-width: 1050px; margin: auto; padding: 20px; }
-
-        #ledgerArea { 
-            display: none; background: white; border: 2px solid #000; 
-            padding: 15px; box-sizing: border-box; position: relative;
+        /* Ledger specific tweaks jo CSS file mein nahi hain */
+        #ledgerArea { display: none; margin-top: 30px; }
+        .table-ledger { width: 100%; border-collapse: collapse; border: 1.5px solid var(--royal-blue); margin-top: 20px; }
+        .table-ledger th { background: var(--royal-blue); color: var(--gold); padding: 12px; font-family: 'Cinzel', serif; font-size: 12px; }
+        .table-ledger td { border: 1px solid var(--border-color); padding: 10px; text-align: center; font-weight: 500; }
+        .student-strip { 
+            background: var(--light-gold); border: 2px solid var(--gold); 
+            padding: 20px; border-radius: 10px; display: flex; gap: 20px; margin-bottom: 20px; 
         }
-
-        .print-header { border-bottom: 3px double var(--gold); padding-bottom: 10px; margin-bottom: 10px; }
-        .school-name-print { font-family: 'Georgia', serif; font-weight: 900; color: var(--royal-blue); font-size: 24px; margin: 0; text-transform: uppercase; }
-
-        .student-strip { display: flex; align-items: center; border: 1px solid #000; padding: 8px; background: #fffcf0; margin-bottom: 10px; gap: 15px; }
-        .student-strip img { width: 70px; height: 90px; border: 1.5px solid var(--royal-blue); object-fit: cover; }
-        .student-details-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; width: 100%; font-size: 13px; }
-
-        .breakdown-row { display: flex; border: 1px solid #000; margin-bottom: 10px; background: #f2f2f2; font-size: 11px; }
-        .break-item { flex: 1; padding: 6px; text-align: center; border-right: 1px solid #000; }
-        .break-item:last-child { border-right: none; background: var(--royal-blue); color: var(--gold); font-weight: bold; }
-
-        .table-ledger { width: 100%; border-collapse: collapse; border: 1.5px solid #000; table-layout: fixed; }
-        .table-ledger th { background: var(--royal-blue) !important; color: var(--gold) !important; font-size: 11px; padding: 8px; border: 1px solid #000; text-align: center; }
-        .table-ledger td { border: 1px solid #000; padding: 0 5px; font-size: 13px; text-align: center; font-weight: 600; color: #000; }
-        .month-name { text-align: left !important; background: #f9f9f9 !important; padding-left: 10px !important; }
-
-        @media print {
-            @page { size: A4 portrait; margin: 8mm; }
-            .no-print { display: none !important; }
-            body { background: white; padding: 0; }
-            #ledgerArea { display: flex !important; flex-direction: column; height: 275mm; border: none; padding: 0; }
-            .table-ledger { flex-grow: 1; height: 100%; }
-            .table-ledger td { height: 45px; }
-            .student-strip { background: #fff !important; }
-            .breakdown-row { background: #fff !important; }
-        }
+        .breakdown-row { display: flex; background: var(--royal-blue); color: white; border-radius: 5px; margin-bottom: 15px; overflow: hidden; }
+        .break-item { flex: 1; padding: 10px; text-align: center; border-right: 1px solid rgba(255,255,255,0.2); font-size: 12px; }
     </style>
 </head>
 <body>
 
-<div class="main-header no-print">
-    <img src="logo.png" class="brand-logo" style="width: 70px;">
-    <h1 id="brand-name-main" class="school-title-main">LOADING...</h1>
-    <p class="text-muted small">Financial Ledger Archive Portal</p>
-</div>
+<div id="menu-container"></div>
 
-<div class="content-wrap">
-    <div class="card no-print p-4 mb-4 border-gold shadow-sm">
-        <div class="input-group input-group-lg">
-            <span class="input-group-text bg-white"><i class="fas fa-search text-gold"></i></span>
-            <input type="text" id="searchID" class="form-control" placeholder="Search Student Name or Admission ID..." oninput="liveSearch()">
+<div class="main-content">
+    <div class="royal-card">
+        
+        <header id="brand-header-container" class="header no-print"></header>
+
+        <div class="search-box-wrapper no-print">
+            <i class="fas fa-search" style="position: absolute; left: 20px; top: 18px; color: var(--gold);"></i>
+            <input type="text" id="searchID" class="search-input-royal" placeholder="Search Student Name or Admission ID..." oninput="liveSearch()">
+            <div id="searchSuggestions"></div>
         </div>
-        <div id="searchSuggestions" class="list-group position-absolute w-100" style="z-index:100; display:none;"></div>
-    </div>
 
-    <div id="ledgerArea">
-        <div class="print-header d-flex justify-content-between align-items-center">
-            <div class="d-flex align-items-center">
-                <img src="logo.png" class="brand-logo" style="width: 55px; margin-right: 12px;">
-                <div>
-                    <h2 id="brand-name-print" class="school-name-print">LOADING...</h2>
-                    <span class="small fw-bold">Academic Session 2025-26 | Ledger Statement</span>
+        <div id="ledgerArea">
+            <div class="print-header d-flex justify-content-between align-items-center mb-4">
+                <div class="d-flex align-items-center">
+                    <img src="logo.png" class="receipt-logo" onerror="this.src='https://via.placeholder.com/80'">
+                    <div class="ms-3">
+                        <h2 style="margin:0; text-align:left; font-size: 1.5rem;" class="brand-font">THE LALIT INTERNATIONAL SCHOOL</h2>
+                        <span class="small fw-bold text-muted">Academic Session 2025-26 | Ledger Statement</span>
+                    </div>
+                </div>
+                <div class="text-end small"><b>Date:</b> <span id="pDate"></span></div>
+            </div>
+
+            <div class="student-strip">
+                <img id="lPhoto" class="id-photo" src="" alt="Student">
+                <div class="student-details-grid flex-grow-1" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>NAME: <b id="lName" class="text-uppercase"></b></div>
+                    <div>ID: <b id="lID"></b></div>
+                    <div>CLASS: <b id="lClass"></b></div>
+                    <div>FATHER: <b id="lFather"></b></div>
+                    <div>TRANSPORT: <b id="lTrans"></b></div>
+                    <div>STATUS: <span class="status-badge btn-success">ACTIVE</span></div>
                 </div>
             </div>
-            <div class="text-end small"><b>Date:</b> <span id="pDate"></span></div>
-        </div>
 
-        <div class="student-strip">
-            <img id="lPhoto" src="" alt="Student">
-            <div class="student-details-grid">
-                <div>NAME: <b id="lName"></b></div>
-                <div>ID: <b id="lID"></b></div>
-                <div>CLASS: <b id="lClass"></b></div>
-                <div>FATHER: <b id="lFather"></b></div>
-                <div>TRANSPORT: <b id="lTrans"></b></div>
-                <div>STATUS: <b class="text-success">ACTIVE</b></div>
+            <div class="breakdown-row" id="lBreakdown"></div>
+
+            <div class="table-responsive">
+                <table class="table-ledger">
+                    <thead>
+                        <tr>
+                            <th>PARTICULARS</th>
+                            <th>TUITION</th>
+                            <th>HOSTEL</th>
+                            <th>TRANS.</th>
+                            <th>ANNUAL</th>
+                            <th>PAYABLE</th>
+                            <th>PAID</th>
+                            <th>BALANCE</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lBody"></tbody>
+                    <tfoot>
+                        <tr style="background: var(--gold); color: var(--royal-blue); font-weight: bold;">
+                            <td colspan="5" class="text-end px-3">SESSION GRAND TOTAL</td>
+                            <td id="totalPay"></td>
+                            <td id="totalPaid"></td>
+                            <td id="totalDue"></td>
+                        </tr>
+                    </tfoot>
+                </table>
             </div>
-        </div>
 
-        <div class="breakdown-row" id="lBreakdown"></div>
-
-        <table class="table-ledger">
-            <thead>
-                <tr>
-                    <th style="width: 18%;">PARTICULARS</th>
-                    <th>TUITION</th>
-                    <th>HOSTEL</th>
-                    <th>TRANS.</th>
-                    <th>ANNUAL</th>
-                    <th>PAYABLE</th>
-                    <th>PAID</th>
-                    <th>BALANCE</th>
-                </tr>
-            </thead>
-            <tbody id="lBody"></tbody>
-            <tfoot>
-                <tr style="background: var(--royal-blue); color: var(--gold); font-weight: bold; font-size: 14px;">
-                    <td colspan="5" class="text-end px-3">SESSION GRAND TOTAL</td>
-                    <td id="totalPay"></td>
-                    <td id="totalPaid"></td>
-                    <td id="totalDue"></td>
-                </tr>
-            </tfoot>
-        </table>
-
-        <div class="mt-3 text-end no-print">
-            <button class="btn btn-dark px-5 fw-bold" onclick="window.print()">PRINT OFFICIAL LEDGER</button>
+            <div class="mt-4 text-center no-print">
+                <button class="royal-btn" onclick="window.print()">
+                    <i class="fas fa-print"></i> PRINT OFFICIAL LEDGER
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -130,28 +107,24 @@
 <script>
     const months = ["April", "May", "June", "July", "August", "September", "October", "November", "December", "January", "February", "March"];
 
-    // Function to apply branding from brand.js if available
-    window.onload = function() {
-        if (typeof brandName !== 'undefined') {
-            document.getElementById('brand-name-main').innerText = brandName;
-            document.getElementById('brand-name-print').innerText = brandName;
-            document.title = `Master Ledger - ${brandName}`;
-        }
-    };
-
+    // Search aur Ledger Loading Logic
     async function liveSearch() {
         const val = document.getElementById('searchID').value.toLowerCase();
         const sugg = document.getElementById('searchSuggestions');
         if(val.length < 2) { sugg.style.display='none'; return; }
+        
         const snap = await db.collection('students').get();
         let html = '';
         snap.forEach(doc => {
             const d = doc.data();
             if(d.name.toLowerCase().includes(val) || d.uniqueID.toString().includes(val)) {
-                html += `<button class="list-group-item list-group-item-action" onclick='loadLedger(${JSON.stringify(d)})'>${d.name} (${d.uniqueID})</button>`;
+                html += `<div class="suggestion-item" onclick='loadLedger(${JSON.stringify(d)})'>
+                            <b>${d.name}</b> <small>(${d.uniqueID})</small>
+                         </div>`;
             }
         });
-        sugg.innerHTML = html; sugg.style.display='block';
+        sugg.innerHTML = html; 
+        sugg.style.display = html ? 'block' : 'none';
     }
 
     async function loadLedger(s) {
@@ -159,16 +132,17 @@
         document.getElementById('ledgerArea').style.display='block';
         document.getElementById('pDate').innerText = new Date().toLocaleDateString('en-GB');
         
-        document.getElementById('lName').innerText = s.name.toUpperCase();
+        document.getElementById('lName').innerText = s.name;
         document.getElementById('lID').innerText = s.uniqueID;
         document.getElementById('lClass').innerText = s.class;
         document.getElementById('lFather').innerText = s.father || "N/A";
         document.getElementById('lTrans').innerText = s.transportDistance || "NONE";
-        document.getElementById('lPhoto').src = s.photo || '';
+        document.getElementById('lPhoto').src = s.photo || 'https://via.placeholder.com/100';
 
         const mDoc = await db.collection('fee_master').doc(s.class).get();
         const fm = mDoc.exists ? mDoc.data() : {};
         
+        // Fee calculation logic remains the same...
         let tRate = 0;
         if(s.transport === 'Yes') {
             const tSnap = await db.collection('transport_master').get();
@@ -182,36 +156,37 @@
 
         const annualTotal = Number(fm.admission||0) + Number(fm.development||0) + Number(fm.exam||0) + Number(fm.books||0) + Number(fm.misc||0);
         document.getElementById('lBreakdown').innerHTML = `
-            <div class="break-item">Adm: ₹${fm.admission||0}</div>
-            <div class="break-item">Dev: ₹${fm.development||0}</div>
-            <div class="break-item">Exam: ₹${fm.exam||0}</div>
-            <div class="break-item">Books: ₹${fm.books||0}</div>
-            <div class="break-item">ANNUAL TOTAL: ₹${annualTotal}</div>
+            <div class="break-item">ADM: ₹${fm.admission||0}</div>
+            <div class="break-item">DEV: ₹${fm.development||0}</div>
+            <div class="break-item">EXAM: ₹${fm.exam||0}</div>
+            <div class="break-item">BOOKS: ₹${fm.books||0}</div>
+            <div class="break-item" style="background:var(--gold); color:var(--royal-blue); font-weight:bold;">ANNUAL: ₹${annualTotal}</div>
         `;
 
-        let html = '', gPay = 0, gPaid = 0;
-        let runningBalance = 0;
+        let html = '', gPay = 0, gPaid = 0, runningBalance = 0;
         const mT = Number(fm.tuition||0), mH = (s.hostel==='Yes'?Number(fm.hostel||0):0), mTr = tRate;
 
+        // Registration Row
         const aPaid = payData.filter(p => ["Admission", "Exam", "Books", "Annual", "Development", "Registration"].includes(p.month)).reduce((sum, p) => sum + Number(p.amount), 0);
         runningBalance = annualTotal - aPaid;
-        html += `<tr><td class="month-name">REGISTRATION</td><td>-</td><td>-</td><td>-</td><td>₹${annualTotal}</td><td>₹${annualTotal}</td><td>₹${aPaid}</td><td>₹${runningBalance}</td></tr>`;
+        html += `<tr><td style="text-align:left; font-weight:bold;">REGISTRATION</td><td>-</td><td>-</td><td>-</td><td>₹${annualTotal}</td><td>₹${annualTotal}</td><td>₹${aPaid}</td><td>₹${runningBalance}</td></tr>`;
         gPay += annualTotal; gPaid += aPaid;
 
+        // Monthly Rows
         months.forEach(m => {
             const total = mT + mH + mTr;
             const monthPaid = payData.filter(p => p.month === m).reduce((acc, curr) => acc + Number(curr.amount), 0);
             runningBalance = (runningBalance + total) - monthPaid;
 
             html += `<tr>
-                <td class="month-name">${m.toUpperCase()}</td>
+                <td style="text-align:left;">${m.toUpperCase()}</td>
                 <td>₹${mT}</td>
                 <td>${mH>0?'₹'+mH:'-'}</td>
                 <td>${mTr>0?'₹'+mTr:'-'}</td>
                 <td>-</td>
                 <td>₹${total}</td>
                 <td>₹${monthPaid}</td>
-                <td>₹${runningBalance}</td>
+                <td style="background:#f9f9f9;">₹${runningBalance}</td>
             </tr>`;
             gPay += total; gPaid += monthPaid;
         });
