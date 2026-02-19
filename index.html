@@ -14,45 +14,45 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script src="firebase-config.js"></script>
-    <script src="auth-guard.js"></script> <script src="brand.js"></script>
+    <script src="auth-guard.js"></script> 
+    <script src="brand.js"></script>
 
     <style>
         .stat-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
         .stat-card {
-            background: white; border-radius: 12px; padding: 20px;
+            background: white; border-radius: 12px; padding: 25px;
             box-shadow: var(--shadow-md);
-            border-bottom: 4px solid var(--royal-blue);
+            border-bottom: 5px solid var(--royal-blue);
             text-align: center;
-            transition: 0.3s;
+            transition: var(--transition);
         }
-        .stat-card:hover { transform: translateY(-5px); }
-        .stat-card h6 { margin: 0; color: #666; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; font-weight: bold; }
-        .stat-card h3 { margin: 10px 0 0; font-size: 1.8rem; color: var(--royal-blue); font-family: 'Cinzel', serif; }
+        .stat-card:hover { transform: translateY(-8px); border-bottom-color: var(--gold); }
+        .stat-card h6 { margin: 0; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1.5px; font-weight: 700; }
+        .stat-card h3 { margin: 12px 0 0; font-size: 2rem; color: var(--royal-blue); font-family: 'Cinzel', serif; font-weight: 900; }
         
         .chart-container-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
         }
         .chart-box {
             background: white; border-radius: 12px; padding: 20px;
-            border: 1px solid var(--gold); height: 350px;
+            border: 1px solid var(--border-color); height: 380px;
             display: flex; flex-direction: column; align-items: center;
             box-shadow: var(--shadow-sm);
         }
-        canvas { max-width: 100% !important; max-height: 250px !important; }
+        canvas { width: 100% !important; max-height: 280px !important; }
 
-        /* Access Denied Overlay for Charts */
         .no-access {
-            display: flex; align-items: center; justify-content: center;
-            height: 100%; color: #ccc; font-style: italic; font-size: 0.9rem;
-            text-align: center; padding: 20px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100%; color: #999; font-size: 0.85rem; text-align: center;
         }
+        .no-access i { font-size: 2rem; margin-bottom: 10px; color: #eee; }
     </style>
 </head>
 <body>
@@ -61,50 +61,49 @@
 
 <div class="main-content">
     <div class="royal-card">
-        <div class="header" id="brand-header-container">
-            </div>
+        <div class="header" id="brand-header-container"></div>
 
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="brand-font" style="color: var(--royal-blue); margin: 0;">
-                <i class="fas fa-tachometer-alt me-2"></i>Control Tower
+            <h2 class="brand-font" style="margin: 0;">
+                <i class="fas fa-crown me-2" style="color: var(--gold);"></i>Control Tower
             </h2>
-            <div id="userWelcome" class="small fw-bold text-muted"></div>
+            <div id="userWelcome" class="badge bg-light text-dark p-2 border"></div>
         </div>
 
         <div class="stat-grid">
-            <div class="stat-card" id="stat_students">
-                <h6>Total Students</h6>
-                <h3 id="countStudents">0</h3>
+            <div class="stat-card">
+                <h6>Total Strength</h6>
+                <h3 id="countStudents">--</h3>
             </div>
-            <div class="stat-card" id="stat_revenue">
+            <div class="stat-card">
                 <h6>Today's Collection</h6>
-                <h3 id="countCash" style="color: #198754;">₹0</h3>
+                <h3 id="countCash" style="color: #27ae60;">₹0</h3>
             </div>
-            <div class="stat-card" id="stat_attendance">
-                <h6>Today's Attendance</h6>
+            <div class="stat-card">
+                <h6>Attendance Today</h6>
                 <h3 id="countAttend" style="color: var(--gold);">0%</h3>
             </div>
-            <div class="stat-card" id="stat_new">
-                <h6>New Admissions</h6>
-                <h3 id="countNew" style="color: #0d6efd;">0</h3>
+            <div class="stat-card">
+                <h6>Monthly New Adm.</h6>
+                <h3 id="countNew" style="color: var(--info);">0</h3>
             </div>
         </div>
 
-        <div class="chart-container-grid" id="chartsGrid">
+        <div class="chart-container-grid">
             <div class="chart-box" id="box_admission">
-                <h6 class="mb-3"><i class="fas fa-user-plus me-2"></i>ADMISSION TREND</h6>
+                <h6 class="section-title"><i class="fas fa-users me-2"></i>STRENGTH ANALYSIS</h6>
                 <canvas id="admissionChart"></canvas>
             </div>
-            <div class="chart-box" id="box_attendance">
-                <h6 class="mb-3"><i class="fas fa-calendar-check me-2"></i>ATTENDANCE OVERVIEW</h6>
-                <canvas id="attendanceChart"></canvas>
-            </div>
             <div class="chart-box" id="box_fee">
-                <h6 class="mb-3"><i class="fas fa-vault me-2"></i>FEE COLLECTION</h6>
+                <h6 class="section-title"><i class="fas fa-chart-pie me-2"></i>FEE REVENUE</h6>
                 <canvas id="feeChart"></canvas>
             </div>
+            <div class="chart-box" id="box_attendance">
+                <h6 class="section-title"><i class="fas fa-fingerprint me-2"></i>ATTENDANCE RATE</h6>
+                <canvas id="attendanceChart"></canvas>
+            </div>
             <div class="chart-box" id="box_expense">
-                <h6 class="mb-3"><i class="fas fa-wallet me-2"></i>EXPENSE ANALYSIS</h6>
+                <h6 class="section-title"><i class="fas fa-file-invoice-dollar me-2"></i>EXPENSE SPLIT</h6>
                 <canvas id="expenseChart"></canvas>
             </div>
         </div>
@@ -112,84 +111,129 @@
 </div>
 
 <script>
-    let charts = { admission: null, attendance: null, fee: null, expense: null };
+    let charts = {};
 
-    // Function to initialize Dashboard after Auth Check
+    // Helper: Normalize numbers from Firebase (handles strings and empty values)
+    const val = (v) => parseFloat(v) || 0;
+
     async function startDashboard(userData) {
-        document.getElementById('userWelcome').innerText = `Welcome, ${userData.name} (${userData.role.toUpperCase()})`;
+        document.getElementById('userWelcome').innerHTML = `<i class="fas fa-user-circle me-1"></i> ${userData.name} | ${userData.role.toUpperCase()}`;
 
-        // 1. ADMISSIONS LOGIC (Visible to Admin & view_students permission)
-        if(userData.role === 'admin' || (userData.permissions && userData.permissions.view_students)) {
+        const todayDate = new Date().toLocaleDateString('en-GB'); // "DD/MM/YYYY"
+
+        // --- 1. STUDENTS & ADMISSION ---
+        if(userData.role === 'admin' || (userData.permissions?.view_students)) {
             db.collection('students').onSnapshot(snap => {
                 let total = snap.size;
-                let newAdm = snap.docs.filter(d => d.data().isNew === true).length;
+                let newCount = 0;
+                snap.forEach(doc => {
+                    const s = doc.data();
+                    // Checking if isNew is true OR if they joined this month
+                    if(s.isNew === true || (s.admissionDate && s.admissionDate.includes(todayDate.split('/')[1]))) {
+                        newCount++;
+                    }
+                });
                 document.getElementById('countStudents').innerText = total;
-                document.getElementById('countNew').innerText = newAdm;
-                renderChart('admission', 'doughnut', ['Existing', 'New'], [total - newAdm, newAdm], ['#002366', '#D4AF37']);
+                document.getElementById('countNew').innerText = newCount;
+                renderChart('admission', 'doughnut', ['Old Students', 'New Admissions'], [total - newCount, newCount], ['#002366', '#D4AF37']);
             });
         } else {
-            document.getElementById('box_admission').innerHTML = `<div class="no-access">Admission data restricted</div>`;
+            lockBox('box_admission');
         }
 
-        // 2. FEE/REVENUE LOGIC (Visible to Admin & collect_fees permission)
-        if(userData.role === 'admin' || (userData.permissions && userData.permissions.collect_fees)) {
-            const today = new Date().toLocaleDateString('en-GB');
+        // --- 2. FEE COLLECTION ---
+        if(userData.role === 'admin' || (userData.permissions?.collect_fees)) {
             db.collection('fee_transactions').onSnapshot(snap => {
                 let todayTotal = 0;
                 let monthTotal = 0;
                 snap.forEach(doc => {
-                    const d = doc.data();
-                    if(d.date === today) todayTotal += Number(d.amount);
-                    monthTotal += Number(d.amount);
+                    const f = doc.data();
+                    const amount = val(f.amount);
+                    if(f.date === todayDate) todayTotal += amount;
+                    // Simplified: adding all for chart, in real world filter by month
+                    monthTotal += amount;
                 });
                 document.getElementById('countCash').innerText = "₹" + todayTotal.toLocaleString('en-IN');
-                renderChart('fee', 'doughnut', ['Collected', 'Dues'], [monthTotal, 50000], ['#198754', '#f8f9fa']);
+                renderChart('fee', 'pie', ['Collected', 'Expected'], [monthTotal, monthTotal * 0.2], ['#27ae60', '#f4f4f2']);
             });
         } else {
-            document.getElementById('box_fee').innerHTML = `<div class="no-access">Financial data restricted</div>`;
-            document.getElementById('countCash').innerText = "Locked";
+            lockBox('box_fee');
+            document.getElementById('countCash').innerText = "LOCKED";
         }
 
-        // 3. ATTENDANCE LOGIC
-        if(userData.role === 'admin' || (userData.permissions && userData.permissions.attendance)) {
-             // Sample Data for demonstration
-             document.getElementById('countAttend').innerText = "92%";
-             renderChart('attendance', 'pie', ['Present', 'Absent'], [92, 8], ['#D4AF37', '#eee']);
+        // --- 3. ATTENDANCE ---
+        if(userData.role === 'admin' || (userData.permissions?.attendance)) {
+             // Link this to your attendance collection
+             document.getElementById('countAttend').innerText = "94%";
+             renderChart('attendance', 'polarArea', ['Present', 'Absent', 'Leave'], [94, 4, 2], ['#D4AF37', '#c0392b', '#2980b9']);
         } else {
-            document.getElementById('box_attendance').innerHTML = `<div class="no-access">Attendance data restricted</div>`;
+            lockBox('box_attendance');
         }
 
-        // 4. EXPENSES (Admin Only)
+        // --- 4. EXPENSES (Admin Only) ---
         if(userData.role === 'admin') {
-            renderChart('expense', 'bar', ['Salary', 'Bills', 'Misc'], [45000, 15000, 8000], ['#002366', '#D4AF37', '#6c757d']);
+            db.collection('expenses').onSnapshot(snap => {
+                let cat = { Salary: 0, Utility: 0, Maintenance: 0 };
+                snap.forEach(doc => {
+                    const e = doc.data();
+                    if(cat[e.category] !== undefined) cat[e.category] += val(e.amount);
+                });
+                renderChart('expense', 'bar', Object.keys(cat), Object.values(cat), ['#002366', '#D4AF37', '#555']);
+            });
         } else {
-            document.getElementById('box_expense').innerHTML = `<div class="no-access">Admin-only analytics</div>`;
+            lockBox('box_expense');
         }
     }
 
     function renderChart(id, type, labels, data, colors) {
-        const canvas = document.getElementById(id + 'Chart');
-        if(!canvas) return;
+        const ctx = document.getElementById(id + 'Chart')?.getContext('2d');
+        if(!ctx) return;
         if (charts[id]) charts[id].destroy(); 
-        charts[id] = new Chart(canvas.getContext('2d'), {
+        charts[id] = new Chart(ctx, {
             type: type,
             data: {
                 labels: labels,
-                datasets: [{ data: data, backgroundColor: colors, borderWidth: 0 }]
+                datasets: [{ 
+                    data: data, 
+                    backgroundColor: colors,
+                    hoverOffset: 15,
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } }
+                plugins: { 
+                    legend: { 
+                        position: 'bottom', 
+                        labels: { padding: 20, font: { family: 'Poppins', size: 11 }, usePointStyle: true } 
+                    } 
+                },
+                layout: { padding: 10 }
             }
         });
     }
 
-    // Auth Listening to trigger Dashboard
+    function lockBox(boxId) {
+        document.getElementById(boxId).innerHTML = `
+            <div class="no-access">
+                <i class="fas fa-lock"></i>
+                <p>ACCESS RESTRICTED<br><span style="font-size:10px">Contact Administrator</span></p>
+            </div>`;
+    }
+
+    // Global Auth Trigger
     firebase.auth().onAuthStateChanged(async (user) => {
         if (user) {
             const doc = await db.collection('users').doc(user.uid).get();
-            if(doc.exists) startDashboard(doc.data());
+            if(doc.exists) {
+                startDashboard(doc.data());
+            } else {
+                console.error("User profile not found in Firestore");
+            }
+        } else {
+            window.location.href = "login.html";
         }
     });
 </script>
