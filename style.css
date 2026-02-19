@@ -214,3 +214,19 @@ input, select, textarea {
     .input-grid { grid-template-columns: 1fr; }
     .school-logo { width: 90px; height: 90px; }
 }
+/* --- MENU TOGGLE FIX: BACKGROUND REMOVAL --- */
+#menu-trigger-btn {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+#menu-trigger-btn:hover {
+    background: transparent !important; /* Hover par bhi background nahi aayega */
+    transform: scale(1.1); /* Sirf halka sa zoom effect lines par */
+}
+
+#menu-trigger-btn span {
+    background: var(--gold) !important; /* Lines ka color gold rahega */
+}
