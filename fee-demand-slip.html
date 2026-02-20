@@ -30,6 +30,7 @@
         .fee-table { width: 100%; border-collapse: collapse; margin: 15px 0; border: 1px solid #000; }
         .fee-table th, .fee-table td { border: 1px solid #000; padding: 10px; font-size: 14px; }
         .total-row { background: var(--royal) !important; color: #fff; font-size: 18px; font-weight: bold; }
+        #suggestions { position: absolute; z-index: 1000; width: 100%; max-height: 200px; overflow-y: auto; }
         @media print { .no-print, #menu-container, .control-panel { display: none !important; } }
     </style>
 </head>
@@ -54,12 +55,24 @@
             </div>
             <div class="col-md-3">
                 <label class="small fw-bold">Class Filter</label>
-                <select id="classFilter" class="form-select"><option value="">-- All Classes --</option></select>
+                <select id="classFilter" class="form-select">
+                    <option value="">-- All Classes --</option>
+                    <option value="Pre-Nursery">Pre-Nursery</option>
+                    <option value="Nursery">Nursery</option>
+                    <option value="LKG">LKG</option>
+                    <option value="UKG">UKG</option>
+                    <option value="1">Class 1</option><option value="2">Class 2</option>
+                    <option value="3">Class 3</option><option value="4">Class 4</option>
+                    <option value="5">Class 5</option><option value="6">Class 6</option>
+                    <option value="7">Class 7</option><option value="8">Class 8</option>
+                    <option value="9">Class 9</option><option value="10">Class 10</option>
+                    <option value="11">Class 11</option><option value="12">Class 12</option>
+                </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-3 position-relative">
                 <label class="small fw-bold">Search Student</label>
-                <input type="text" id="searchName" class="form-control" placeholder="Name or ID..." oninput="liveSearch()">
-                <div id="suggestions" class="list-group position-absolute w-25" style="z-index:100; display:none;"></div>
+                <input type="text" id="searchName" class="form-control" placeholder="Enter Name or ID..." oninput="liveSearch()">
+                <div id="suggestions" class="list-group" style="display:none;"></div>
             </div>
             <div class="col-md-2"><button class="btn btn-dark w-100" onclick="startGeneration()">GENERATE</button></div>
             <div class="col-md-2"><button class="btn btn-warning w-100 fw-bold" onclick="window.print()">PRINT</button></div>
@@ -72,21 +85,37 @@
 <script>
 let students = []; 
 
+// Student data fetch karna
 async function init() {
     const sS = await db.collection('students').get();
+    students = [];
     sS.forEach(d => students.push(d.data()));
-    const classes = [...new Set(students.map(s => s.class))].sort();
-    const cf = document.getElementById('classFilter');
-    classes.forEach(c => cf.innerHTML += `<option value="${c}">${c}</option>`);
 }
 
 function liveSearch() {
     const val = document.getElementById('searchName').value.toLowerCase();
     const sugg = document.getElementById('suggestions');
-    if(val.length < 2) { sugg.style.display='none'; return; }
-    let matches = students.filter(s => s.name.toLowerCase().includes(val) || s.uniqueID.toString().includes(val));
-    sugg.innerHTML = matches.map(s => `<button class="list-group-item list-group-item-action" onclick="setSearch('${s.uniqueID}', '${s.name}')">${s.name} (${s.uniqueID})</button>`).join('');
-    sugg.style.display='block';
+    if(val.length < 1) { 
+        sugg.style.display='none'; 
+        delete document.getElementById('searchName').dataset.id;
+        return; 
+    }
+    
+    let matches = students.filter(s => 
+        s.name.toLowerCase().includes(val) || 
+        s.uniqueID.toString().includes(val)
+    );
+    
+    if(matches.length > 0) {
+        sugg.innerHTML = matches.map(s => `
+            <button class="list-group-item list-group-item-action py-2" onclick="setSearch('${s.uniqueID}', '${s.name}')">
+                <div class="fw-bold">${s.name}</div>
+                <small class="text-muted">ID: ${s.uniqueID} | Class: ${s.class}</small>
+            </button>`).join('');
+        sugg.style.display='block';
+    } else {
+        sugg.style.display='none';
+    }
 }
 
 function setSearch(id, name) {
@@ -101,19 +130,34 @@ async function startGeneration() {
     const singleId = document.getElementById('searchName').dataset.id;
     const nameInput = document.getElementById('searchName').value;
 
-    let targetList = (nameInput && singleId) ? students.filter(s => s.uniqueID.toString() === singleId) : (cls ? students.filter(s => s.class === cls) : students);
+    let targetList = [];
     
-    document.getElementById('printArea').innerHTML = "<h4 class='text-center mt-5'>Fetching Ledger Balances...</h4>";
+    // Priority: 1. ID Search, 2. Class Filter, 3. All Students
+    if (nameInput && singleId) {
+        targetList = students.filter(s => s.uniqueID.toString() === singleId.toString());
+    } else if (cls) {
+        targetList = students.filter(s => s.class.toString() === cls.toString());
+    } else {
+        targetList = students;
+    }
+
+    if (targetList.length === 0) {
+        alert("No students found!");
+        return;
+    }
+
+    document.getElementById('printArea').innerHTML = "<h4 class='text-center mt-5'><i class='fas fa-spinner fa-spin'></i> Syncing with Ledger Database...</h4>";
     
     let html = '';
     for(let s of targetList) {
-        // LEDGER SYNC: Seedha Ledger Document se us month ka balance uthana
+        // Seedha Ledger Collection se Balance uthana
         const ledgerDoc = await db.collection('ledger').doc(String(s.uniqueID)).get();
         if(ledgerDoc.exists) {
             const ledgerData = ledgerDoc.data();
             const monthData = ledgerData[month] || {};
             const balance = Number(monthData.balance || 0);
 
+            // Sirf unhi ko dikhao jinka balance 0 se zyada hai
             if(balance > 0) {
                 html += `
                 <div class="slip-card">
@@ -123,32 +167,46 @@ async function startGeneration() {
                         <p class="m-0 fw-bold">FEE DEMAND SLIP | ${month.toUpperCase()} 2026</p>
                     </div>
                     <div class="row mb-3 px-2">
-                        <div class="col-4 small">ID: <b>${s.uniqueID}</b></div>
+                        <div class="col-4 small text-start">STUDENT ID: <b>${s.uniqueID}</b></div>
                         <div class="col-4 text-center small">NAME: <b>${s.name.toUpperCase()}</b></div>
                         <div class="col-4 text-end small">CLASS: <b>${s.class}</b></div>
                     </div>
                     <table class="fee-table">
-                        <thead><tr><th>PARTICULARS</th><th class="text-end">AMOUNT</th></tr></thead>
+                        <thead class="table-light">
+                            <tr><th>PARTICULARS / FEE DESCRIPTION</th><th class="text-end">AMOUNT (INR)</th></tr>
+                        </thead>
                         <tbody>
-                            <tr><td>Net Outstanding Balance (including previous dues)</td><td class="text-end">₹${balance}</td></tr>
-                            <tr><td colspan="2" class="small text-muted text-center">Refer to Master Ledger for detailed breakdown</td></tr>
+                            <tr>
+                                <td class="py-4">
+                                    <b>Net Outstanding Balance</b><br>
+                                    <span class="text-muted small">Current month dues including any previous carry-forward balance.</span>
+                                </td>
+                                <td class="text-end py-4 fw-bold">₹${balance.toLocaleString('en-IN')}</td>
+                            </tr>
                         </tbody>
                         <tfoot>
-                            <tr class="total-row"><td class="text-end">TOTAL PAYABLE:</td><td class="text-end">₹${balance}</td></tr>
+                            <tr class="total-row">
+                                <td class="text-end">NET PAYABLE AMOUNT:</td>
+                                <td class="text-end">₹${balance.toLocaleString('en-IN')}</td>
+                            </tr>
                         </tfoot>
                     </table>
-                    <div class="d-flex justify-content-between mt-5 small">
-                        <div class="text-center" style="width:150px"><hr class="border-dark">Cashier Signature</div>
-                        <div class="text-center" style="width:150px"><hr class="border-dark">Parent Signature</div>
+                    <div class="mt-3 small italic text-muted text-center">
+                        * Please ignore if already paid. Detailed breakdown is available in the Master Ledger.
+                    </div>
+                    <div class="d-flex justify-content-between mt-5 pt-3">
+                        <div class="text-center" style="width:180px"><hr class="border-dark">Office Seal / Cashier</div>
+                        <div class="text-center" style="width:180px"><hr class="border-dark">Parent / Guardian Signature</div>
                     </div>
                 </div>`;
             }
         }
     }
-    document.getElementById('printArea').innerHTML = html || "<h4 class='text-center mt-5'>No Dues Found for selected criteria.</h4>";
+    document.getElementById('printArea').innerHTML = html || "<h4 class='text-center mt-5 text-success'>Great! No pending dues found for selected criteria.</h4>";
 }
 
-init();
+// Page load par data init karein
+window.onload = init;
 </script>
 <script src="menu.js"></script>
 </body>
