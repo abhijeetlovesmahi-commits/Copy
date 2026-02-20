@@ -10,46 +10,57 @@
     <link rel="stylesheet" href="style.css">
     
     <style>
-        :root { --royal: #002147; --gold: #D4AF37; }
-        .search-inner-box { background: #fdfbf0; border: 1px dashed var(--gold); padding: 25px; border-radius: 15px; }
-        .suggestions-box { 
-            position: absolute; width: 100%; z-index: 1000; 
-            background: white; border: 1px solid #ddd; 
-            max-height: 250px; overflow-y: auto; display: none;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        /* Aapka Original Style */
+        .school-logo-main { width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px; }
+        .student-profile-img { 
+            width: 120px; height: 120px; border-radius: 10px; border: 3px solid var(--gold); 
+            object-fit: cover; margin-bottom: 10px; background: #f0f0f0;
         }
-        .suggestion-item { padding: 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: 0.2s; }
-        .suggestion-item:hover { background: #f0f7ff; color: var(--royal); }
-        #feeDetailsForm { display: none; margin-top: 30px; animation: fadeIn 0.5s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        
-        @media print { .no-print { display: none !important; } #receiptArea { display: block !important; } }
+        .portal-container {
+            max-width: 850px; margin: 20px auto; background: #fff;
+            border: 2px solid var(--gold); border-radius: 20px; padding: 30px;
+            box-shadow: var(--shadow-lg);
+        }
+        .search-inner-box {
+            background: #fdfbf0; border: 1px dashed var(--gold);
+            padding: 25px; border-radius: 15px; margin-bottom: 20px;
+        }
+        /* Suggestion Box Fix */
+        #searchSuggestions {
+            position: absolute; width: 94%; z-index: 1000; background: white; 
+            border: 1px solid #ddd; border-radius: 0 0 10px 10px; max-height: 200px; overflow-y: auto;
+        }
+        .sugg-item { padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; }
+        .sugg-item:hover { background: #fff9e6; }
+        #feeDetailsForm { display: none; margin-top: 20px; border-top: 2px solid #eee; padding-top: 20px; }
     </style>
 </head>
 <body>
 
 <div id="menu-container" class="no-print"></div>
 
-<div class="container py-4 no-print">
-    <div class="text-center mb-4">
-        <img src="logo.png" style="width: 80px;" onerror="this.src='https://via.placeholder.com/80'">
-        <h2 class="fw-bold mt-2" style="color:var(--royal)">Fee Collection Terminal</h2>
+<div class="main-content">
+    <div class="header no-print text-center">
+        <img src="logo.png" class="school-logo-main" onerror="this.src='https://via.placeholder.com/100'">
+        <h1 class="brand-font">The Lalit International School</h1>
+        <p style="color: var(--gold); letter-spacing: 2px;">Nurturing Global Citizens</p>
     </div>
 
-    <div class="portal-container shadow-sm p-4 bg-white rounded-4 border">
+    <div class="portal-container no-print">
+        <h2 class="portal-title text-center mb-4" style="color: var(--royal-blue);">
+            <i class="fas fa-file-invoice-dollar"></i> Fee Collection Portal
+        </h2>
+
         <div class="search-inner-box position-relative">
             <div class="row g-3">
-                <div class="col-md-8">
-                    <label class="fw-bold small mb-1">STUDENT NAME OR ADMISSION ID</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
-                        <input type="text" id="studentSearch" class="form-control form-control-lg" placeholder="Type here..." oninput="handleSearchInput()">
-                    </div>
-                    <div id="searchSuggestions" class="suggestions-box rounded-3"></div>
+                <div class="col-md-7">
+                    <label class="fw-bold small mb-1">ADMISSION ID OR NAME</label>
+                    <input type="text" id="studentSearch" class="form-control" placeholder="Search..." oninput="liveSearch()" autocomplete="off">
+                    <div id="searchSuggestions" style="display:none;"></div>
                 </div>
-                <div class="col-md-4">
-                    <label class="fw-bold small mb-1">UP TO MONTH</label>
-                    <select id="calcMonth" class="form-select form-select-lg">
+                <div class="col-md-5">
+                    <label class="fw-bold small mb-1">FEES UP TO</label>
+                    <select id="calcMonth" class="form-select" onchange="if(activeStudent) calculateDue(activeStudent)">
                         <option>April</option><option>May</option><option>June</option>
                         <option>July</option><option>August</option><option>September</option>
                         <option>October</option><option>November</option><option>December</option>
@@ -57,44 +68,44 @@
                     </select>
                 </div>
             </div>
-            <button class="btn btn-dark w-100 mt-3 py-2 fw-bold" onclick="handleSearchInput()">
-                <i class="fas fa-sync-alt me-2"></i> REFRESH / SEARCH
-            </button>
+            <button class="btn-search-black mt-3" onclick="document.getElementById('studentSearch').focus()">SEARCH</button>
         </div>
 
-        <div id="feeDetailsForm" class="border-top pt-4">
-            <div class="row align-items-center">
+        <div id="feeDetailsForm">
+            <div class="row g-4 align-items-center">
                 <div class="col-md-4 text-center border-end">
-                    <img id="studentPhoto" src="" style="width:120px;height:120px;object-fit:cover;" class="rounded-circle border mb-2" onerror="this.src='https://via.placeholder.com/120?text=User'">
-                    <h5 id="displayName" class="fw-bold mb-0">---</h5>
-                    <p id="displayId" class="text-muted small">---</p>
+                    <img id="studentPhoto" src="" class="student-profile-img" onerror="this.src='https://via.placeholder.com/120?text=No+Photo'">
+                    <h5 id="displayName" class="fw-bold text-primary mb-0">---</h5>
+                    <p id="displayId" class="small text-muted">ID: ---</p>
                 </div>
-                <div class="col-md-8 px-4">
-                    <p class="text-center text-muted small mb-0">ESTIMATED PENDING DUES</p>
-                    <h1 id="dueAmount" class="text-center fw-bold text-danger mb-4">₹ 0</h1>
-                    
+                <div class="col-md-8">
                     <div class="row g-3">
-                        <div class="col-6">
-                            <label class="small fw-bold">Amount to Pay</label>
-                            <input type="number" id="payAmt" class="form-control form-control-lg border-primary">
+                        <div class="col-12 text-center">
+                            <p class="text-muted small mb-1">TOTAL OUTSTANDING</p>
+                            <div id="dueAmount" class="fw-bold text-danger" style="font-size: 2rem;">₹ 0.00</div>
                         </div>
-                        <div class="col-6">
+                        <div class="col-md-6">
+                            <label class="small fw-bold">Amount to Collect</label>
+                            <input type="number" id="payAmt" class="form-control" placeholder="0.00">
+                        </div>
+                        <div class="col-md-6">
                             <label class="small fw-bold">Pay Mode</label>
-                            <select id="payMode" class="form-select form-select-lg">
-                                <option>Cash</option><option>Online Transfer</option><option>Cheque</option>
+                            <select id="payMode" class="form-select">
+                                <option>Cash</option><option>Online</option><option>Cheque</option>
                             </select>
                         </div>
-                        <button class="btn btn-primary btn-lg w-100 fw-bold mt-3" onclick="submitPayment()">
-                            COLLECT & GENERATE RECEIPT
-                        </button>
+                        <div class="col-12">
+                            <button class="royal-btn w-100 py-3" id="submitBtn" onclick="submitPayment()">
+                                <i class="fas fa-check-circle"></i> COLLECT & GENERATE RECEIPT
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    <div id="receiptArea"></div>
 </div>
-
-<div id="receiptArea"></div>
 
 <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
@@ -102,66 +113,52 @@
 
 <script>
 let activeStudent = null;
-let db = firebase.firestore();
+const database = firebase.firestore();
 
-// 1. Search Logic
-async function handleSearchInput() {
-    const val = document.getElementById('studentSearch').value.trim().toLowerCase();
+// Fixed Live Search function
+async function liveSearch() {
+    const val = document.getElementById('studentSearch').value.toLowerCase();
     const sugg = document.getElementById('searchSuggestions');
-    
-    if(val.length < 2) { sugg.style.display = 'none'; return; }
+    if(val.length < 2) { sugg.style.display='none'; return; }
 
     try {
-        const snap = await db.collection('students').get();
+        const snap = await database.collection('students').get();
         let html = '';
         snap.forEach(doc => {
             const d = doc.data();
             const sid = String(d.uniqueID);
             const name = d.name.toLowerCase();
-
             if(name.includes(val) || sid.includes(val)) {
-                html += `
-                <div class="suggestion-item" onclick='selectStudent(${JSON.stringify(d)})'>
-                    <i class="fas fa-user me-2"></i> <b>${d.uniqueID}</b> - ${d.name} (${d.class})
-                </div>`;
+                html += `<div class="sugg-item" onclick='selectStudent(${JSON.stringify(d)})'>
+                            ${d.name} (${d.uniqueID})
+                         </div>`;
             }
         });
-
-        if(html) {
-            sugg.innerHTML = html;
-            sugg.style.display = 'block';
-        } else {
-            sugg.style.display = 'none';
-        }
-    } catch(e) { console.error("Search error:", e); }
+        sugg.innerHTML = html;
+        sugg.style.display = html ? 'block' : 'none';
+    } catch(e) { console.log(e); }
 }
 
-// 2. Select Student
 function selectStudent(student) {
     activeStudent = student;
     document.getElementById('studentSearch').value = student.name;
-    document.getElementById('searchSuggestions').style.display = 'none';
-    
     document.getElementById('displayName').innerText = student.name;
     document.getElementById('displayId').innerText = "ID: " + student.uniqueID;
     document.getElementById('studentPhoto').src = student.photo || student.imageURL || '';
-    
+    document.getElementById('searchSuggestions').style.display = 'none';
     document.getElementById('feeDetailsForm').style.display = 'block';
     calculateDue(student);
 }
 
-// 3. Due Calculation
 async function calculateDue(student) {
     const months = ["April","May","June","July","August","September","October","November","December","January","February","March"];
     const targetIdx = months.indexOf(document.getElementById('calcMonth').value);
 
-    const mDoc = await db.collection('fee_master').doc(student.class).get();
-    const tSnap = await db.collection('fee_transactions')
-                    .where('studentID', '==', String(student.uniqueID))
-                    .where('status', '==', 'Paid').get();
+    const mDoc = await database.collection('fee_master').doc(student.class).get();
+    const tSnap = await database.collection('fee_transactions').where('studentID', '==', String(student.uniqueID)).where('status', '==', 'Paid').get();
     
-    let totalPaid = 0;
-    tSnap.forEach(d => totalPaid += Number(d.data().amount || 0));
+    let paid = 0;
+    tSnap.forEach(d => paid += Number(d.data().amount || 0));
 
     if(mDoc.exists) {
         const fm = mDoc.data();
@@ -169,22 +166,17 @@ async function calculateDue(student) {
         const tui = (fm.tuition || 0) * (1 - (d.tuition || 0)/100);
         const hos = (student.hostel === 'Yes' ? (fm.hostel || 0) : 0) * (1 - (d.hostel || 0)/100);
         const tra = (student.transport === 'Yes' ? (student.transport_fee || 0) : 0) * (1 - (d.trans || 0)/100);
-        const annual = ((fm.admission||0)*(1-(d.adm||0)/100)) + ((fm.development||0)*(1-(d.dev||0)/100)) + ((fm.exam||0)*(1-(d.exa||0)/100));
+        const annual = ((fm.admission||0)*(1-(d.adm||0)/100)) + ((fm.development||0)*(1-(d.dev||0)/100)) + ((fm.exam||0)*(1-(d.exam||0)/100));
         
-        const monthlyTotal = tui + hos + tra;
-        const totalDue = annual + (monthlyTotal * (targetIdx + 1));
-        const balance = Math.round(totalDue - totalPaid);
-        
+        const balance = Math.round((annual + ((tui + hos + tra) * (targetIdx + 1))) - paid);
         document.getElementById('dueAmount').innerText = `₹ ${balance}`;
         document.getElementById('payAmt').value = balance;
     }
 }
 
-// 4. Submit Payment
 async function submitPayment() {
     const amt = document.getElementById('payAmt').value;
-    if(!amt || amt <= 0) return alert("Amount dalo!");
-
+    if(!amt || amt <= 0) return alert("Enter amount");
     const pData = {
         studentID: String(activeStudent.uniqueID),
         name: activeStudent.name,
@@ -195,11 +187,10 @@ async function submitPayment() {
         status: 'Paid',
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
     };
-
     try {
-        await db.collection('fee_transactions').add(pData);
-        alert("Payment Successful!");
-        location.reload(); // Refresh to clear
+        await database.collection('fee_transactions').add(pData);
+        alert("Payment Recorded!");
+        location.reload();
     } catch (e) { alert(e.message); }
 }
 </script>
