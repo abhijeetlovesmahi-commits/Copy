@@ -13,9 +13,11 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
     
     <script src="firebase-config.js"></script>
-    <script src="auth-guard.js"></script> <script src="brand.js"></script>
+    <script src="auth-guard.js"></script> 
+    <script src="brand.js"></script>
 
     <style>
+        :root { --royal: #002147; --gold: #D4AF37; --danger: #e74c3c; }
         .summary-cards { 
             display: grid; 
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
@@ -27,7 +29,7 @@
             border-bottom: 5px solid var(--danger);
         }
         .stat-card-def h2 { color: var(--danger); font-size: 2.2rem; margin: 10px 0 0; font-family: 'Cinzel', serif; }
-        .stat-card-def p { color: var(--royal-blue); font-weight: bold; text-transform: uppercase; font-size: 0.8rem; margin: 0; }
+        .stat-card-def p { color: var(--royal); font-weight: bold; text-transform: uppercase; font-size: 0.8rem; margin: 0; }
         
         .whatsapp-btn {
             background: #25D366; color: white; border: none; padding: 8px 15px;
@@ -35,13 +37,13 @@
             display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-size: 13px;
         }
         .whatsapp-btn:hover { background: #128C7E; transform: scale(1.05); color: white; }
-
         .loader-container { text-align: center; padding: 100px 0; color: var(--gold); }
         
         @media print {
             .no-print, #menu-container, .whatsapp-btn { display: none !important; }
             .main-content { margin: 0 !important; padding: 0 !important; }
             .royal-card { border: none !important; box-shadow: none !important; }
+            table { font-size: 10px; }
         }
     </style>
 </head>
@@ -54,12 +56,17 @@
         <div class="header" id="brand-header-container"></div>
 
         <div class="d-flex justify-content-between align-items-center mb-4 no-print">
-            <h2 class="brand-font" style="color: var(--royal-blue); margin: 0;">
+            <h2 class="brand-font" style="color: var(--royal); margin: 0;">
                 <i class="fas fa-exclamation-triangle me-2" style="color: var(--danger);"></i>FEES DEFAULTER REGISTRY
             </h2>
-            <button class="royal-btn btn-sm" onclick="window.print()">
-                <i class="fas fa-print me-1"></i> PRINT RECOVERY LIST
-            </button>
+            <div class="d-flex gap-2">
+                <select id="uptoMonth" class="form-select form-select-sm" onchange="generateDefaulterList()">
+                    <option value="March">Upto End of Session</option>
+                    </select>
+                <button class="royal-btn btn-sm" onclick="window.print()">
+                    <i class="fas fa-print me-1"></i> PRINT
+                </button>
+            </div>
         </div>
 
         <div class="summary-cards">
@@ -75,20 +82,20 @@
 
         <div id="loading" class="loader-container">
             <i class="fas fa-spinner fa-spin fa-3x mb-3"></i>
-            <p>Accessing Royal Financial Ledgers...</p>
+            <p>Scanning Financial Ledgers for Arrears...</p>
         </div>
 
         <div id="defaulterWrapper" style="display:none;">
             <div style="overflow-x: auto;">
-                <table style="width: 100%; border-collapse: collapse;">
+                <table class="table table-bordered">
                     <thead>
-                        <tr style="background: var(--royal-blue); color: var(--gold);">
-                            <th style="padding: 15px; border: 1px solid var(--gold);">ADM ID</th>
-                            <th style="padding: 15px; border: 1px solid var(--gold);">STUDENT NAME</th>
-                            <th style="padding: 15px; border: 1px solid var(--gold);">CLASS</th>
-                            <th style="padding: 15px; border: 1px solid var(--gold);">PARENT NAME</th>
-                            <th style="padding: 15px; border: 1px solid var(--gold);">BALANCE DUE</th>
-                            <th style="padding: 15px; border: 1px solid var(--gold);" class="no-print">RECOVERY</th>
+                        <tr style="background: var(--royal); color: var(--gold);">
+                            <th>ADM ID</th>
+                            <th>STUDENT NAME</th>
+                            <th>CLASS</th>
+                            <th>PARENT NAME</th>
+                            <th>BALANCE DUE</th>
+                            <th class="no-print">RECOVERY</th>
                         </tr>
                     </thead>
                     <tbody id="listBody"></tbody>
@@ -99,13 +106,17 @@
 </div>
 
 <script>
+const monthsArr = ["April","May","June","July","August","September","October","November","December","January","February","March"];
+
 async function generateDefaulterList() {
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('defaulterWrapper').style.display = 'none';
+
     try {
-        // Fetching Master, Students and Transactions in parallel
         const [masterSnap, studentSnap, transSnap] = await Promise.all([
             db.collection('fee_master').get(),
             db.collection('students').get(),
-            db.collection('fee_transactions').get()
+            db.collection('fee_transactions').where('status', '==', 'Paid').get()
         ]);
 
         const masters = {};
@@ -122,33 +133,48 @@ async function generateDefaulterList() {
         const tbody = document.getElementById('listBody');
         tbody.innerHTML = "";
 
+        // Default target is March (End of Session)
+        const targetMonth = document.getElementById('uptoMonth').value;
+        const targetIdx = monthsArr.indexOf(targetMonth);
+
         studentSnap.forEach(doc => {
             const s = doc.data();
-            const m = masters[s.class];
+            const fm = masters[s.class];
 
-            if (m) {
-                // Expected calculation (Tuition + Admission + Optional Services)
-                let expected = Number(m.tuition || 0) + Number(m.admission || 0);
-                if(s.hostel === 'Yes') expected += Number(m.hostel || 0);
-                if(s.transport === 'Yes') expected += 500 * 10; // Sample for 10 months
+            if (fm) {
+                const d = s.discounts || { tui:0, hos:0, tra:0, adm:0, dev:0, exa:0, boo:0, mis:0 };
+
+                // 1. Annual Charges with Discounts
+                const annual = 
+                    (Number(fm.admission||0)*(1-(d.adm||0)/100)) + 
+                    (Number(fm.development||0)*(1-(d.dev||0)/100)) + 
+                    (Number(fm.exam||0)*(1-(d.exa||0)/100)) + 
+                    (Number(fm.books||0)*(1-(d.boo||0)/100)) + 
+                    (Number(fm.misc||0)*(1-(d.mis||0)/100));
+
+                // 2. Monthly Charges with Discounts
+                const tuiNet = Number(fm.tuition||0)*(1-(d.tui||0)/100);
+                const hosNet = (s.hostel === 'Yes' ? Number(fm.hostel||0) : 0) * (1-(d.hos||0)/100);
+                const traNet = (s.transport === 'Yes' ? Number(s.transport_fee||0) : 0) * (1-(d.tra||0)/100);
+
+                const monthlyTotal = tuiNet + hosNet + traNet;
+                const expectedTotal = annual + (monthlyTotal * (targetIdx + 1));
 
                 const paid = payments[s.uniqueID] || 0;
-                const balance = expected - paid;
+                const balance = Math.round(expectedTotal - paid);
 
-                if (balance > 0) {
+                if (balance > 10) { // Threshold to avoid minor rounding differences
                     count++;
                     grandTotal += balance;
                     
                     tbody.innerHTML += `
-                        <tr style="border-bottom: 1px solid #eee;">
-                            <td style="padding: 12px; text-align: center;">${s.uniqueID}</td>
-                            <td style="padding: 12px;"><b>${s.name.toUpperCase()}</b></td>
-                            <td style="padding: 12px; text-align: center;">${s.class}</td>
-                            <td style="padding: 12px;">${s.father}</td>
-                            <td style="padding: 12px; text-align: center; color:var(--danger); font-weight:bold;">
-                                ₹ ${balance.toLocaleString('en-IN')}
-                            </td>
-                            <td class="no-print" style="padding: 12px; text-align: center;">
+                        <tr>
+                            <td class="text-center">${s.uniqueID}</td>
+                            <td><b>${s.name.toUpperCase()}</b></td>
+                            <td class="text-center">${s.class}</td>
+                            <td>${s.father || 'N/A'}</td>
+                            <td class="text-center text-danger fw-bold">₹ ${balance.toLocaleString('en-IN')}</td>
+                            <td class="no-print text-center">
                                 <button class="whatsapp-btn" onclick="sendWhatsApp('${s.contact || s.pContact}', '${s.name}', '${balance}')">
                                     <i class="fab fa-whatsapp"></i> REMIND
                                 </button>
@@ -160,23 +186,22 @@ async function generateDefaulterList() {
         });
 
         document.getElementById('totalCount').innerText = count;
-        document.getElementById('totalPending').innerText = "₹" + grandTotal.toLocaleString('en-IN');
+        document.getElementById('totalPending').innerText = "₹" + Math.round(grandTotal).toLocaleString('en-IN');
         document.getElementById('loading').style.display = 'none';
         document.getElementById('defaulterWrapper').style.display = 'block';
 
     } catch (error) {
         console.error(error);
-        alert("Permission Error: You may not have access to financial records.");
+        alert("System Error: Could not sync with financial ledgers.");
     }
 }
 
 function sendWhatsApp(phone, name, amount) {
-    if(!phone || phone === 'undefined') return alert("Contact number not available!");
+    if(!phone || phone === 'undefined' || phone === '') return alert("Contact number not found for this student!");
     const msg = `*THE LALIT INTERNATIONAL SCHOOL*%0A%0A*FEE REMINDER*%0A%0ADear Parent, this is a formal reminder that an amount of *₹${amount}* is pending for student *${name}*. Please clear the dues at the earliest to avoid late charges.%0A%0A_Ignore if already paid._`;
     window.open(`https://wa.me/91${phone}?text=${msg}`, '_blank');
 }
 
-// Initial execution
 generateDefaulterList();
 </script>
 
