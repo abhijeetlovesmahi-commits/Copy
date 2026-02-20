@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Defaulter List | The Lalit Intl.</title>
+    <title>Fee Defaulter List | The Lalit Intl.</title>
     
     <link rel="stylesheet" href="style.css"> 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -11,224 +11,222 @@
     
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
-    
     <script src="firebase-config.js"></script>
     <script src="brand.js"></script>
 
     <style>
-        :root { --royal: #002147; --gold: #D4AF37; }
-        body { background: #f8f9fa; }
-        
-        /* Defaulter Specific UI */
-        .defaulter-img { 
-            width: 45px; height: 55px; border-radius: 4px; 
-            object-fit: cover; border: 1px solid var(--gold); 
+        :root { --royal: #002147; --gold: #D4AF37; --danger: #d32f2f; }
+        body { background: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
+
+        /* Dashboard Cards */
+        .stat-card {
+            background: var(--royal); color: #fff; border-radius: 10px;
+            padding: 20px; text-align: center; border-bottom: 5px solid var(--gold);
         }
-        
-        .action-btns .btn { border-radius: 4px; font-weight: bold; font-size: 13px; padding: 5px 10px; border: none; }
-        .btn-whatsapp { background: #25D366; color: white; }
-        .btn-call { background: #007bff; color: white; }
-        
-        #reportArea { 
-            background: #fff; width: 1000px; margin: 20px auto; 
-            padding: 40px; border: 1px solid #ddd; box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            position: relative;
+        .stat-card h2 { font-weight: 800; font-size: 32px; margin: 0; color: var(--gold); }
+        .stat-card p { margin: 0; text-transform: uppercase; font-size: 12px; letter-spacing: 1px; }
+
+        /* Compact Table */
+        .defaulter-table { background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .defaulter-table thead { background: var(--royal); color: #fff; }
+        .defaulter-table th { font-size: 11px; text-transform: uppercase; padding: 12px; font-weight: 600; border: none; }
+        .defaulter-table td { font-size: 13px; vertical-align: middle; padding: 6px 12px; border-bottom: 1px solid #eee; font-weight: 500; }
+
+        /* Nano Photo Styling */
+        .nano-photo { 
+            width: 30px; height: 30px; border-radius: 50%; object-fit: cover; 
+            border: 1px solid #ddd; background: #eee;
         }
 
-        /* Watermark like Demand Slip */
-        #reportArea::before {
-            content: ""; position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%) rotate(-30deg);
-            width: 400px; height: 400px;
-            background: url('logo.png') no-repeat center;
-            background-size: contain; opacity: 0.03; z-index: 0; pointer-events: none;
-        }
+        /* Action Buttons */
+        .btn-call { color: #2ecc71; background: #eafaf1; border: none; padding: 5px 10px; border-radius: 4px; transition: 0.3s; }
+        .btn-wa { color: #25d366; background: #e9fbf0; border: none; padding: 5px 10px; border-radius: 4px; transition: 0.3s; }
+        .btn-call:hover { background: #2ecc71; color: #fff; }
+        .btn-wa:hover { background: #25d366; color: #fff; }
 
-        @media print {
-            .no-print { display: none !important; }
-            #reportArea { width: 100%; border: none; margin: 0; padding: 10px; box-shadow: none; }
-            .action-btns { display: none !important; }
-        }
+        .due-tag { color: var(--danger); font-weight: 800; background: #ffebee; padding: 2px 8px; border-radius: 12px; font-size: 12px; }
+
+        @media print { .no-print { display: none !important; } }
     </style>
 </head>
 <body>
 
 <div id="menu-container" class="no-print"></div>
 
-<div class="container mt-4 no-print">
-    <div id="brand-header-container" class="mb-4 text-center"></div>
+<div class="container mt-4">
+    <div id="brand-header-container" class="mb-4"></div>
 
-    <div class="card p-4 shadow-sm border-0" style="border-top: 4px solid var(--royal) !important;">
-        <h5 class="mb-3 fw-bold"><i class="fas fa-filter me-2"></i>Defaulter Search Panel</h5>
-        <div class="row g-3 align-items-end">
+    <div class="row justify-content-center mb-4">
+        <div class="col-md-6">
+            <div class="stat-card">
+                <p>Total Estimated Outstanding (Entire School)</p>
+                <h2 id="totalSchoolDue">₹0</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-3 mb-4 shadow-sm border-0 no-print">
+        <div class="row g-2 align-items-end">
             <div class="col-md-4">
-                <label class="small fw-bold mb-1">SELECT CLASS</label>
-                <select id="fClass" class="form-select border-dark">
-                    <option value="">-- Choose Class --</option>
+                <label class="form-label small fw-bold">Select Class</label>
+                <select id="classSelect" class="form-select border-0 bg-light shadow-sm">
+                    <option value="All">All Classes</option>
                     <option value="Pre-Nursery">Pre-Nursery</option>
                     <option value="Nursery">Nursery</option>
                     <option value="LKG">LKG</option>
                     <option value="UKG">UKG</option>
-                    <option value="1">Class 1</option><option value="2">Class 2</option>
-                    <option value="3">Class 3</option><option value="4">Class 4</option>
-                    <option value="5">Class 5</option><option value="6">Class 6</option>
-                    <option value="7">Class 7</option><option value="8">Class 8</option>
-                    <option value="9">Class 9</option><option value="10">Class 10</option>
-                    <option value="11">Class 11</option><option value="12">Class 12</option>
+                    <script>
+                        for(let i=1; i<=12; i++) {
+                            document.write(`<option value="${i}">Class ${i}</option>`);
+                        }
+                    </script>
                 </select>
             </div>
             <div class="col-md-4">
-                <label class="small fw-bold mb-1">SELECT MONTH</label>
-                <select id="fMonth" class="form-select border-dark">
-                    <option value="April">April</option><option value="May">May</option>
-                    <option value="June">June</option><option value="July">July</option>
-                    <option value="August">August</option><option value="September">September</option>
-                    <option value="October">October</option><option value="November">November</option>
-                    <option value="December">December</option><option value="January">January</option>
-                    <option value="February">February</option><option value="March">March</option>
+                <label class="form-label small fw-bold">Due Till Month</label>
+                <select id="targetMonth" class="form-select border-0 bg-light shadow-sm">
+                    <option value="April">April</option>
+                    <option value="May">May</option>
+                    <option value="June">June</option>
+                    <option value="July">July</option>
+                    <option value="August">August</option>
+                    <option value="September">September</option>
+                    <option value="October">October</option>
+                    <option value="November">November</option>
+                    <option value="December">December</option>
+                    <option value="January">January</option>
+                    <option value="February">February</option>
+                    <option value="March">March</option>
                 </select>
             </div>
             <div class="col-md-4">
-                <button class="btn btn-dark w-100 fw-bold" onclick="generateDefaulterList()">
-                    <i class="fas fa- sync-alt me-2"></i> FETCH DEFAULTERS
+                <button class="btn btn-dark w-100 fw-bold" onclick="generateList()">
+                    <i class="fas fa-search"></i> FETCH DEFAULTERS
                 </button>
             </div>
         </div>
     </div>
-</div>
 
-<div id="reportArea">
-    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
-        <div class="d-flex align-items-center" style="position:relative; z-index:1;">
-            <img src="logo.png" style="width:70px; margin-right:20px;" onerror="this.style.display='none'">
-            <div>
-                <h2 style="margin:0; color:var(--royal); font-weight:900; letter-spacing:-1px;">THE LALIT INTERNATIONAL SCHOOL</h2>
-                <p class="m-0 fw-bold text-danger" id="reportTitle">FEE DEFAULTER STATEMENT</p>
-            </div>
-        </div>
-        <button class="btn btn-outline-dark btn-sm no-print fw-bold" onclick="window.print()">PRINT REPORT</button>
-    </div>
-
-    <table class="table table-bordered align-middle" style="position:relative; z-index:1;">
-        <thead class="table-light text-center small fw-bold">
-            <tr>
-                <th>PHOTO</th>
-                <th class="text-start">STUDENT NAME & ID</th>
-                <th>FATHER'S NAME</th>
-                <th>BALANCE DUE</th>
-                <th class="no-print">ACTIONS</th>
-            </tr>
-        </thead>
-        <tbody id="defTableBody">
-            <tr>
-                <td colspan="5" class="text-center py-5 text-muted">Please use the filter panel above to generate list.</td>
-            </tr>
-        </tbody>
-    </table>
-    
-    <div class="mt-4 d-flex justify-content-between small px-2">
-        <span>Generated On: <b id="genTime">-</b></span>
-        <span>Accountant Signature: _________________</span>
+    <div class="defaulter-table table-responsive">
+        <table class="table mb-0">
+            <thead>
+                <tr>
+                    <th>Photo</th>
+                    <th>ID / Name</th>
+                    <th>Father's Name</th>
+                    <th>Class</th>
+                    <th>Phone</th>
+                    <th class="text-end">Default Amount</th>
+                    <th class="no-print">Connect</th>
+                </tr>
+            </thead>
+            <tbody id="listBody">
+                </tbody>
+        </table>
     </div>
 </div>
-
-<script src="menu.js"></script>
 
 <script>
-async function generateDefaulterList() {
-    const selClass = document.getElementById('fClass').value;
-    const selMonth = document.getElementById('fMonth').value;
-    const tbody = document.getElementById('defTableBody');
-    
-    if(!selClass) { alert("Please select a class!"); return; }
-    
-    tbody.innerHTML = `<tr><td colspan="5" class="text-center py-5"><div class="spinner-border text-primary"></div><br>Calculating Balances...</td></tr>`;
-    document.getElementById('genTime').innerText = new Date().toLocaleString();
+const months = ["April", "May", "June", "July", "August", "September", "October", "November", "December", "January", "February", "March"];
 
-    try {
-        // 1. Data Fetching (Demand Slip Logic)
-        const [fMasterDoc, stuSnap, transMasterSnap] = await Promise.all([
-            db.collection('fee_master').doc(selClass).get(),
-            db.collection('students').where('class', '==', selClass).get(),
-            db.collection('transport_master').get()
-        ]);
+// Initial Load: Calculate Global School Dues
+window.onload = () => { calculateGlobalDues(); };
 
-        const fm = fMasterDoc.exists ? fMasterDoc.data() : {};
-        let tRates = {};
-        transMasterSnap.forEach(doc => tRates[doc.id] = doc.data().amount);
+async function calculateGlobalDues() {
+    const month = document.getElementById('targetMonth').value;
+    const stuSnap = await db.collection('students').get();
+    const fmSnap = await db.collection('fee_master').get();
+    const tmSnap = await db.collection('transport_master').get();
 
-        // 2. Monthly Transactions Fetching
-        const transSnap = await db.collection('fee_transactions').where('month', '==', selMonth).get();
-        const paidMap = {};
-        transSnap.forEach(t => {
-            const d = t.data();
-            paidMap[String(d.studentID)] = (paidMap[String(d.studentID)] || 0) + Number(d.amount || 0);
-        });
+    let feeMasters = {}; fmSnap.forEach(d => feeMasters[d.id] = d.data());
+    let transRates = {}; tmSnap.forEach(d => transRates[d.id] = d.data().amount);
 
-        let html = '';
-        let count = 0;
+    let schoolTotal = 0;
 
-        // 3. Calculation Loop (Same as Ledger/Demand Slip)
-        stuSnap.forEach(doc => {
-            const s = doc.data();
-            const d = s.discounts || {};
-
-            // Calculate Net Payable
-            const tui = (fm.tuition || 0) * (1 - (d.tuition || 0)/100);
-            const hos = (s.hostel === 'Yes' ? (fm.hostel || 0) : 0) * (1 - (d.hostel || 0)/100);
-            const tra = (s.transport === 'Yes' ? (tRates[s.transportDistance] || 0) : 0) * (1 - (d.trans || 0)/100);
-
-            let annualTotal = 0;
-            if (selMonth === 'April') {
-                const adm = (fm.admission || 0) * (1 - (d.adm || 0)/100);
-                const dev = (fm.development || 0) * (1 - (d.dev || 0)/100);
-                const exa = (fm.exam || 0) * (1 - (d.exam || 0)/100);
-                const boo = (fm.books || 0) * (1 - (d.books || 0)/100);
-                const mis = (fm.misc || 0) * (1 - (d.misc || 0)/100);
-                annualTotal = Math.round(adm+dev+exa+boo+mis);
-            }
-
-            const netPayable = Math.round(tui + hos + tra + annualTotal);
-            const totalPaid = paidMap[String(s.uniqueID)] || 0;
-            const balanceDue = netPayable - totalPaid;
-
-            // Defaulter found if balance > 0
-            if (balanceDue > 0) {
-                count++;
-                const phone = s.contact || s.whatsapp || "";
-                const waMsg = `Dear Parent, fee for ${s.name} (ID:${s.uniqueID}) for ${selMonth} is pending. Total: Rs.${netPayable}, Paid: Rs.${totalPaid}, Balance Due: Rs.${balanceDue}. Please deposit at the earliest. - The Lalit Intl.`;
-
-                html += `
-                <tr class="text-center">
-                    <td><img src="${s.photo || ''}" class="defaulter-img" onerror="this.src='https://via.placeholder.com/45x55?text=No+Pic'"></td>
-                    <td class="text-start">
-                        <div class="fw-bold" style="color:var(--royal); font-size:15px;">${s.name.toUpperCase()}</div>
-                        <small class="text-muted">Student ID: ${s.uniqueID}</small>
-                    </td>
-                    <td>${s.father || 'N/A'}</td>
-                    <td class="fw-bold text-danger">
-                        ₹${balanceDue}
-                        <div style="font-size:10px; color:#666; font-weight:normal;">Payable: ₹${netPayable}</div>
-                    </td>
-                    <td class="no-print action-btns">
-                        <div class="d-flex gap-1 justify-content-center">
-                            <a href="tel:${phone}" class="btn btn-call btn-sm"><i class="fas fa-phone-alt"></i></a>
-                            <a href="https://wa.me/91${phone}?text=${encodeURIComponent(waMsg)}" target="_blank" class="btn btn-whatsapp btn-sm"><i class="fab fa-whatsapp"></i></a>
-                        </div>
-                    </td>
-                </tr>`;
-            }
-        });
-
-        tbody.innerHTML = count > 0 ? html : `<tr><td colspan="5" class="text-center py-5 text-success fw-bold">🎉 Excellent! No defaulters found for this class and month.</td></tr>`;
-        document.getElementById('reportTitle').innerText = `DEFAULTER STATEMENT: ${selClass.toUpperCase()} (${selMonth.toUpperCase()})`;
-
-    } catch (e) {
-        console.error(e);
-        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-danger py-5 border-0">Error loading data. Check console for details.</td></tr>`;
+    for(const doc of stuSnap.docs) {
+        const s = doc.data();
+        schoolTotal += await calculateStudentDue(s, month, feeMasters, transRates);
     }
+    document.getElementById('totalSchoolDue').innerText = "₹" + Math.round(schoolTotal).toLocaleString('en-IN');
+}
+
+async function calculateStudentDue(s, month, feeMasters, transRates) {
+    const fm = feeMasters[s.class] || {};
+    const d = s.discounts || {};
+    const getNet = (base, disc) => Number(base || 0) * (1 - (Number(disc) || 0) / 100);
+    const tRate = (s.transport === 'Yes' && s.transportDistance) ? (transRates[s.transportDistance] || 0) : 0;
+
+    const monthlyFee = getNet(fm.tuition, d.tuition) + (s.hostel === 'Yes' ? getNet(fm.hostel, d.hostel) : 0) + getNet(tRate, d.trans);
+    const annualFee = getNet(fm.admission, d.adm) + getNet(fm.development, d.dev) + getNet(fm.exam, d.exam) + getNet(fm.books, d.books) + getNet(fm.misc, d.misc);
+
+    const tSnap = await db.collection('fee_transactions').where('studentID', '==', String(s.uniqueID)).get();
+    let trans = []; tSnap.forEach(t => trans.push(t.data()));
+
+    let totalDue = 0;
+    let targetIdx = months.indexOf(month);
+
+    // Annual
+    let annualPaid = trans.filter(p => p.month === 'Annual').reduce((acc, p) => acc + Number(p.amount), 0);
+    totalDue += (annualFee - annualPaid);
+
+    // Months
+    for(let i = 0; i <= targetIdx; i++) {
+        let mPaid = trans.filter(p => p.month === months[i]).reduce((acc, p) => acc + Number(p.amount), 0);
+        totalDue += (monthlyFee - mPaid);
+    }
+    return totalDue > 0 ? totalDue : 0;
+}
+
+async function generateList() {
+    const cls = document.getElementById('classSelect').value;
+    const month = document.getElementById('targetMonth').value;
+    const body = document.getElementById('listBody');
+    body.innerHTML = '<tr><td colspan="7" class="text-center py-5"><div class="spinner-border text-primary"></div></td></tr>';
+
+    const fmSnap = await db.collection('fee_master').get();
+    let feeMasters = {}; fmSnap.forEach(d => feeMasters[d.id] = d.data());
+    const tmSnap = await db.collection('transport_master').get();
+    let transRates = {}; tmSnap.forEach(d => transRates[d.id] = d.data().amount);
+
+    let q = db.collection('students');
+    if(cls !== 'All') q = q.where('class', '==', cls);
+    const snap = await q.get();
+
+    let html = '';
+    let rowsFound = 0;
+
+    for(const doc of snap.docs) {
+        const s = doc.data();
+        const due = await calculateStudentDue(s, month, feeMasters, transRates);
+
+        if(due > 1) { // Only show those with balance > 1 Rupee
+            rowsFound++;
+            const phone = s.phone || s.mobile || "";
+            const waMsg = `Dear Parent, your ward ${s.name}'s school fee of ₹${Math.round(due)} is pending for the month of ${month}. Please ignore if already paid. - The Lalit Intl.`;
+            
+            html += `
+            <tr>
+                <td><img src="${s.photo || 'placeholder.png'}" class="nano-photo"></td>
+                <td><small class="text-muted d-block">${s.uniqueID}</small><b>${s.name.toUpperCase()}</b></td>
+                <td>${(s.father || 'N/A').toUpperCase()}</td>
+                <td><span class="badge bg-secondary">${s.class}</span></td>
+                <td>${phone}</td>
+                <td class="text-end"><span class="due-tag">₹${Math.round(due)}</span></td>
+                <td class="no-print">
+                    <div class="d-flex gap-2">
+                        <a href="tel:${phone}" class="btn-call"><i class="fas fa-phone-alt"></i></a>
+                        <a href="https://wa.me/91${phone}?text=${encodeURIComponent(waMsg)}" target="_blank" class="btn-wa"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </td>
+            </tr>`;
+        }
+    }
+
+    body.innerHTML = rowsFound > 0 ? html : '<tr><td colspan="7" class="text-center py-5 text-muted">No Defaulters Found for this month!</td></tr>';
+    // Update global total every time we filter to keep it fresh
+    calculateGlobalDues();
 }
 </script>
-
+<script src="menu.js"></script>
 </body>
 </html>
