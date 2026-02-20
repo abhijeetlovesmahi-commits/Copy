@@ -17,68 +17,20 @@
     <style>
         :root { --royal: #002147; --gold: #D4AF37; }
         body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
-        
-        /* Control Panel */
         .control-panel { background: #fff; padding: 20px; border-bottom: 3px solid var(--gold); margin-bottom: 30px; }
-        
-        /* Secure Slip Card with Currency-like background */
         .slip-card { 
-            background: white; 
-            width: 100%; max-width: 800px; 
-            margin: 0 auto 30px auto; 
-            padding: 30px; 
-            border: 3px double var(--royal); /* Double border like a bond */
-            page-break-after: always; 
-            position: relative;
-            overflow: hidden;
-            /* Security Pattern Background */
-            background-image: 
-                radial-gradient(circle at 2px 2px, rgba(0, 33, 71, 0.03) 1px, transparent 0),
-                repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(0, 33, 71, 0.02) 35px, rgba(0, 33, 71, 0.02) 36px),
-                repeating-linear-gradient(-45deg, transparent, transparent 35px, rgba(0, 33, 71, 0.02) 35px, rgba(0, 33, 71, 0.02) 36px);
-            background-size: 4px 4px, 100% 100%, 100% 100%;
+            background: white; width: 100%; max-width: 800px; 
+            margin: 0 auto 30px auto; padding: 30px; 
+            border: 3px double var(--royal); position: relative;
+            background-image: radial-gradient(circle at 2px 2px, rgba(0, 33, 71, 0.03) 1px, transparent 0);
+            background-size: 4px 4px; page-break-after: always;
         }
-
-        /* Subtle Watermark Logo */
-        .slip-card::before {
-            content: "";
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%) rotate(-30deg);
-            width: 400px; height: 400px;
-            background: url('logo.png') no-repeat center;
-            background-size: contain;
-            opacity: 0.04; /* Very faint watermark */
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        .slip-header-centered {
-            text-align: center;
-            border-bottom: 2px solid var(--royal);
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-            position: relative;
-            z-index: 1;
-        }
-        .slip-header-centered img { width: 75px; margin-bottom: 5px; }
-
-        .fee-table { width: 100%; border-collapse: collapse; margin: 15px 0; border: 1px solid #000; position: relative; z-index: 1; background: rgba(255,255,255,0.8); }
+        .slip-header-centered { text-align: center; border-bottom: 2px solid var(--royal); padding-bottom: 10px; margin-bottom: 20px; }
+        .slip-header-centered img { width: 75px; }
+        .fee-table { width: 100%; border-collapse: collapse; margin: 15px 0; border: 1px solid #000; }
         .fee-table th, .fee-table td { border: 1px solid #000; padding: 10px; font-size: 14px; }
-        .fee-table th { background: rgba(0, 33, 71, 0.05); }
-        
         .total-row { background: var(--royal) !important; color: #fff; font-size: 18px; font-weight: bold; }
-
-        @media print {
-            .no-print, #menu-container, .control-panel, #suggestions { display: none !important; }
-            body { background: white; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            .slip-card { 
-                margin: 0; border: 2px solid #000; padding: 20px; width: 100%; 
-                box-shadow: none; 
-                /* Ensures background pattern prints */
-                -webkit-print-color-adjust: exact; 
-            }
-        }
+        @media print { .no-print, #menu-container, .control-panel { display: none !important; } }
     </style>
 </head>
 <body>
@@ -118,18 +70,11 @@
 <div id="printArea"></div>
 
 <script>
-let students = []; let feeMaster = {}; let transMaster = {};
+let students = []; 
 
 async function init() {
-    const [sS, fS, tS] = await Promise.all([
-        db.collection('students').get(),
-        db.collection('fee_master').get(),
-        db.collection('transport_master').get()
-    ]);
+    const sS = await db.collection('students').get();
     sS.forEach(d => students.push(d.data()));
-    fS.forEach(d => feeMaster[d.id] = d.data());
-    tS.forEach(d => transMaster[d.id] = d.data().amount);
-
     const classes = [...new Set(students.map(s => s.class))].sort();
     const cf = document.getElementById('classFilter');
     classes.forEach(c => cf.innerHTML += `<option value="${c}">${c}</option>`);
@@ -150,76 +95,57 @@ function setSearch(id, name) {
     document.getElementById('suggestions').style.display='none';
 }
 
-function startGeneration() {
+async function startGeneration() {
     const month = document.getElementById('slipMonth').value;
     const cls = document.getElementById('classFilter').value;
     const singleId = document.getElementById('searchName').dataset.id;
     const nameInput = document.getElementById('searchName').value;
 
     let targetList = (nameInput && singleId) ? students.filter(s => s.uniqueID.toString() === singleId) : (cls ? students.filter(s => s.class === cls) : students);
-    renderSlips(targetList, month);
-}
-
-function renderSlips(list, month) {
+    
+    document.getElementById('printArea').innerHTML = "<h4 class='text-center mt-5'>Fetching Ledger Balances...</h4>";
+    
     let html = '';
-    list.forEach(s => {
-        const fm = feeMaster[s.class] || {};
-        const d = s.discounts || {};
-        const tui = (fm.tuition || 0) * (1 - (d.tuition || 0)/100);
-        const hos = (s.hostel === 'Yes' ? (fm.hostel || 0) : 0) * (1 - (d.hostel || 0)/100);
-        const tra = (s.transport === 'Yes' ? (transMaster[s.transportDistance] || 0) : 0) * (1 - (d.trans || 0)/100);
+    for(let s of targetList) {
+        // LEDGER SYNC: Seedha Ledger Document se us month ka balance uthana
+        const ledgerDoc = await db.collection('ledger').doc(String(s.uniqueID)).get();
+        if(ledgerDoc.exists) {
+            const ledgerData = ledgerDoc.data();
+            const monthData = ledgerData[month] || {};
+            const balance = Number(monthData.balance || 0);
 
-        let annualTotal = 0; let annualRows = '';
-        if (month === 'April') {
-            const adm = (fm.admission || 0) * (1 - (d.adm || 0)/100);
-            const dev = (fm.development || 0) * (1 - (d.dev || 0)/100);
-            const exa = (fm.exam || 0) * (1 - (d.exam || 0)/100);
-            const boo = (fm.books || 0) * (1 - (d.books || 0)/100);
-            const mis = (fm.misc || 0) * (1 - (d.misc || 0)/100);
-            annualTotal = Math.round(adm+dev+exa+boo+mis);
-            if(annualTotal > 0) annualRows = `<tr><td>Registration & Annual Fee</td><td class="text-end">₹${annualTotal}</td></tr>`;
+            if(balance > 0) {
+                html += `
+                <div class="slip-card">
+                    <div class="slip-header-centered">
+                        <img src="logo.png">
+                        <h3 class="m-0" style="color:var(--royal); font-weight:900">THE LALIT INTERNATIONAL SCHOOL</h3>
+                        <p class="m-0 fw-bold">FEE DEMAND SLIP | ${month.toUpperCase()} 2026</p>
+                    </div>
+                    <div class="row mb-3 px-2">
+                        <div class="col-4 small">ID: <b>${s.uniqueID}</b></div>
+                        <div class="col-4 text-center small">NAME: <b>${s.name.toUpperCase()}</b></div>
+                        <div class="col-4 text-end small">CLASS: <b>${s.class}</b></div>
+                    </div>
+                    <table class="fee-table">
+                        <thead><tr><th>PARTICULARS</th><th class="text-end">AMOUNT</th></tr></thead>
+                        <tbody>
+                            <tr><td>Net Outstanding Balance (including previous dues)</td><td class="text-end">₹${balance}</td></tr>
+                            <tr><td colspan="2" class="small text-muted text-center">Refer to Master Ledger for detailed breakdown</td></tr>
+                        </tbody>
+                        <tfoot>
+                            <tr class="total-row"><td class="text-end">TOTAL PAYABLE:</td><td class="text-end">₹${balance}</td></tr>
+                        </tfoot>
+                    </table>
+                    <div class="d-flex justify-content-between mt-5 small">
+                        <div class="text-center" style="width:150px"><hr class="border-dark">Cashier Signature</div>
+                        <div class="text-center" style="width:150px"><hr class="border-dark">Parent Signature</div>
+                    </div>
+                </div>`;
+            }
         }
-
-        const netPayable = Math.round(tui + hos + tra + annualTotal);
-
-        html += `
-        <div class="slip-card">
-            <div class="slip-header-centered">
-                <img src="logo.png">
-                <h3 class="m-0" style="color:var(--royal); font-weight:900">THE LALIT INTERNATIONAL SCHOOL</h3>
-                <p class="m-0 fw-bold">FEE DEMAND SLIP | ${month.toUpperCase()} 2026</p>
-            </div>
-
-            <div class="row mb-3 px-2 position-relative" style="z-index:1">
-                <div class="col-4 small">ID: <b>${s.uniqueID}</b></div>
-                <div class="col-4 text-center small">NAME: <b>${s.name.toUpperCase()}</b></div>
-                <div class="col-4 text-end small">CLASS: <b>${s.class}</b></div>
-            </div>
-
-            <table class="fee-table">
-                <thead><tr><th>PARTICULARS</th><th class="text-end">AMOUNT</th></tr></thead>
-                <tbody>
-                    <tr><td>Monthly Tuition Fee</td><td class="text-end">₹${Math.round(tui)}</td></tr>
-                    ${tra > 0 ? `<tr><td>Transport Fee (${s.transportDistance})</td><td class="text-end">₹${Math.round(tra)}</td></tr>` : ''}
-                    ${hos > 0 ? `<tr><td>Hostel Fee</td><td class="text-end">₹${Math.round(hos)}</td></tr>` : ''}
-                    ${annualRows}
-                </tbody>
-                <tfoot>
-                    <tr class="total-row"><td class="text-end">NET PAYABLE AMOUNT:</td><td class="text-end">₹${netPayable}</td></tr>
-                </tfoot>
-            </table>
-
-            <div class="d-flex justify-content-between mt-5 small position-relative" style="z-index:1">
-                <div class="text-center" style="width:150px"><hr class="border-dark">Cashier Signature</div>
-                <div class="text-center" style="width:150px"><hr class="border-dark">Parent Signature</div>
-            </div>
-            
-            <div class="text-center mt-4" style="font-size:8px; opacity:0.5; z-index:1; position:relative;">
-                SECURE DOCUMENT - COMPUTER GENERATED DEMAND SLIP
-            </div>
-        </div>`;
-    });
-    document.getElementById('printArea').innerHTML = html;
+    }
+    document.getElementById('printArea').innerHTML = html || "<h4 class='text-center mt-5'>No Dues Found for selected criteria.</h4>";
 }
 
 init();
