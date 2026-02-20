@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="style.css">
     
     <style>
-        /* Aapka Original Style */
+        /* Aapka Original Layout CSS */
         .school-logo-main { width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px; }
         .student-profile-img { 
             width: 120px; height: 120px; border-radius: 10px; border: 3px solid var(--gold); 
@@ -25,14 +25,18 @@
             background: #fdfbf0; border: 1px dashed var(--gold);
             padding: 25px; border-radius: 15px; margin-bottom: 20px;
         }
-        /* Suggestion Box Fix */
         #searchSuggestions {
-            position: absolute; width: 94%; z-index: 1000; background: white; 
-            border: 1px solid #ddd; border-radius: 0 0 10px 10px; max-height: 200px; overflow-y: auto;
+            position: absolute; width: 95%; z-index: 100; background: white; 
+            border: 1px solid #ddd; display: none; border-radius: 8px;
         }
         .sugg-item { padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; }
-        .sugg-item:hover { background: #fff9e6; }
+        .sugg-item:hover { background: #fdfbf0; }
         #feeDetailsForm { display: none; margin-top: 20px; border-top: 2px solid #eee; padding-top: 20px; }
+        
+        @media print {
+            .no-print, #menu-container, .btn-print-action { display: none !important; }
+            #receiptArea { display: block !important; }
+        }
     </style>
 </head>
 <body>
@@ -56,7 +60,7 @@
                 <div class="col-md-7">
                     <label class="fw-bold small mb-1">ADMISSION ID OR NAME</label>
                     <input type="text" id="studentSearch" class="form-control" placeholder="Search..." oninput="liveSearch()" autocomplete="off">
-                    <div id="searchSuggestions" style="display:none;"></div>
+                    <div id="searchSuggestions"></div>
                 </div>
                 <div class="col-md-5">
                     <label class="fw-bold small mb-1">FEES UP TO</label>
@@ -78,12 +82,11 @@
                     <h5 id="displayName" class="fw-bold text-primary mb-0">---</h5>
                     <p id="displayId" class="small text-muted">ID: ---</p>
                 </div>
-                <div class="col-md-8">
-                    <div class="row g-3">
-                        <div class="col-12 text-center">
-                            <p class="text-muted small mb-1">TOTAL OUTSTANDING</p>
-                            <div id="dueAmount" class="fw-bold text-danger" style="font-size: 2rem;">₹ 0.00</div>
-                        </div>
+                <div class="col-md-8 text-center">
+                    <p class="text-muted small mb-1">TOTAL OUTSTANDING</p>
+                    <div id="dueAmount" class="fw-bold text-danger" style="font-size: 2.5rem;">₹ 0.00</div>
+                    
+                    <div class="row g-3 mt-2 text-start">
                         <div class="col-md-6">
                             <label class="small fw-bold">Amount to Collect</label>
                             <input type="number" id="payAmt" class="form-control" placeholder="0.00">
@@ -95,7 +98,7 @@
                             </select>
                         </div>
                         <div class="col-12">
-                            <button class="royal-btn w-100 py-3" id="submitBtn" onclick="submitPayment()">
+                            <button class="royal-btn w-100 py-3" onclick="submitPayment()">
                                 <i class="fas fa-check-circle"></i> COLLECT & GENERATE RECEIPT
                             </button>
                         </div>
@@ -104,6 +107,7 @@
             </div>
         </div>
     </div>
+
     <div id="receiptArea"></div>
 </div>
 
@@ -115,28 +119,24 @@
 let activeStudent = null;
 const database = firebase.firestore();
 
-// Fixed Live Search function
+// 1. Live Search Logic
 async function liveSearch() {
     const val = document.getElementById('studentSearch').value.toLowerCase();
     const sugg = document.getElementById('searchSuggestions');
     if(val.length < 2) { sugg.style.display='none'; return; }
 
-    try {
-        const snap = await database.collection('students').get();
-        let html = '';
-        snap.forEach(doc => {
-            const d = doc.data();
-            const sid = String(d.uniqueID);
-            const name = d.name.toLowerCase();
-            if(name.includes(val) || sid.includes(val)) {
-                html += `<div class="sugg-item" onclick='selectStudent(${JSON.stringify(d)})'>
-                            ${d.name} (${d.uniqueID})
-                         </div>`;
-            }
-        });
-        sugg.innerHTML = html;
-        sugg.style.display = html ? 'block' : 'none';
-    } catch(e) { console.log(e); }
+    const snap = await database.collection('students').get();
+    let html = '';
+    snap.forEach(doc => {
+        const d = doc.data();
+        if(d.name.toLowerCase().includes(val) || String(d.uniqueID).includes(val)) {
+            html += `<div class="sugg-item" onclick='selectStudent(${JSON.stringify(d)})'>
+                        ${d.name} (${d.uniqueID})
+                     </div>`;
+        }
+    });
+    sugg.innerHTML = html;
+    sugg.style.display = html ? 'block' : 'none';
 }
 
 function selectStudent(student) {
@@ -150,33 +150,49 @@ function selectStudent(student) {
     calculateDue(student);
 }
 
+// 2. FIXED CALCULATION (Exact Ledger Match)
 async function calculateDue(student) {
     const months = ["April","May","June","July","August","September","October","November","December","January","February","March"];
     const targetIdx = months.indexOf(document.getElementById('calcMonth').value);
 
     const mDoc = await database.collection('fee_master').doc(student.class).get();
-    const tSnap = await database.collection('fee_transactions').where('studentID', '==', String(student.uniqueID)).where('status', '==', 'Paid').get();
+    const tSnap = await database.collection('fee_transactions')
+                    .where('studentID', '==', String(student.uniqueID))
+                    .where('status', '==', 'Paid').get();
     
-    let paid = 0;
-    tSnap.forEach(d => paid += Number(d.data().amount || 0));
+    let totalPaid = 0;
+    tSnap.forEach(d => totalPaid += Number(d.data().amount || 0));
 
     if(mDoc.exists) {
         const fm = mDoc.data();
-        const d = student.discounts || {};
-        const tui = (fm.tuition || 0) * (1 - (d.tuition || 0)/100);
-        const hos = (student.hostel === 'Yes' ? (fm.hostel || 0) : 0) * (1 - (d.hostel || 0)/100);
-        const tra = (student.transport === 'Yes' ? (student.transport_fee || 0) : 0) * (1 - (d.trans || 0)/100);
-        const annual = ((fm.admission||0)*(1-(d.adm||0)/100)) + ((fm.development||0)*(1-(d.dev||0)/100)) + ((fm.exam||0)*(1-(d.exam||0)/100));
+        const d = student.discounts || { tui:0, hos:0, tra:0, adm:0, dev:0, exa:0, boo:0, mis:0 };
+
+        // Exact Ledger Math for Annual
+        const annual = (Number(fm.admission||0)*(1-(d.adm||0)/100)) + 
+                       (Number(fm.development||0)*(1-(d.dev||0)/100)) + 
+                       (Number(fm.exam||0)*(1-(d.exa||0)/100)) +
+                       (Number(fm.books||0)*(1-(d.boo||0)/100)) +
+                       (Number(fm.misc||0)*(1-(d.mis||0)/100));
+
+        // Exact Ledger Math for Monthly
+        const tuiNet = Number(fm.tuition||0)*(1-(d.tui||0)/100);
+        const hosNet = (student.hostel === 'Yes' ? Number(fm.hostel||0) : 0) * (1-(d.hos||0)/100);
+        const traNet = (student.transport === 'Yes' ? Number(student.transport_fee||0) : 0) * (1-(d.tra||0)/100);
+
+        const monthlyTotal = tuiNet + hosNet + traNet;
+        const totalDue = annual + (monthlyTotal * (targetIdx + 1));
+        const balance = Math.round(totalDue - totalPaid);
         
-        const balance = Math.round((annual + ((tui + hos + tra) * (targetIdx + 1))) - paid);
         document.getElementById('dueAmount').innerText = `₹ ${balance}`;
         document.getElementById('payAmt').value = balance;
     }
 }
 
+// 3. Submit Payment
 async function submitPayment() {
     const amt = document.getElementById('payAmt').value;
-    if(!amt || amt <= 0) return alert("Enter amount");
+    if(!amt || amt <= 0) return alert("Enter valid amount");
+
     const pData = {
         studentID: String(activeStudent.uniqueID),
         name: activeStudent.name,
@@ -187,12 +203,14 @@ async function submitPayment() {
         status: 'Paid',
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
     };
+
     try {
         await database.collection('fee_transactions').add(pData);
-        alert("Payment Recorded!");
+        alert("Payment Recorded Successfully!");
         location.reload();
     } catch (e) { alert(e.message); }
 }
 </script>
+
 </body>
 </html>
