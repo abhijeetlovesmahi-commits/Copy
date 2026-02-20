@@ -18,15 +18,15 @@
     <style>
         :root { --royal: #002147; --gold: #D4AF37; }
         
-        /* Defaulter Specific UI */
+        /* Defaulter Table UI */
         .defaulter-img { 
-            width: 45px; height: 45px; border-radius: 50%; 
-            object-fit: cover; border: 1px solid var(--royal); 
+            width: 45px; height: 55px; border-radius: 4px; 
+            object-fit: cover; border: 1px solid var(--gold); 
         }
         
-        .action-btns .btn { border-radius: 20px; font-weight: bold; font-size: 12px; }
-        .btn-whatsapp { background: #25D366; color: white; }
-        .btn-call { background: #007bff; color: white; }
+        .action-btns .btn { border-radius: 4px; font-weight: bold; font-size: 13px; padding: 5px 12px; }
+        .btn-whatsapp { background: #25D366; color: white; border: none; }
+        .btn-call { background: #007bff; color: white; border: none; }
         
         #reportArea { 
             background: #fff; width: 1000px; margin: 20px auto; 
@@ -35,8 +35,8 @@
 
         @media print {
             .no-print { display: none !important; }
-            #reportArea { width: 100%; border: none; margin: 0; padding: 0; }
-            .btn-group { display: none; }
+            #reportArea { width: 100%; border: none; margin: 0; padding: 0; box-shadow: none; }
+            .action-btns { display: none !important; }
         }
     </style>
 </head>
@@ -47,23 +47,33 @@
 <div class="container mt-4 no-print">
     <div id="brand-header-container" class="mb-4"></div>
 
-    <div class="card p-4 shadow-sm border-0" style="background: #f8f9fa;">
+    <div class="card p-4 shadow-sm border-0" style="background: #f8f9fa; border-left: 5px solid var(--royal) !important;">
+        <h4 class="mb-3" style="color:var(--royal)">Defaulter Search Panel</h4>
         <div class="row align-items-end">
             <div class="col-md-4">
-                <label class="fw-bold small">SELECT CLASS</label>
+                <label class="fw-bold small mb-1">SELECT ENROLLMENT CLASS</label>
                 <select id="fClass" class="form-select border-dark">
+                    <option value="">Select Class</option>
+                    <option value="Pre-Nursery">Pre-Nursery</option>
                     <option value="Nursery">Nursery</option>
                     <option value="LKG">LKG</option>
                     <option value="UKG">UKG</option>
-                    <script>
-                        for(let i=1; i<=12; i++) {
-                            document.write(`<option value="${i}${i==1?'st':i==2?'nd':i==3?'rd':'th'}">${i}${i==1?'st':i==2?'nd':i==3?'rd':'th'}</option>`);
-                        }
-                    </script>
+                    <option value="1">Class 1</option>
+                    <option value="2">Class 2</option>
+                    <option value="3">Class 3</option>
+                    <option value="4">Class 4</option>
+                    <option value="5">Class 5</option>
+                    <option value="6">Class 6</option>
+                    <option value="7">Class 7</option>
+                    <option value="8">Class 8</option>
+                    <option value="9">Class 9</option>
+                    <option value="10">Class 10</option>
+                    <option value="11">Class 11</option>
+                    <option value="12">Class 12</option>
                 </select>
             </div>
             <div class="col-md-4">
-                <label class="fw-bold small">SELECT MONTH</label>
+                <label class="fw-bold small mb-1">FEE MONTH</label>
                 <select id="fMonth" class="form-select border-dark">
                     <option value="April">April</option><option value="May">May</option>
                     <option value="June">June</option><option value="July">July</option>
@@ -74,8 +84,8 @@
                 </select>
             </div>
             <div class="col-md-4">
-                <button class="btn btn-dark w-100 fw-bold" onclick="generateList()">
-                    <i class="fas fa-search me-2"></i> SEARCH DEFAULTERS
+                <button class="btn btn-dark w-100 fw-bold" onclick="generateList()" style="height: 38px;">
+                    <i class="fas fa-search me-2"></i> FETCH DEFAULTERS
                 </button>
             </div>
         </div>
@@ -83,33 +93,40 @@
 </div>
 
 <div id="reportArea">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
         <div class="d-flex align-items-center">
-            <img src="logo.png" style="width:60px; margin-right:15px;">
+            <img src="logo.png" style="width:70px; margin-right:20px;" onerror="this.style.display='none'">
             <div>
-                <h2 style="margin:0; color:var(--royal); font-weight:800;">THE LALIT INTERNATIONAL SCHOOL</h2>
-                <p class="m-0 fw-bold text-danger" id="reportTitle">FEE DEFAULTER STATEMENT</p>
+                <h1 style="margin:0; color:var(--royal); font-weight:800; font-size: 26px;">THE LALIT INTERNATIONAL SCHOOL</h1>
+                <p class="m-0 fw-bold text-danger" id="reportTitle">OFFICIAL DEFAULTER STATEMENT</p>
             </div>
         </div>
-        <button class="btn btn-outline-dark no-print" onclick="window.print()">PRINT</button>
+        <div class="text-end no-print">
+            <button class="btn btn-warning btn-sm fw-bold" onclick="window.print()">PRINT LIST</button>
+        </div>
     </div>
 
     <table class="table table-bordered align-middle">
-        <thead class="table-light">
-            <tr class="small text-center">
+        <thead class="table-light text-center">
+            <tr style="font-size: 13px;">
                 <th>PHOTO</th>
-                <th class="text-start">STUDENT NAME</th>
+                <th class="text-start">STUDENT NAME & ID</th>
                 <th>FATHER'S NAME</th>
-                <th>MONTHLY FEE</th>
-                <th class="no-print">ACTIONS</th>
+                <th>PENDING FEE</th>
+                <th class="no-print">REACH OUT</th>
             </tr>
         </thead>
         <tbody id="defTableBody">
             <tr>
-                <td colspan="5" class="text-center py-5">Please select filters to generate list.</td>
+                <td colspan="5" class="text-center py-5 text-muted">Awaiting Selection...</td>
             </tr>
         </tbody>
     </table>
+    
+    <div class="mt-4 d-flex justify-content-between small">
+        <span>Report Generated on: <b id="genTime">-</b></span>
+        <span>Authorized Signatory: _________________</span>
+    </div>
 </div>
 
 <script src="menu.js"></script>
@@ -120,20 +137,21 @@ async function generateList() {
     const selMonth = document.getElementById('fMonth').value;
     const tbody = document.getElementById('defTableBody');
     
-    tbody.innerHTML = `<tr><td colspan="5" class="text-center">Scanning database...</td></tr>`;
+    if(!selClass) { alert("Please select a class first."); return; }
+    
+    tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary"></div> Checking Records...</td></tr>`;
+    document.getElementById('genTime').innerText = new Date().toLocaleString();
 
     try {
-        // 1. Get Fee Master for the class
+        // 1. Fee Master se class ki tuition fee uthana
         const fMaster = await db.collection('fee_master').doc(selClass).get();
         const baseFee = fMaster.exists ? (fMaster.data().tuition || 0) : 0;
 
-        // 2. Get Students
+        // 2. Students fetch karna (Using EXACT class value from dropdown)
         const stuSnap = await db.collection('students').where('class', '==', selClass).get();
         
-        // 3. Get Paid Transactions for this month
-        const transSnap = await db.collection('fee_transactions')
-                            .where('month', '==', selMonth)
-                            .get();
+        // 3. Transactions fetch karna
+        const transSnap = await db.collection('fee_transactions').where('month', '==', selMonth).get();
         
         const paidSet = new Set();
         transSnap.forEach(t => paidSet.add(String(t.data().studentID)));
@@ -143,34 +161,40 @@ async function generateList() {
 
         stuSnap.forEach(doc => {
             const s = doc.data();
+            // Agar bachhe ne fee nahi bhari hai
             if (!paidSet.has(String(s.uniqueID))) {
                 count++;
-                const phone = s.mobile || "";
-                const msg = `Dear Parent, fee for ${s.name} for ${selMonth} is still pending. Kindly deposit at the earliest. - The Lalit Intl.`;
+                const phone = s.contact || s.whatsapp || "";
+                const waMsg = `Dear Parent, fee for ${s.name} for ${selMonth} is still pending. Kindly deposit at the earliest. - The Lalit Intl.`;
 
                 html += `
                 <tr class="text-center">
-                    <td><img src="${s.photo || ''}" class="defaulter-img" onerror="this.src='https://via.placeholder.com/45'"></td>
+                    <td><img src="${s.photo || ''}" class="defaulter-img" onerror="this.src='https://via.placeholder.com/45x55?text=No+Pic'"></td>
                     <td class="text-start">
-                        <div class="fw-bold">${s.name.toUpperCase()}</div>
-                        <small>ID: ${s.uniqueID}</small>
+                        <div class="fw-bold" style="color:var(--royal)">${s.name.toUpperCase()}</div>
+                        <code class="text-dark">ID: ${s.uniqueID}</code>
                     </td>
                     <td>${s.father || 'N/A'}</td>
                     <td class="fw-bold text-danger">₹${baseFee}</td>
                     <td class="no-print action-btns">
-                        <a href="tel:${phone}" class="btn btn-call btn-sm me-1"><i class="fas fa-phone"></i></a>
-                        <a href="https://wa.me/91${phone}?text=${encodeURIComponent(msg)}" target="_blank" class="btn btn-whatsapp btn-sm"><i class="fab fa-whatsapp"></i></a>
+                        <a href="tel:${phone}" class="btn btn-call btn-sm me-1"><i class="fas fa-phone-alt"></i></a>
+                        <a href="https://wa.me/91${phone}?text=${encodeURIComponent(waMsg)}" target="_blank" class="btn btn-whatsapp btn-sm"><i class="fab fa-whatsapp"></i></a>
                     </td>
                 </tr>`;
             }
         });
 
-        tbody.innerHTML = count > 0 ? html : `<tr><td colspan="5" class="text-center py-4 text-success fw-bold">No Defaulters Found!</td></tr>`;
-        document.getElementById('reportTitle').innerText = `FEE DEFAULTER LIST: ${selClass.toUpperCase()} - ${selMonth.toUpperCase()}`;
+        if(count > 0) {
+            tbody.innerHTML = html;
+        } else {
+            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-success fw-bold">Great! No Defaulters found for Class ${selClass} in ${selMonth}.</td></tr>`;
+        }
+        
+        document.getElementById('reportTitle').innerText = `DEFAULTER STATEMENT: CLASS ${selClass} (${selMonth})`;
 
     } catch (e) {
         console.error(e);
-        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">Error: ${e.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">Database Error: ${e.message}</td></tr>`;
     }
 }
 </script>
