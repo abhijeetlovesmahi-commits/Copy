@@ -1,1 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Staff - Control Tower</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .form-container { max-width: 500px; margin: 80px auto; padding: 30px; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-top: 5px solid #D4AF37; }
+        .form-header { text-align: center; margin-bottom: 25px; }
+        .form-header h2 { color: #002366; font-family: 'Cinzel', serif; }
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; font-size: 0.9rem; }
+        .input-group input, .input-group select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
+        .btn-submit { width: 100%; padding: 15px; background: #002366; color: #D4AF37; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: 0.3s; }
+        .btn-submit:hover { background: #001a4d; transform: translateY(-2px); }
+        #status-msg { margin-top: 15px; text-align: center; font-size: 0.9rem; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="form-container">
+        <div class="form-header">
+            <i class="fas fa-user-shield fa-3x" style="color: #D4AF37;"></i>
+            <h2>Register New Staff</h2>
+            <p style="font-size: 0.8rem; color: #888;">ID & Password will be generated automatically</p>
+        </div>
+
+        <form id="addStaffForm">
+            <div class="input-group">
+                <label>Full Name</label>
+                <input type="text" id="staffName" placeholder="e.g. Rajesh Kumar" required>
+            </div>
+            <div class="input-group">
+                <label>Email ID (This will be the Login ID)</label>
+                <input type="email" id="staffEmail" placeholder="e.g. rajesh@lalit.com" required>
+            </div>
+            <div class="input-group">
+                <label>Phone Number</label>
+                <input type="tel" id="staffPhone" placeholder="10 Digit Mobile No." required>
+            </div>
+            <div class="input-group">
+                <label>Assign Role</label>
+                <select id="staffRole" required>
+                    <option value="">Select Role</option>
+                    <option value="teacher">Teacher</option>
+                    <option value="accountant">Accountant</option>
+                    <option value="principal">Principal</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+            <button type="submit" class="btn-submit" id="submitBtn">CREATE STAFF ACCOUNT</button>
+            <div id="status-msg"></div>
+        </form>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    
+    <script src="firebase-config.js"></script>
+    <script src="menu.js"></script>
+
+    <script>
+        const form = document.getElementById('addStaffForm');
+        const statusMsg = document.getElementById('status-msg');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('staffName').value;
+            const email = document.getElementById('staffEmail').value;
+            const phone = document.getElementById('staffPhone').value;
+            const role = document.getElementById('staffRole').value;
+            const submitBtn = document.getElementById('submitBtn');
+
+            // 1. Automatic Password Generate (e.g. Lalit@1234)
+            const generatedPassword = "Lalit@" + Math.floor(1000 + Math.random() * 9000);
+
+            submitBtn.disabled = true;
+            statusMsg.innerText = "Creating account... Please wait.";
+            statusMsg.style.color = "blue";
+
+            try {
+                /* IMPORTANT: Creating a secondary app instance to prevent admin logout */
+                const secondaryApp = firebase.initializeApp(firebaseConfig, "Secondary");
+                
+                // 2. Create User in Firebase Auth
+                const userCredential = await secondaryApp.auth().createUserWithEmailAndPassword(email, generatedPassword);
+                const uid = userCredential.user.uid;
+
+                // 3. Save details in Firestore 'users' collection
+                await firebase.firestore().collection('users').doc(uid).set({
+                    name: name,
+                    email: email,
+                    phone: phone,
+                    role: role,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // Success Message
+                statusMsg.innerHTML = `
+                    <div style="background: #d4edda; padding: 15px; border-radius: 8px; color: #155724;">
+                        Account Created Successfully!<br>
+                        <strong>ID:</strong> ${email}<br>
+                        <strong>Password:</strong> ${generatedPassword}<br>
+                        <small>Please note down the password.</small>
+                    </div>`;
+                
+                form.reset();
+                await secondaryApp.delete(); // Clean up
+
+            } catch (error) {
+                statusMsg.innerText = "Error: " + error.message;
+                statusMsg.style.color = "red";
+            } finally {
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
 
