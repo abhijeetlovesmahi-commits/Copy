@@ -97,11 +97,14 @@
                         <option value="Peon">Peon</option>
                         <option value="Sweeper">Sweeper</option>
                         <option value="Guard">Security Guard</option>
+                    </select>
+
                     <select id="stRole" required>
-    <option value="admin">Admin (Full Access)</option>
-    <option value="accountant">Accountant/Clerk (Fee & Admission)</option>
-    <option value="teacher">Teacher (Academic Access)</option>
-    <option value="staff">General Staff (No Login Access)</option>
+                        <option value="">Select Account Role</option>
+                        <option value="admin">Admin (Full Access)</option>
+                        <option value="accountant">Accountant/Clerk (Fee & Admission)</option>
+                        <option value="teacher">Teacher (Academic Access)</option>
+                        <option value="staff">General Staff (No Login Access)</option>
                     </select>
                         
                     <input type="text" id="stDob" placeholder="Date of Birth" onfocus="(this.type='date')" required>
@@ -176,7 +179,6 @@ let compressedBase64 = "";
 let currentViewData = null;
 let allStaff = [];
 
-// Secondary app instances to manage user creation without logging out the current admin session
 const secondaryApp = firebase.initializeApp(firebaseConfig, "SecondaryStaffApp");
 const secondaryAuth = secondaryApp.auth();
 
@@ -218,12 +220,10 @@ document.getElementById('staffForm').addEventListener('submit', async (e) => {
             const lastSnap = await db.collection('staff').orderBy('staffID', 'desc').limit(1).get();
             staffID = lastSnap.empty ? 5001 : Number(lastSnap.docs[0].data().staffID) + 1;
 
-            // Generate Email and Password
             const cleanName = document.getElementById('stName').value.replace(/\s+/g, '').toLowerCase();
             generatedEmail = `${cleanName}${staffID}@staff.lalit.com`;
             generatedPassword = `Staff@${staffID}`;
 
-            // Create account in Firebase Auth
             await secondaryAuth.createUserWithEmailAndPassword(generatedEmail, generatedPassword);
             await secondaryAuth.signOut();
         }
@@ -241,7 +241,6 @@ document.getElementById('staffForm').addEventListener('submit', async (e) => {
             address: document.getElementById('stAddr').value,
             photo: compressedBase64 || (currentViewData ? currentViewData.photo : ""),
             timestamp: Date.now(),
-            // Save login info if it's a new registration
             ...(generatedEmail && { loginEmail: generatedEmail, loginPass: generatedPassword })
         };
 
