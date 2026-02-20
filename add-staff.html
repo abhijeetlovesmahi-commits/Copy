@@ -15,6 +15,7 @@
     <script src="brand.js"></script>
 
     <style>
+        /* Modal & UI Tweaks */
         .modal {
             display: none; position: fixed; z-index: 9999; 
             left: 0; top: 0; width: 100%; height: 100%;
@@ -34,10 +35,15 @@
             background: #fff5f5; border: 1px solid #feb2b2;
             padding: 15px; border-radius: 8px; margin-top: 20px; display: none;
         }
-        .credential-badge {
-            background: #e3f2fd; border-left: 4px solid #1976d2;
-            padding: 10px; margin-top: 10px; font-family: monospace;
+        .custom-id-card {
+            background: white; border: 1px solid #e0e0e0; border-radius: 12px;
+            padding: 15px; display: flex; align-items: center; gap: 15px;
+            cursor: pointer; transition: 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
+        .custom-id-card:hover { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
+        .id-photo { width: 70px; height: 90px; border-radius: 6px; object-fit: cover; border: 2px solid var(--gold); }
+        .id-info h4 { margin: 0; color: var(--royal-blue); font-size: 1.1rem; }
+        .id-info p { margin: 2px 0; font-size: 0.85rem; color: #666; }
     </style>
 </head>
 <body>
@@ -48,20 +54,20 @@
     <div class="royal-card">
         
         <div class="header" id="brand-header-container">
-            <p style="text-align:center; color:var(--gold);">Loading Royal Branding...</p>
+            <p style="text-align:center; color:var(--gold);">Connecting to School Brand...</p>
         </div>
 
-        <h2 id="formTitle" style="margin-top:0;">STAFF REGISTRATION FORM</h2>
+        <h2 id="formTitle" style="margin-top:0;">STAFF ENROLLMENT FORM</h2>
 
         <form id="staffForm">
             <input type="hidden" id="editingId">
             
             <section class="form-section">
-                <span class="section-title">Step 1: Staff Identity</span>
+                <span class="section-title">Step 1: Profile Image</span>
                 <div style="text-align: center;">
                     <input type="file" id="staffPhoto" accept="image/*" onchange="processPhoto(this)" style="max-width:300px;">
                     <div style="margin-top:20px;">
-                        <img id="imgPreview" style="width:140px; height:180px; border:3px solid var(--gold); display:none; object-fit:cover; border-radius:8px; box-shadow: var(--shadow-md);">
+                        <img id="imgPreview" style="width:140px; height:180px; border:3px solid var(--gold); display:none; object-fit:cover; border-radius:8px;">
                     </div>
                 </div>
             </section>
@@ -70,9 +76,9 @@
                 <span class="section-title">Step 2: Personal & Professional Details</span>
                 <div class="input-grid">
                     <input type="text" id="fullName" placeholder="Staff Full Name" required>
-                    <input type="text" id="fatherName" placeholder="Father/Husband Name" required>
+                    <input type="text" id="fatherName" placeholder="Father/Husband Name">
                     <select id="staffPost" required>
-                        <option value="">Select Designation / Post</option>
+                        <option value="">Select Designation</option>
                         <option value="Director">Director</option>
                         <option value="Principal">Principal</option>
                         <option value="Teacher">Teacher</option>
@@ -80,50 +86,50 @@
                         <option value="Clerk">Clerk</option>
                         <option value="Librarian">Librarian</option>
                         <option value="PTI">PTI (Sports)</option>
+                        <option value="Guard">Security Guard</option>
                         <option value="Driver">Driver</option>
-                        <option value="Guard">Guard</option>
                         <option value="Mali">Mali</option>
                         <option value="Sweeper">Sweeper</option>
                     </select>
-                    <input type="text" id="qualification" placeholder="Highest Qualification (e.g. B.Ed, M.A)">
+                    <input type="text" id="qualification" placeholder="Qualification (B.Ed, M.A etc)">
                     <input type="number" id="salary" placeholder="Monthly Salary (₹)" required>
                 </div>
             </section>
 
             <section class="form-section">
-                <span class="section-title">Step 3: Contact & Security Role</span>
+                <span class="section-title">Step 3: Account & System Role</span>
                 <div class="input-grid">
                     <input type="email" id="email" placeholder="Official Email (Login ID)" required>
                     <input type="tel" id="phone" placeholder="Mobile Number" required>
                     <select id="userRole" required>
-                        <option value="">Assign System Role</option>
-                        <option value="admin">Admin (Full Access)</option>
-                        <option value="principal">Principal (Academic View)</option>
-                        <option value="accountant">Accountant (Fees/Salary)</option>
+                        <option value="">Assign System Access Role</option>
+                        <option value="admin">Admin (All Access)</option>
                         <option value="teacher">Teacher (Attendance/Marks)</option>
+                        <option value="accountant">Accountant (Fees/Salary)</option>
+                        <option value="principal">Principal (Full View Only)</option>
                     </select>
                 </div>
                 <div style="margin-top:20px;">
-                    <textarea id="address" placeholder="Full Residential Address" rows="2" required style="width:100%; padding:14px; border-bottom:3px solid var(--gold); border-radius:6px; font-family:inherit;"></textarea>
+                    <textarea id="address" placeholder="Residential Address" rows="2" required style="width:100%; padding:14px; border-bottom:3px solid var(--gold); border-radius:6px; font-family:inherit;"></textarea>
                 </div>
             </section>
 
             <div style="display: flex; gap: 15px;">
-                <button type="submit" id="submitBtn" class="royal-btn btn-block btn-success">GENERATE ID & SAVE STAFF</button>
-                <button type="button" id="cancelEdit" class="royal-btn btn-danger" style="display:none;" onclick="resetForm()">CANCEL EDIT</button>
+                <button type="submit" id="submitBtn" class="royal-btn btn-block btn-success">AUTHORIZE & SAVE STAFF</button>
+                <button type="button" id="cancelEdit" class="royal-btn btn-danger" style="display:none;" onclick="resetForm()">CANCEL</button>
             </div>
         </form>
 
         <hr style="margin: 60px 0; border: 0; border-top: 2px double var(--gold); opacity: 0.3;">
 
         <div>
-            <h2>STAFF DIRECTORY</h2>
+            <h2>ACTIVE STAFF DIRECTORY</h2>
             <div style="display: flex; gap: 10px; margin-bottom: 30px; justify-content: center; flex-wrap: wrap;">
-                <input type="text" id="searchInput" placeholder="Search by Name, Post or ID..." style="max-width: 450px;">
+                <input type="text" id="searchInput" placeholder="Search by Name, ID or Designation..." style="max-width: 450px;">
             </div>
             
             <div id="staffList" class="profile-grid-custom">
-                <p style="text-align:center; grid-column:1/-1;">Loading Staff Records...</p>
+                <p style="text-align:center; grid-column:1/-1;">Synchronizing Staff Records...</p>
             </div>
         </div>
     </div>
@@ -140,9 +146,9 @@
         </div>
 
         <div id="securityCheck" class="security-box">
-            <p style="color:#c53030; font-weight:bold; margin-bottom:10px;">🛡️ Secure Deletion</p>
-            <p style="font-size:0.85rem; margin-bottom:10px;">Type Staff ID <span id="confirmIdText" style="font-weight:bold; color:black;"></span> to confirm:</p>
-            <input type="text" id="deleteConfirmInput" placeholder="Enter ID to delete" style="width:100%; margin-bottom:10px; padding:8px; border:1px solid #ccc;">
+            <p style="color:#c53030; font-weight:bold; margin-bottom:10px;">⚠️ Secure Deletion</p>
+            <p style="font-size:0.85rem;">Type Staff ID <span id="confirmIdText" style="font-weight:bold;"></span> to confirm:</p>
+            <input type="text" id="deleteConfirmInput" placeholder="Confirm ID" style="width:100%; margin:10px 0; padding:8px; border:1px solid #ccc;">
             <div style="display:flex; gap:10px;">
                 <button class="royal-btn btn-danger" onclick="confirmDeleteProcess()" style="flex:1;">DELETE NOW</button>
                 <button class="royal-btn" onclick="hideSecurity()" style="flex:1; background:#666;">CANCEL</button>
@@ -151,7 +157,7 @@
 
         <div id="modalBtnGroup" style="margin-top:30px; display:flex; gap:15px; justify-content:flex-end; border-top:1px solid #eee; padding-top:20px;">
             <button class="royal-btn btn-sm" id="modalEditBtn">EDIT DATA</button>
-            <button class="royal-btn btn-sm btn-danger" onclick="showSecurity()">DELETE</button>
+            <button class="royal-btn btn-sm btn-danger" onclick="showSecurity()">REMOVE</button>
             <button class="royal-btn btn-sm" onclick="window.print()" style="background:var(--gold); color:black;">PRINT ID</button>
         </div>
     </div>
@@ -159,12 +165,10 @@
 
 <script>
 const db = firebase.firestore();
-const auth = firebase.auth();
 let compressedBase64 = "";
 let currentStaffData = null;
 let allStaff = [];
 
-// Photo Compression Logic
 function processPhoto(input) {
     const file = input.files[0];
     if (file) {
@@ -187,33 +191,33 @@ function processPhoto(input) {
     }
 }
 
-// Handle Form Submission (Add/Edit)
 document.getElementById('staffForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const btn = document.getElementById('submitBtn');
     const editingId = document.getElementById('editingId').value;
-    btn.disabled = true; 
-    btn.innerText = "Securing Record...";
+    btn.disabled = true; btn.innerText = "Securing Record...";
 
     try {
         let uniqueID = editingId;
         let autoPassword = "";
 
         if(!editingId) {
-            // New Staff: Generate Numeric ID
-            const lastSnap = await db.collection('users').orderBy('uniqueID', 'desc').limit(1).get();
-            uniqueID = lastSnap.empty ? 5001 : Number(lastSnap.docs[0].data().uniqueID) + 1;
-            
-            // Generate Automatic Password
-            autoPassword = "Lalit@" + Math.floor(1000 + Math.random() * 9000);
-            
-            // Optional: Register in Firebase Auth (Secondary Instance to avoid admin logout)
-            // Note: Since browsers limit multiple auth instances easily, 
-            // you might want to create the Auth record via a Cloud Function or manually 
-            // if not using a secondary app. Here we focus on Firestore Data.
+            // Logic to handle empty collection and find next numeric ID
+            const snapshot = await db.collection('users').get();
+            if(snapshot.empty) {
+                uniqueID = 5001; 
+            } else {
+                let maxId = 5000;
+                snapshot.forEach(doc => {
+                    const d = doc.data();
+                    if(d.uniqueID && Number(d.uniqueID) > maxId) maxId = Number(d.uniqueID);
+                });
+                uniqueID = maxId + 1;
+            }
+            autoPassword = "Lalit@" + Math.floor(1000 + Math.random() * 9900);
         }
 
-        const staffData = {
+        const data = {
             uniqueID: Number(uniqueID),
             name: document.getElementById('fullName').value,
             fatherName: document.getElementById('fatherName').value,
@@ -228,79 +232,78 @@ document.getElementById('staffForm').addEventListener('submit', async (e) => {
             timestamp: Date.now()
         };
 
-        if(!editingId) staffData.password = autoPassword; // Save generated password for admin reference
+        if(!editingId) data.password = autoPassword;
 
-        await db.collection('users').doc(uniqueID.toString()).set(staffData, {merge: true});
+        // Save with uniqueID as Document Name
+        await db.collection('users').doc(uniqueID.toString()).set(data, {merge: true});
         
         if(!editingId) {
-            alert(`SUCCESS!\nStaff ID: ${uniqueID}\nLogin Password: ${autoPassword}\n\nPlease note down the password!`);
+            alert(`SUCCESS!\nStaff ID: ${uniqueID}\nTemporary Password: ${autoPassword}\n\nPlease share these with the staff.`);
         } else {
-            alert("Record Updated Successfully!");
+            alert("Staff Details Updated Successfully!");
         }
         location.reload();
-    } catch (err) { alert("Error: " + err.message); btn.disabled = false; }
+    } catch (err) { alert("Error: " + err.message); btn.disabled = false; btn.innerText = "AUTHORIZE & SAVE STAFF"; }
 });
 
-// Load and Real-time Sync
-function loadStaffData() {
-    db.collection('users').onSnapshot(snapshot => {
+function loadStaff() {
+    db.collection('users').onSnapshot(snap => {
         allStaff = [];
-        snapshot.forEach(doc => allStaff.push(doc.data()));
-        allStaff.sort((a, b) => b.timestamp - a.timestamp);
+        snap.forEach(doc => allStaff.push(doc.data()));
+        allStaff.sort((a,b) => b.timestamp - a.timestamp);
         renderStaff(allStaff);
-    });
+    }, err => { console.error("Sync Error:", err); });
 }
 
-function renderStaff(dataArray) {
+function renderStaff(arr) {
     const list = document.getElementById('staffList');
     list.innerHTML = "";
-    dataArray.forEach(data => {
+    if(arr.length === 0) { list.innerHTML = "<p style='text-align:center;'>No staff records found.</p>"; return; }
+    arr.forEach(s => {
         const card = document.createElement('div');
         card.className = 'custom-id-card';
-        card.onclick = () => showDetails(data);
+        card.onclick = () => showDetails(s);
         card.innerHTML = `
-            <img src="${data.photo || 'https://via.placeholder.com/150'}" class="id-photo">
+            <img src="${s.photo || 'https://via.placeholder.com/150'}" class="id-photo">
             <div class="id-info">
-                <h4>${data.name}</h4>
-                <p><b>ID:</b> ${data.uniqueID} | <b>Post:</b> ${data.post}</p>
-                <span class="status-badge" style="background:var(--gold); color:black; font-size:10px;">
-                    ${data.role.toUpperCase()}
-                </span>
+                <h4>${s.name}</h4>
+                <p><b>ID:</b> ${s.uniqueID} | <b>Post:</b> ${s.post}</p>
+                <p style="color:var(--gold); font-weight:bold; font-size:10px; margin-top:5px;">${s.role.toUpperCase()}</p>
             </div>`;
         list.appendChild(card);
     });
 }
 
-// Search Logic
 document.getElementById('searchInput').addEventListener('input', (e) => {
     const val = e.target.value.toLowerCase();
     const filtered = allStaff.filter(s => s.name.toLowerCase().includes(val) || s.uniqueID.toString().includes(val) || s.post.toLowerCase().includes(val));
     renderStaff(filtered);
 });
 
-// Modal Actions
-function showDetails(data) {
-    currentStaffData = data;
+function showDetails(s) {
+    currentStaffData = s;
     hideSecurity();
-    document.getElementById('modalName').innerText = data.name;
-    document.getElementById('modalPhoto').src = data.photo || 'https://via.placeholder.com/150';
+    document.getElementById('modalName').innerText = s.name;
+    document.getElementById('modalPhoto').src = s.photo || 'https://via.placeholder.com/150';
     document.getElementById('modalDetails').innerHTML = `
-        <p><strong>Designation:</strong> ${data.post}</p>
-        <p><strong>Staff ID:</strong> ${data.uniqueID}</p>
-        <p><strong>Email/Login:</strong> ${data.email}</p>
-        <p><strong>Generated Pass:</strong> ${data.password || '********'}</p>
-        <p><strong>Phone:</strong> ${data.phone}</p>
-        <p><strong>Salary:</strong> ₹${data.salary}</p>
-        <p><strong>Address:</strong> ${data.address}</p>
+        <p><strong>Designation:</strong> ${s.post}</p>
+        <p><strong>Staff ID:</strong> ${s.uniqueID}</p>
+        <p><strong>Login Email:</strong> ${s.email}</p>
+        <p><strong>Temporary Pass:</strong> ${s.password || '********'}</p>
+        <p><strong>Phone:</strong> ${s.phone}</p>
+        <p><strong>Monthly Salary:</strong> ₹${s.salary}</p>
+        <p><strong>Qualification:</strong> ${s.qualification || 'N/A'}</p>
+        <p><strong>Address:</strong> ${s.address}</p>
     `;
-    document.getElementById('modalEditBtn').onclick = () => startEdit(data);
+    document.getElementById('modalEditBtn').onclick = () => startEdit(s);
     document.getElementById('detailModal').style.display = 'block';
 }
 
-function showSecurity() {
+function showSecurity() { 
     document.getElementById('modalBtnGroup').style.display = 'none';
     document.getElementById('securityCheck').style.display = 'block';
     document.getElementById('confirmIdText').innerText = currentStaffData.uniqueID;
+    document.getElementById('deleteConfirmInput').value = "";
 }
 
 function hideSecurity() {
@@ -309,34 +312,33 @@ function hideSecurity() {
 }
 
 async function confirmDeleteProcess() {
-    const inputId = document.getElementById('deleteConfirmInput').value;
-    if(inputId == currentStaffData.uniqueID) {
-        if(confirm("Confirm permanent deletion of this staff?")) {
+    if(document.getElementById('deleteConfirmInput').value == currentStaffData.uniqueID) {
+        if(confirm("Are you sure you want to permanently delete this staff member?")) {
             await db.collection('users').doc(currentStaffData.uniqueID.toString()).delete();
             closeModal();
         }
-    } else { alert("ID Mismatch!"); }
+    } else { alert("ID Mismatch! Please enter correct ID."); }
 }
 
-function startEdit(data) {
+function startEdit(s) {
     closeModal();
     window.scrollTo({top: 0, behavior: 'smooth'});
     document.getElementById('formTitle').innerText = "UPDATE STAFF RECORD";
-    document.getElementById('editingId').value = data.uniqueID;
-    document.getElementById('fullName').value = data.name;
-    document.getElementById('fatherName').value = data.fatherName;
-    document.getElementById('staffPost').value = data.post;
-    document.getElementById('qualification').value = data.qualification;
-    document.getElementById('salary').value = data.salary;
-    document.getElementById('email').value = data.email;
-    document.getElementById('phone').value = data.phone;
-    document.getElementById('userRole').value = data.role;
-    document.getElementById('address').value = data.address;
-    if(data.photo) {
-        document.getElementById('imgPreview').src = data.photo;
+    document.getElementById('editingId').value = s.uniqueID;
+    document.getElementById('fullName').value = s.name;
+    document.getElementById('fatherName').value = s.fatherName;
+    document.getElementById('staffPost').value = s.post;
+    document.getElementById('qualification').value = s.qualification;
+    document.getElementById('salary').value = s.salary;
+    document.getElementById('email').value = s.email;
+    document.getElementById('phone').value = s.phone;
+    document.getElementById('userRole').value = s.role;
+    document.getElementById('address').value = s.address;
+    if(s.photo) {
+        document.getElementById('imgPreview').src = s.photo;
         document.getElementById('imgPreview').style.display = 'block';
     }
-    document.getElementById('submitBtn').innerText = "UPDATE CHANGES";
+    document.getElementById('submitBtn').innerText = "SAVE CHANGES";
     document.getElementById('cancelEdit').style.display = 'inline-block';
 }
 
@@ -344,7 +346,7 @@ function closeModal() { document.getElementById('detailModal').style.display = '
 function resetForm() { location.reload(); }
 window.onclick = (e) => { if(e.target == document.getElementById('detailModal')) closeModal(); }
 
-loadStaffData();
+loadStaff();
 </script>
 
 <script src="menu.js"></script>
