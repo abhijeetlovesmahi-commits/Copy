@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure Demand Slip | The Lalit Intl.</title>
+    <title>Detailed Demand Slip | The Lalit Intl.</title>
     
     <link rel="stylesheet" href="style.css"> 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -26,11 +26,11 @@
             background-size: 4px 4px; page-break-after: always;
         }
         .slip-header-centered { text-align: center; border-bottom: 2px solid var(--royal); padding-bottom: 10px; margin-bottom: 20px; }
-        .slip-header-centered img { width: 75px; }
+        .slip-header-centered img { width: 65px; }
         .fee-table { width: 100%; border-collapse: collapse; margin: 15px 0; border: 1px solid #000; }
-        .fee-table th, .fee-table td { border: 1px solid #000; padding: 10px; font-size: 14px; }
-        .total-row { background: var(--royal) !important; color: #fff; font-size: 18px; font-weight: bold; }
-        #suggestions { position: absolute; z-index: 1000; width: 100%; max-height: 200px; overflow-y: auto; }
+        .fee-table th, .fee-table td { border: 1px solid #000; padding: 8px 12px; font-size: 13px; }
+        .total-row { background: var(--royal) !important; color: #fff; font-size: 16px; font-weight: bold; }
+        .arrears-row { background: #fff3f3; color: #a94442; font-weight: bold; }
         @media print { .no-print, #menu-container, .control-panel { display: none !important; } }
     </style>
 </head>
@@ -71,8 +71,8 @@
             </div>
             <div class="col-md-3 position-relative">
                 <label class="small fw-bold">Search Student</label>
-                <input type="text" id="searchName" class="form-control" placeholder="Enter Name or ID..." oninput="liveSearch()">
-                <div id="suggestions" class="list-group" style="display:none;"></div>
+                <input type="text" id="searchName" class="form-control" placeholder="Name or ID..." oninput="liveSearch()">
+                <div id="suggestions" class="list-group position-absolute w-100" style="z-index:100; display:none;"></div>
             </div>
             <div class="col-md-2"><button class="btn btn-dark w-100" onclick="startGeneration()">GENERATE</button></div>
             <div class="col-md-2"><button class="btn btn-warning w-100 fw-bold" onclick="window.print()">PRINT</button></div>
@@ -83,39 +83,26 @@
 <div id="printArea"></div>
 
 <script>
-let students = []; 
+let students = []; let feeMaster = {}; let transMaster = {};
 
-// Student data fetch karna
 async function init() {
-    const sS = await db.collection('students').get();
-    students = [];
+    const [sS, fS, tS] = await Promise.all([
+        db.collection('students').get(),
+        db.collection('fee_master').get(),
+        db.collection('transport_master').get()
+    ]);
     sS.forEach(d => students.push(d.data()));
+    fS.forEach(d => feeMaster[d.id] = d.data());
+    tS.forEach(d => transMaster[d.id] = d.data().amount);
 }
 
 function liveSearch() {
     const val = document.getElementById('searchName').value.toLowerCase();
     const sugg = document.getElementById('suggestions');
-    if(val.length < 1) { 
-        sugg.style.display='none'; 
-        delete document.getElementById('searchName').dataset.id;
-        return; 
-    }
-    
-    let matches = students.filter(s => 
-        s.name.toLowerCase().includes(val) || 
-        s.uniqueID.toString().includes(val)
-    );
-    
-    if(matches.length > 0) {
-        sugg.innerHTML = matches.map(s => `
-            <button class="list-group-item list-group-item-action py-2" onclick="setSearch('${s.uniqueID}', '${s.name}')">
-                <div class="fw-bold">${s.name}</div>
-                <small class="text-muted">ID: ${s.uniqueID} | Class: ${s.class}</small>
-            </button>`).join('');
-        sugg.style.display='block';
-    } else {
-        sugg.style.display='none';
-    }
+    if(val.length < 1) { sugg.style.display='none'; return; }
+    let matches = students.filter(s => s.name.toLowerCase().includes(val) || s.uniqueID.toString().includes(val));
+    sugg.innerHTML = matches.map(s => `<button class="list-group-item list-group-item-action" onclick="setSearch('${s.uniqueID}', '${s.name}')">${s.name} (${s.uniqueID})</button>`).join('');
+    sugg.style.display='block';
 }
 
 function setSearch(id, name) {
@@ -128,85 +115,81 @@ async function startGeneration() {
     const month = document.getElementById('slipMonth').value;
     const cls = document.getElementById('classFilter').value;
     const singleId = document.getElementById('searchName').dataset.id;
-    const nameInput = document.getElementById('searchName').value;
-
-    let targetList = [];
     
-    // Priority: 1. ID Search, 2. Class Filter, 3. All Students
-    if (nameInput && singleId) {
-        targetList = students.filter(s => s.uniqueID.toString() === singleId.toString());
-    } else if (cls) {
-        targetList = students.filter(s => s.class.toString() === cls.toString());
-    } else {
-        targetList = students;
-    }
-
-    if (targetList.length === 0) {
-        alert("No students found!");
-        return;
-    }
-
-    document.getElementById('printArea').innerHTML = "<h4 class='text-center mt-5'><i class='fas fa-spinner fa-spin'></i> Syncing with Ledger Database...</h4>";
+    let targetList = singleId ? students.filter(s => s.uniqueID.toString() === singleId) : (cls ? students.filter(s => s.class === cls) : students);
     
+    document.getElementById('printArea').innerHTML = "<h5 class='text-center mt-5'>Processing detailed slips...</h5>";
     let html = '';
+
     for(let s of targetList) {
-        // Seedha Ledger Collection se Balance uthana
         const ledgerDoc = await db.collection('ledger').doc(String(s.uniqueID)).get();
         if(ledgerDoc.exists) {
             const ledgerData = ledgerDoc.data();
-            const monthData = ledgerData[month] || {};
-            const balance = Number(monthData.balance || 0);
+            const totalBalance = Number(ledgerData[month]?.balance || 0);
 
-            // Sirf unhi ko dikhao jinka balance 0 se zyada hai
-            if(balance > 0) {
+            if(totalBalance > 0) {
+                const fm = feeMaster[s.class] || {};
+                const disc = s.discounts || {};
+                
+                // 1. Calculate Current Month Components
+                const tui = Math.round((fm.tuition || 0) * (1 - (disc.tuition || 0)/100));
+                const hos = Math.round((s.hostel === 'Yes' ? (fm.hostel || 0) : 0) * (1 - (disc.hostel || 0)/100));
+                const tra = Math.round((s.transport === 'Yes' ? (transMaster[s.transportDistance] || 0) : 0) * (1 - (disc.trans || 0)/100));
+                
+                let annual = 0;
+                if(month === 'April') {
+                    annual = Math.round(
+                        (fm.admission || 0) * (1 - (disc.adm || 0)/100) +
+                        (fm.development || 0) * (1 - (disc.dev || 0)/100) +
+                        (fm.exam || 0) * (1 - (disc.exam || 0)/100) +
+                        (fm.books || 0) * (1 - (disc.books || 0)/100) +
+                        (fm.misc || 0) * (1 - (disc.misc || 0)/100)
+                    );
+                }
+
+                const currentMonthTotal = tui + hos + tra + annual;
+                const previousArrears = totalBalance - currentMonthTotal;
+
                 html += `
                 <div class="slip-card">
                     <div class="slip-header-centered">
                         <img src="logo.png">
-                        <h3 class="m-0" style="color:var(--royal); font-weight:900">THE LALIT INTERNATIONAL SCHOOL</h3>
-                        <p class="m-0 fw-bold">FEE DEMAND SLIP | ${month.toUpperCase()} 2026</p>
+                        <h4 class="m-0" style="color:var(--royal); font-weight:900">THE LALIT INTERNATIONAL SCHOOL</h4>
+                        <p class="m-0 small fw-bold">FEE DEMAND SLIP: ${month.toUpperCase()} 2025-26</p>
                     </div>
-                    <div class="row mb-3 px-2">
-                        <div class="col-4 small text-start">STUDENT ID: <b>${s.uniqueID}</b></div>
-                        <div class="col-4 text-center small">NAME: <b>${s.name.toUpperCase()}</b></div>
-                        <div class="col-4 text-end small">CLASS: <b>${s.class}</b></div>
+
+                    <div class="row mb-2 px-1 small">
+                        <div class="col-4">ID: <b>${s.uniqueID}</b></div>
+                        <div class="col-4 text-center">NAME: <b>${s.name.toUpperCase()}</b></div>
+                        <div class="col-4 text-end">CLASS: <b>${s.class}</b></div>
                     </div>
+
                     <table class="fee-table">
-                        <thead class="table-light">
-                            <tr><th>PARTICULARS / FEE DESCRIPTION</th><th class="text-end">AMOUNT (INR)</th></tr>
-                        </thead>
+                        <thead><tr class="table-light"><th>FEE DESCRIPTION</th><th class="text-end">AMOUNT</th></tr></thead>
                         <tbody>
-                            <tr>
-                                <td class="py-4">
-                                    <b>Net Outstanding Balance</b><br>
-                                    <span class="text-muted small">Current month dues including any previous carry-forward balance.</span>
-                                </td>
-                                <td class="text-end py-4 fw-bold">₹${balance.toLocaleString('en-IN')}</td>
-                            </tr>
+                            ${previousArrears > 0 ? `<tr class="arrears-row"><td>Previous Arrears / Balance Carry Forward</td><td class="text-end">₹${previousArrears}</td></tr>` : ''}
+                            <tr><td>Monthly Tuition Fee</td><td class="text-end">₹${tui}</td></tr>
+                            ${tra > 0 ? `<tr><td>Transport Fee</td><td class="text-end">₹${tra}</td></tr>` : ''}
+                            ${hos > 0 ? `<tr><td>Hostel Fee</td><td class="text-end">₹${hos}</td></tr>` : ''}
+                            ${annual > 0 ? `<tr><td>Annual Charges (Admission/Exam/Books/Misc)</td><td class="text-end">₹${annual}</td></tr>` : ''}
                         </tbody>
                         <tfoot>
-                            <tr class="total-row">
-                                <td class="text-end">NET PAYABLE AMOUNT:</td>
-                                <td class="text-end">₹${balance.toLocaleString('en-IN')}</td>
-                            </tr>
+                            <tr class="total-row"><td class="text-end">TOTAL PAYABLE AMOUNT:</td><td class="text-end">₹${totalBalance}</td></tr>
                         </tfoot>
                     </table>
-                    <div class="mt-3 small italic text-muted text-center">
-                        * Please ignore if already paid. Detailed breakdown is available in the Master Ledger.
-                    </div>
-                    <div class="d-flex justify-content-between mt-5 pt-3">
-                        <div class="text-center" style="width:180px"><hr class="border-dark">Office Seal / Cashier</div>
-                        <div class="text-center" style="width:180px"><hr class="border-dark">Parent / Guardian Signature</div>
+
+                    <div class="d-flex justify-content-between mt-4 small">
+                        <div class="text-center" style="width:150px"><hr class="border-dark">Accounts Dept.</div>
+                        <div class="text-center" style="width:150px"><hr class="border-dark">Parent Signature</div>
                     </div>
                 </div>`;
             }
         }
     }
-    document.getElementById('printArea').innerHTML = html || "<h4 class='text-center mt-5 text-success'>Great! No pending dues found for selected criteria.</h4>";
+    document.getElementById('printArea').innerHTML = html || "<h5 class='text-center mt-5'>All clear! No dues found.</h5>";
 }
 
-// Page load par data init karein
-window.onload = init;
+init();
 </script>
 <script src="menu.js"></script>
 </body>
