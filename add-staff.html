@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Portal - The Lalit International</title>
+    
+    <link rel="stylesheet" href="style.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
+    
+    <script src="firebase-config.js"></script>
+    <script src="brand.js"></script>
+
+    <style>
+        .modal {
+            display: none; position: fixed; z-index: 9999; 
+            left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+        }
+        .modal-content {
+            background-color: #fff; margin: 5% auto; padding: 25px;
+            border-radius: 15px; width: 90%; max-width: 600px;
+            position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            animation: slideDown 0.3s ease-out;
+        }
+        @keyframes slideDown {
+            from { transform: translateY(-30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .security-box {
+            background: #fff5f5; border: 1px solid #feb2b2;
+            padding: 15px; border-radius: 8px; margin-top: 20px; display: none;
+        }
+        .credential-badge {
+            background: #e3f2fd; border-left: 4px solid #1976d2;
+            padding: 10px; margin-top: 10px; font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+
+<div id="menu-container"></div>
+
+<div class="main-content">
+    <div class="royal-card">
+        
+        <div class="header" id="brand-header-container">
+            <p style="text-align:center; color:var(--gold);">Loading Royal Branding...</p>
+        </div>
+
+        <h2 id="formTitle" style="margin-top:0;">STAFF REGISTRATION FORM</h2>
+
+        <form id="staffForm">
+            <input type="hidden" id="editingId">
+            
+            <section class="form-section">
+                <span class="section-title">Step 1: Staff Identity</span>
+                <div style="text-align: center;">
+                    <input type="file" id="staffPhoto" accept="image/*" onchange="processPhoto(this)" style="max-width:300px;">
+                    <div style="margin-top:20px;">
+                        <img id="imgPreview" style="width:140px; height:180px; border:3px solid var(--gold); display:none; object-fit:cover; border-radius:8px; box-shadow: var(--shadow-md);">
+                    </div>
+                </div>
+            </section>
+
+            <section class="form-section">
+                <span class="section-title">Step 2: Personal & Professional Details</span>
+                <div class="input-grid">
+                    <input type="text" id="fullName" placeholder="Staff Full Name" required>
+                    <input type="text" id="fatherName" placeholder="Father/Husband Name" required>
+                    <select id="staffPost" required>
+                        <option value="">Select Designation / Post</option>
+                        <option value="Director">Director</option>
+                        <option value="Principal">Principal</option>
+                        <option value="Teacher">Teacher</option>
+                        <option value="Accountant">Accountant</option>
+                        <option value="Clerk">Clerk</option>
+                        <option value="Librarian">Librarian</option>
+                        <option value="PTI">PTI (Sports)</option>
+                        <option value="Driver">Driver</option>
+                        <option value="Guard">Guard</option>
+                        <option value="Mali">Mali</option>
+                        <option value="Sweeper">Sweeper</option>
+                    </select>
+                    <input type="text" id="qualification" placeholder="Highest Qualification (e.g. B.Ed, M.A)">
+                    <input type="number" id="salary" placeholder="Monthly Salary (₹)" required>
+                </div>
+            </section>
+
+            <section class="form-section">
+                <span class="section-title">Step 3: Contact & Security Role</span>
+                <div class="input-grid">
+                    <input type="email" id="email" placeholder="Official Email (Login ID)" required>
+                    <input type="tel" id="phone" placeholder="Mobile Number" required>
+                    <select id="userRole" required>
+                        <option value="">Assign System Role</option>
+                        <option value="admin">Admin (Full Access)</option>
+                        <option value="principal">Principal (Academic View)</option>
+                        <option value="accountant">Accountant (Fees/Salary)</option>
+                        <option value="teacher">Teacher (Attendance/Marks)</option>
+                    </select>
+                </div>
+                <div style="margin-top:20px;">
+                    <textarea id="address" placeholder="Full Residential Address" rows="2" required style="width:100%; padding:14px; border-bottom:3px solid var(--gold); border-radius:6px; font-family:inherit;"></textarea>
+                </div>
+            </section>
+
+            <div style="display: flex; gap: 15px;">
+                <button type="submit" id="submitBtn" class="royal-btn btn-block btn-success">GENERATE ID & SAVE STAFF</button>
+                <button type="button" id="cancelEdit" class="royal-btn btn-danger" style="display:none;" onclick="resetForm()">CANCEL EDIT</button>
+            </div>
+        </form>
+
+        <hr style="margin: 60px 0; border: 0; border-top: 2px double var(--gold); opacity: 0.3;">
+
+        <div>
+            <h2>STAFF DIRECTORY</h2>
+            <div style="display: flex; gap: 10px; margin-bottom: 30px; justify-content: center; flex-wrap: wrap;">
+                <input type="text" id="searchInput" placeholder="Search by Name, Post or ID..." style="max-width: 450px;">
+            </div>
+            
+            <div id="staffList" class="profile-grid-custom">
+                <p style="text-align:center; grid-column:1/-1;">Loading Staff Records...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="detailModal" class="modal">
+    <div class="modal-content">
+        <span onclick="closeModal()" style="position:absolute; right:20px; top:10px; font-size:35px; cursor:pointer; color:var(--royal-blue);">&times;</span>
+        <h2 id="modalName" style="border-bottom: 2px solid var(--gold); padding-bottom:10px; color:var(--royal-blue);">STAFF PROFILE</h2>
+        
+        <div style="display: flex; gap: 25px; flex-wrap: wrap; margin-top:20px;">
+            <img id="modalPhoto" src="" style="width:160px; height:200px; border:3px solid var(--gold); border-radius:10px; object-fit:cover;">
+            <div id="modalDetails" style="flex:1; display:grid; grid-template-columns: 1fr; gap:8px; font-size:0.95rem;"></div>
+        </div>
+
+        <div id="securityCheck" class="security-box">
+            <p style="color:#c53030; font-weight:bold; margin-bottom:10px;">🛡️ Secure Deletion</p>
+            <p style="font-size:0.85rem; margin-bottom:10px;">Type Staff ID <span id="confirmIdText" style="font-weight:bold; color:black;"></span> to confirm:</p>
+            <input type="text" id="deleteConfirmInput" placeholder="Enter ID to delete" style="width:100%; margin-bottom:10px; padding:8px; border:1px solid #ccc;">
+            <div style="display:flex; gap:10px;">
+                <button class="royal-btn btn-danger" onclick="confirmDeleteProcess()" style="flex:1;">DELETE NOW</button>
+                <button class="royal-btn" onclick="hideSecurity()" style="flex:1; background:#666;">CANCEL</button>
+            </div>
+        </div>
+
+        <div id="modalBtnGroup" style="margin-top:30px; display:flex; gap:15px; justify-content:flex-end; border-top:1px solid #eee; padding-top:20px;">
+            <button class="royal-btn btn-sm" id="modalEditBtn">EDIT DATA</button>
+            <button class="royal-btn btn-sm btn-danger" onclick="showSecurity()">DELETE</button>
+            <button class="royal-btn btn-sm" onclick="window.print()" style="background:var(--gold); color:black;">PRINT ID</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const db = firebase.firestore();
+const auth = firebase.auth();
+let compressedBase64 = "";
+let currentStaffData = null;
+let allStaff = [];
+
+// Photo Compression Logic
+function processPhoto(input) {
+    const file = input.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = function(e) {
+            const img = new Image();
+            img.src = e.target.result;
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                canvas.width = 150; canvas.height = 190;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, 150, 190);
+                compressedBase64 = canvas.toDataURL('image/jpeg', 0.6);
+                const preview = document.getElementById('imgPreview');
+                preview.src = compressedBase64;
+                preview.style.display = 'block';
+            }
+        }
+    }
+}
+
+// Handle Form Submission (Add/Edit)
+document.getElementById('staffForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('submitBtn');
+    const editingId = document.getElementById('editingId').value;
+    btn.disabled = true; 
+    btn.innerText = "Securing Record...";
+
+    try {
+        let uniqueID = editingId;
+        let autoPassword = "";
+
+        if(!editingId) {
+            // New Staff: Generate Numeric ID
+            const lastSnap = await db.collection('users').orderBy('uniqueID', 'desc').limit(1).get();
+            uniqueID = lastSnap.empty ? 5001 : Number(lastSnap.docs[0].data().uniqueID) + 1;
+            
+            // Generate Automatic Password
+            autoPassword = "Lalit@" + Math.floor(1000 + Math.random() * 9000);
+            
+            // Optional: Register in Firebase Auth (Secondary Instance to avoid admin logout)
+            // Note: Since browsers limit multiple auth instances easily, 
+            // you might want to create the Auth record via a Cloud Function or manually 
+            // if not using a secondary app. Here we focus on Firestore Data.
+        }
+
+        const staffData = {
+            uniqueID: Number(uniqueID),
+            name: document.getElementById('fullName').value,
+            fatherName: document.getElementById('fatherName').value,
+            post: document.getElementById('staffPost').value,
+            qualification: document.getElementById('qualification').value,
+            salary: document.getElementById('salary').value,
+            email: document.getElementById('email').value,
+            phone: document.getElementById('phone').value,
+            role: document.getElementById('userRole').value,
+            address: document.getElementById('address').value,
+            photo: compressedBase64 || (currentStaffData ? currentStaffData.photo : ""),
+            timestamp: Date.now()
+        };
+
+        if(!editingId) staffData.password = autoPassword; // Save generated password for admin reference
+
+        await db.collection('users').doc(uniqueID.toString()).set(staffData, {merge: true});
+        
+        if(!editingId) {
+            alert(`SUCCESS!\nStaff ID: ${uniqueID}\nLogin Password: ${autoPassword}\n\nPlease note down the password!`);
+        } else {
+            alert("Record Updated Successfully!");
+        }
+        location.reload();
+    } catch (err) { alert("Error: " + err.message); btn.disabled = false; }
+});
+
+// Load and Real-time Sync
+function loadStaffData() {
+    db.collection('users').onSnapshot(snapshot => {
+        allStaff = [];
+        snapshot.forEach(doc => allStaff.push(doc.data()));
+        allStaff.sort((a, b) => b.timestamp - a.timestamp);
+        renderStaff(allStaff);
+    });
+}
+
+function renderStaff(dataArray) {
+    const list = document.getElementById('staffList');
+    list.innerHTML = "";
+    dataArray.forEach(data => {
+        const card = document.createElement('div');
+        card.className = 'custom-id-card';
+        card.onclick = () => showDetails(data);
+        card.innerHTML = `
+            <img src="${data.photo || 'https://via.placeholder.com/150'}" class="id-photo">
+            <div class="id-info">
+                <h4>${data.name}</h4>
+                <p><b>ID:</b> ${data.uniqueID} | <b>Post:</b> ${data.post}</p>
+                <span class="status-badge" style="background:var(--gold); color:black; font-size:10px;">
+                    ${data.role.toUpperCase()}
+                </span>
+            </div>`;
+        list.appendChild(card);
+    });
+}
+
+// Search Logic
+document.getElementById('searchInput').addEventListener('input', (e) => {
+    const val = e.target.value.toLowerCase();
+    const filtered = allStaff.filter(s => s.name.toLowerCase().includes(val) || s.uniqueID.toString().includes(val) || s.post.toLowerCase().includes(val));
+    renderStaff(filtered);
+});
+
+// Modal Actions
+function showDetails(data) {
+    currentStaffData = data;
+    hideSecurity();
+    document.getElementById('modalName').innerText = data.name;
+    document.getElementById('modalPhoto').src = data.photo || 'https://via.placeholder.com/150';
+    document.getElementById('modalDetails').innerHTML = `
+        <p><strong>Designation:</strong> ${data.post}</p>
+        <p><strong>Staff ID:</strong> ${data.uniqueID}</p>
+        <p><strong>Email/Login:</strong> ${data.email}</p>
+        <p><strong>Generated Pass:</strong> ${data.password || '********'}</p>
+        <p><strong>Phone:</strong> ${data.phone}</p>
+        <p><strong>Salary:</strong> ₹${data.salary}</p>
+        <p><strong>Address:</strong> ${data.address}</p>
+    `;
+    document.getElementById('modalEditBtn').onclick = () => startEdit(data);
+    document.getElementById('detailModal').style.display = 'block';
+}
+
+function showSecurity() {
+    document.getElementById('modalBtnGroup').style.display = 'none';
+    document.getElementById('securityCheck').style.display = 'block';
+    document.getElementById('confirmIdText').innerText = currentStaffData.uniqueID;
+}
+
+function hideSecurity() {
+    document.getElementById('modalBtnGroup').style.display = 'flex';
+    document.getElementById('securityCheck').style.display = 'none';
+}
+
+async function confirmDeleteProcess() {
+    const inputId = document.getElementById('deleteConfirmInput').value;
+    if(inputId == currentStaffData.uniqueID) {
+        if(confirm("Confirm permanent deletion of this staff?")) {
+            await db.collection('users').doc(currentStaffData.uniqueID.toString()).delete();
+            closeModal();
+        }
+    } else { alert("ID Mismatch!"); }
+}
+
+function startEdit(data) {
+    closeModal();
+    window.scrollTo({top: 0, behavior: 'smooth'});
+    document.getElementById('formTitle').innerText = "UPDATE STAFF RECORD";
+    document.getElementById('editingId').value = data.uniqueID;
+    document.getElementById('fullName').value = data.name;
+    document.getElementById('fatherName').value = data.fatherName;
+    document.getElementById('staffPost').value = data.post;
+    document.getElementById('qualification').value = data.qualification;
+    document.getElementById('salary').value = data.salary;
+    document.getElementById('email').value = data.email;
+    document.getElementById('phone').value = data.phone;
+    document.getElementById('userRole').value = data.role;
+    document.getElementById('address').value = data.address;
+    if(data.photo) {
+        document.getElementById('imgPreview').src = data.photo;
+        document.getElementById('imgPreview').style.display = 'block';
+    }
+    document.getElementById('submitBtn').innerText = "UPDATE CHANGES";
+    document.getElementById('cancelEdit').style.display = 'inline-block';
+}
+
+function closeModal() { document.getElementById('detailModal').style.display = 'none'; }
+function resetForm() { location.reload(); }
+window.onclick = (e) => { if(e.target == document.getElementById('detailModal')) closeModal(); }
+
+loadStaffData();
+</script>
+
+<script src="menu.js"></script>
+</body>
+</html>
