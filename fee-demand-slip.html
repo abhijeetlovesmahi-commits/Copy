@@ -31,6 +31,7 @@
         .fee-table th, .fee-table td { border: 1px solid #000; padding: 8px 12px; font-size: 13px; }
         .total-row { background: var(--royal) !important; color: #fff; font-size: 16px; font-weight: bold; }
         .arrears-row { background: #fff3f3; color: #a94442; font-weight: bold; }
+        #suggestions { position: absolute; z-index: 1000; width: 100%; background: white; }
         @media print { .no-print, #menu-container, .control-panel { display: none !important; } }
     </style>
 </head>
@@ -72,7 +73,7 @@
             <div class="col-md-3 position-relative">
                 <label class="small fw-bold">Search Student</label>
                 <input type="text" id="searchName" class="form-control" placeholder="Name or ID..." oninput="liveSearch()">
-                <div id="suggestions" class="list-group position-absolute w-100" style="z-index:100; display:none;"></div>
+                <div id="suggestions" class="list-group" style="display:none;"></div>
             </div>
             <div class="col-md-2"><button class="btn btn-dark w-100" onclick="startGeneration()">GENERATE</button></div>
             <div class="col-md-2"><button class="btn btn-warning w-100 fw-bold" onclick="window.print()">PRINT</button></div>
@@ -86,14 +87,22 @@
 let students = []; let feeMaster = {}; let transMaster = {};
 
 async function init() {
-    const [sS, fS, tS] = await Promise.all([
-        db.collection('students').get(),
-        db.collection('fee_master').get(),
-        db.collection('transport_master').get()
-    ]);
-    sS.forEach(d => students.push(d.data()));
-    fS.forEach(d => feeMaster[d.id] = d.data());
-    tS.forEach(d => transMaster[d.id] = d.data().amount);
+    try {
+        const [sS, fS, tS] = await Promise.all([
+            db.collection('students').get(),
+            db.collection('fee_master').get(),
+            db.collection('transport_master').get()
+        ]);
+        students = [];
+        sS.forEach(d => students.push(d.data()));
+        fS.forEach(d => feeMaster[d.id] = d.data());
+        tS.forEach(d => {
+            const data = d.data();
+            transMaster[d.id] = data.amount || 0;
+        });
+    } catch (err) {
+        console.error("Initialization Error:", err);
+    }
 }
 
 function liveSearch() {
@@ -112,38 +121,49 @@ function setSearch(id, name) {
 }
 
 async function startGeneration() {
-    const month = document.getElementById('slipMonth').value;
+    const month = document.getElementById('slipMonth').value.trim();
     const cls = document.getElementById('classFilter').value;
     const singleId = document.getElementById('searchName').dataset.id;
     
     let targetList = singleId ? students.filter(s => s.uniqueID.toString() === singleId) : (cls ? students.filter(s => s.class === cls) : students);
     
-    document.getElementById('printArea').innerHTML = "<h5 class='text-center mt-5'>Processing detailed slips...</h5>";
+    if(targetList.length === 0) {
+        alert("No students found.");
+        return;
+    }
+
+    document.getElementById('printArea').innerHTML = "<h5 class='text-center mt-5'><i class='fas fa-spinner fa-spin'></i> Searching Ledger Records...</h5>";
     let html = '';
 
     for(let s of targetList) {
-        const ledgerDoc = await db.collection('ledger').doc(String(s.uniqueID)).get();
-        if(ledgerDoc.exists) {
-            const ledgerData = ledgerDoc.data();
-            const totalBalance = Number(ledgerData[month]?.balance || 0);
+        try {
+            const ledgerDoc = await db.collection('ledger').doc(String(s.uniqueID)).get();
+            let totalBalance = 0;
+
+            if(ledgerDoc.exists) {
+                const ledgerData = ledgerDoc.data();
+                // Check for exact month name match
+                const monthData = ledgerData[month] || {};
+                totalBalance = Number(monthData.balance || 0);
+            }
 
             if(totalBalance > 0) {
                 const fm = feeMaster[s.class] || {};
                 const disc = s.discounts || {};
                 
-                // 1. Calculate Current Month Components
-                const tui = Math.round((fm.tuition || 0) * (1 - (disc.tuition || 0)/100));
-                const hos = Math.round((s.hostel === 'Yes' ? (fm.hostel || 0) : 0) * (1 - (disc.hostel || 0)/100));
-                const tra = Math.round((s.transport === 'Yes' ? (transMaster[s.transportDistance] || 0) : 0) * (1 - (disc.trans || 0)/100));
+                const tui = Math.round((Number(fm.tuition) || 0) * (1 - (Number(disc.tuition) || 0)/100));
+                const hos = Math.round((s.hostel === 'Yes' ? (Number(fm.hostel) || 0) : 0) * (1 - (Number(disc.hostel) || 0)/100));
+                const transDist = s.transportDistance || "";
+                const tra = Math.round((s.transport === 'Yes' ? (Number(transMaster[transDist]) || 0) : 0) * (1 - (Number(disc.trans) || 0)/100));
                 
                 let annual = 0;
                 if(month === 'April') {
                     annual = Math.round(
-                        (fm.admission || 0) * (1 - (disc.adm || 0)/100) +
-                        (fm.development || 0) * (1 - (disc.dev || 0)/100) +
-                        (fm.exam || 0) * (1 - (disc.exam || 0)/100) +
-                        (fm.books || 0) * (1 - (disc.books || 0)/100) +
-                        (fm.misc || 0) * (1 - (disc.misc || 0)/100)
+                        (Number(fm.admission) || 0) * (1 - (Number(disc.adm) || 0)/100) +
+                        (Number(fm.development) || 0) * (1 - (Number(disc.dev) || 0)/100) +
+                        (Number(fm.exam) || 0) * (1 - (Number(disc.exam) || 0)/100) +
+                        (Number(fm.books) || 0) * (1 - (Number(disc.books) || 0)/100) +
+                        (Number(fm.misc) || 0) * (1 - (Number(disc.misc) || 0)/100)
                     );
                 }
 
@@ -168,28 +188,30 @@ async function startGeneration() {
                         <thead><tr class="table-light"><th>FEE DESCRIPTION</th><th class="text-end">AMOUNT</th></tr></thead>
                         <tbody>
                             ${previousArrears > 0 ? `<tr class="arrears-row"><td>Previous Arrears / Balance Carry Forward</td><td class="text-end">₹${previousArrears}</td></tr>` : ''}
+                            ${previousArrears < 0 ? `<tr><td>Advance Payment Adjusted</td><td class="text-end">- ₹${Math.abs(previousArrears)}</td></tr>` : ''}
                             <tr><td>Monthly Tuition Fee</td><td class="text-end">₹${tui}</td></tr>
                             ${tra > 0 ? `<tr><td>Transport Fee</td><td class="text-end">₹${tra}</td></tr>` : ''}
                             ${hos > 0 ? `<tr><td>Hostel Fee</td><td class="text-end">₹${hos}</td></tr>` : ''}
-                            ${annual > 0 ? `<tr><td>Annual Charges (Admission/Exam/Books/Misc)</td><td class="text-end">₹${annual}</td></tr>` : ''}
+                            ${annual > 0 ? `<tr><td>Annual Charges</td><td class="text-end">₹${annual}</td></tr>` : ''}
                         </tbody>
                         <tfoot>
-                            <tr class="total-row"><td class="text-end">TOTAL PAYABLE AMOUNT:</td><td class="text-end">₹${totalBalance}</td></tr>
+                            <tr class="total-row"><td class="text-end">TOTAL NET PAYABLE:</td><td class="text-end">₹${totalBalance}</td></tr>
                         </tfoot>
                     </table>
-
                     <div class="d-flex justify-content-between mt-4 small">
                         <div class="text-center" style="width:150px"><hr class="border-dark">Accounts Dept.</div>
                         <div class="text-center" style="width:150px"><hr class="border-dark">Parent Signature</div>
                     </div>
                 </div>`;
             }
+        } catch (err) {
+            console.error("Error for student", s.uniqueID, err);
         }
     }
-    document.getElementById('printArea').innerHTML = html || "<h5 class='text-center mt-5'>All clear! No dues found.</h5>";
+    document.getElementById('printArea').innerHTML = html || "<h5 class='text-center mt-5 text-success'><i class='fas fa-check-circle'></i> All Dues Clear! No pending amount found in Ledger.</h5>";
 }
 
-init();
+window.onload = init;
 </script>
 <script src="menu.js"></script>
 </body>
