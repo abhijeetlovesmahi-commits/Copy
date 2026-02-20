@@ -97,11 +97,13 @@
                         <option value="Peon">Peon</option>
                         <option value="Sweeper">Sweeper</option>
                         <option value="Guard">Security Guard</option>
-                    </select>
                     <select id="stRole" required>
-                        <option value="staff">Standard Staff Role</option>
-                        <option value="admin">Admin Access Role</option>
+    <option value="admin">Admin (Full Access)</option>
+    <option value="accountant">Accountant/Clerk (Fee & Admission)</option>
+    <option value="teacher">Teacher (Academic Access)</option>
+    <option value="staff">General Staff (No Login Access)</option>
                     </select>
+                        
                     <input type="text" id="stDob" placeholder="Date of Birth" onfocus="(this.type='date')" required>
                     <input type="number" id="stAadhar" placeholder="12 Digit Aadhar Number" oninput="this.value=this.value.slice(0,12)" required>
                     <input type="text" id="stQualification" placeholder="Highest Qualification" required>
