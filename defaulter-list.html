@@ -17,25 +17,36 @@
 
     <style>
         :root { --royal: #002147; --gold: #D4AF37; }
+        body { background: #f8f9fa; }
         
-        /* Defaulter Table UI */
+        /* Defaulter Specific UI */
         .defaulter-img { 
             width: 45px; height: 55px; border-radius: 4px; 
             object-fit: cover; border: 1px solid var(--gold); 
         }
         
-        .action-btns .btn { border-radius: 4px; font-weight: bold; font-size: 13px; padding: 5px 12px; }
-        .btn-whatsapp { background: #25D366; color: white; border: none; }
-        .btn-call { background: #007bff; color: white; border: none; }
+        .action-btns .btn { border-radius: 4px; font-weight: bold; font-size: 13px; padding: 5px 10px; border: none; }
+        .btn-whatsapp { background: #25D366; color: white; }
+        .btn-call { background: #007bff; color: white; }
         
         #reportArea { 
             background: #fff; width: 1000px; margin: 20px auto; 
-            padding: 30px; border: 1px solid #000; box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            padding: 40px; border: 1px solid #ddd; box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            position: relative;
+        }
+
+        /* Watermark like Demand Slip */
+        #reportArea::before {
+            content: ""; position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            width: 400px; height: 400px;
+            background: url('logo.png') no-repeat center;
+            background-size: contain; opacity: 0.03; z-index: 0; pointer-events: none;
         }
 
         @media print {
             .no-print { display: none !important; }
-            #reportArea { width: 100%; border: none; margin: 0; padding: 0; box-shadow: none; }
+            #reportArea { width: 100%; border: none; margin: 0; padding: 10px; box-shadow: none; }
             .action-btns { display: none !important; }
         }
     </style>
@@ -45,35 +56,29 @@
 <div id="menu-container" class="no-print"></div>
 
 <div class="container mt-4 no-print">
-    <div id="brand-header-container" class="mb-4"></div>
+    <div id="brand-header-container" class="mb-4 text-center"></div>
 
-    <div class="card p-4 shadow-sm border-0" style="background: #f8f9fa; border-left: 5px solid var(--royal) !important;">
-        <h4 class="mb-3" style="color:var(--royal)">Defaulter Search Panel</h4>
-        <div class="row align-items-end">
+    <div class="card p-4 shadow-sm border-0" style="border-top: 4px solid var(--royal) !important;">
+        <h5 class="mb-3 fw-bold"><i class="fas fa-filter me-2"></i>Defaulter Search Panel</h5>
+        <div class="row g-3 align-items-end">
             <div class="col-md-4">
-                <label class="fw-bold small mb-1">SELECT ENROLLMENT CLASS</label>
+                <label class="small fw-bold mb-1">SELECT CLASS</label>
                 <select id="fClass" class="form-select border-dark">
-                    <option value="">Select Class</option>
+                    <option value="">-- Choose Class --</option>
                     <option value="Pre-Nursery">Pre-Nursery</option>
                     <option value="Nursery">Nursery</option>
                     <option value="LKG">LKG</option>
                     <option value="UKG">UKG</option>
-                    <option value="1">Class 1</option>
-                    <option value="2">Class 2</option>
-                    <option value="3">Class 3</option>
-                    <option value="4">Class 4</option>
-                    <option value="5">Class 5</option>
-                    <option value="6">Class 6</option>
-                    <option value="7">Class 7</option>
-                    <option value="8">Class 8</option>
-                    <option value="9">Class 9</option>
-                    <option value="10">Class 10</option>
-                    <option value="11">Class 11</option>
-                    <option value="12">Class 12</option>
+                    <option value="1">Class 1</option><option value="2">Class 2</option>
+                    <option value="3">Class 3</option><option value="4">Class 4</option>
+                    <option value="5">Class 5</option><option value="6">Class 6</option>
+                    <option value="7">Class 7</option><option value="8">Class 8</option>
+                    <option value="9">Class 9</option><option value="10">Class 10</option>
+                    <option value="11">Class 11</option><option value="12">Class 12</option>
                 </select>
             </div>
             <div class="col-md-4">
-                <label class="fw-bold small mb-1">FEE MONTH</label>
+                <label class="small fw-bold mb-1">SELECT MONTH</label>
                 <select id="fMonth" class="form-select border-dark">
                     <option value="April">April</option><option value="May">May</option>
                     <option value="June">June</option><option value="July">July</option>
@@ -84,8 +89,8 @@
                 </select>
             </div>
             <div class="col-md-4">
-                <button class="btn btn-dark w-100 fw-bold" onclick="generateList()" style="height: 38px;">
-                    <i class="fas fa-search me-2"></i> FETCH DEFAULTERS
+                <button class="btn btn-dark w-100 fw-bold" onclick="generateDefaulterList()">
+                    <i class="fas fa- sync-alt me-2"></i> FETCH DEFAULTERS
                 </button>
             </div>
         </div>
@@ -94,107 +99,133 @@
 
 <div id="reportArea">
     <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
-        <div class="d-flex align-items-center">
+        <div class="d-flex align-items-center" style="position:relative; z-index:1;">
             <img src="logo.png" style="width:70px; margin-right:20px;" onerror="this.style.display='none'">
             <div>
-                <h1 style="margin:0; color:var(--royal); font-weight:800; font-size: 26px;">THE LALIT INTERNATIONAL SCHOOL</h1>
-                <p class="m-0 fw-bold text-danger" id="reportTitle">OFFICIAL DEFAULTER STATEMENT</p>
+                <h2 style="margin:0; color:var(--royal); font-weight:900; letter-spacing:-1px;">THE LALIT INTERNATIONAL SCHOOL</h2>
+                <p class="m-0 fw-bold text-danger" id="reportTitle">FEE DEFAULTER STATEMENT</p>
             </div>
         </div>
-        <div class="text-end no-print">
-            <button class="btn btn-warning btn-sm fw-bold" onclick="window.print()">PRINT LIST</button>
-        </div>
+        <button class="btn btn-outline-dark btn-sm no-print fw-bold" onclick="window.print()">PRINT REPORT</button>
     </div>
 
-    <table class="table table-bordered align-middle">
-        <thead class="table-light text-center">
-            <tr style="font-size: 13px;">
+    <table class="table table-bordered align-middle" style="position:relative; z-index:1;">
+        <thead class="table-light text-center small fw-bold">
+            <tr>
                 <th>PHOTO</th>
                 <th class="text-start">STUDENT NAME & ID</th>
                 <th>FATHER'S NAME</th>
-                <th>PENDING FEE</th>
-                <th class="no-print">REACH OUT</th>
+                <th>BALANCE DUE</th>
+                <th class="no-print">ACTIONS</th>
             </tr>
         </thead>
         <tbody id="defTableBody">
             <tr>
-                <td colspan="5" class="text-center py-5 text-muted">Awaiting Selection...</td>
+                <td colspan="5" class="text-center py-5 text-muted">Please use the filter panel above to generate list.</td>
             </tr>
         </tbody>
     </table>
     
-    <div class="mt-4 d-flex justify-content-between small">
-        <span>Report Generated on: <b id="genTime">-</b></span>
-        <span>Authorized Signatory: _________________</span>
+    <div class="mt-4 d-flex justify-content-between small px-2">
+        <span>Generated On: <b id="genTime">-</b></span>
+        <span>Accountant Signature: _________________</span>
     </div>
 </div>
 
 <script src="menu.js"></script>
 
 <script>
-async function generateList() {
+async function generateDefaulterList() {
     const selClass = document.getElementById('fClass').value;
     const selMonth = document.getElementById('fMonth').value;
     const tbody = document.getElementById('defTableBody');
     
-    if(!selClass) { alert("Please select a class first."); return; }
+    if(!selClass) { alert("Please select a class!"); return; }
     
-    tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary"></div> Checking Records...</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="5" class="text-center py-5"><div class="spinner-border text-primary"></div><br>Calculating Balances...</td></tr>`;
     document.getElementById('genTime').innerText = new Date().toLocaleString();
 
     try {
-        // 1. Fee Master se class ki tuition fee uthana
-        const fMaster = await db.collection('fee_master').doc(selClass).get();
-        const baseFee = fMaster.exists ? (fMaster.data().tuition || 0) : 0;
+        // 1. Data Fetching (Demand Slip Logic)
+        const [fMasterDoc, stuSnap, transMasterSnap] = await Promise.all([
+            db.collection('fee_master').doc(selClass).get(),
+            db.collection('students').where('class', '==', selClass).get(),
+            db.collection('transport_master').get()
+        ]);
 
-        // 2. Students fetch karna (Using EXACT class value from dropdown)
-        const stuSnap = await db.collection('students').where('class', '==', selClass).get();
-        
-        // 3. Transactions fetch karna
+        const fm = fMasterDoc.exists ? fMasterDoc.data() : {};
+        let tRates = {};
+        transMasterSnap.forEach(doc => tRates[doc.id] = doc.data().amount);
+
+        // 2. Monthly Transactions Fetching
         const transSnap = await db.collection('fee_transactions').where('month', '==', selMonth).get();
-        
-        const paidSet = new Set();
-        transSnap.forEach(t => paidSet.add(String(t.data().studentID)));
+        const paidMap = {};
+        transSnap.forEach(t => {
+            const d = t.data();
+            paidMap[String(d.studentID)] = (paidMap[String(d.studentID)] || 0) + Number(d.amount || 0);
+        });
 
         let html = '';
         let count = 0;
 
+        // 3. Calculation Loop (Same as Ledger/Demand Slip)
         stuSnap.forEach(doc => {
             const s = doc.data();
-            // Agar bachhe ne fee nahi bhari hai
-            if (!paidSet.has(String(s.uniqueID))) {
+            const d = s.discounts || {};
+
+            // Calculate Net Payable
+            const tui = (fm.tuition || 0) * (1 - (d.tuition || 0)/100);
+            const hos = (s.hostel === 'Yes' ? (fm.hostel || 0) : 0) * (1 - (d.hostel || 0)/100);
+            const tra = (s.transport === 'Yes' ? (tRates[s.transportDistance] || 0) : 0) * (1 - (d.trans || 0)/100);
+
+            let annualTotal = 0;
+            if (selMonth === 'April') {
+                const adm = (fm.admission || 0) * (1 - (d.adm || 0)/100);
+                const dev = (fm.development || 0) * (1 - (d.dev || 0)/100);
+                const exa = (fm.exam || 0) * (1 - (d.exam || 0)/100);
+                const boo = (fm.books || 0) * (1 - (d.books || 0)/100);
+                const mis = (fm.misc || 0) * (1 - (d.misc || 0)/100);
+                annualTotal = Math.round(adm+dev+exa+boo+mis);
+            }
+
+            const netPayable = Math.round(tui + hos + tra + annualTotal);
+            const totalPaid = paidMap[String(s.uniqueID)] || 0;
+            const balanceDue = netPayable - totalPaid;
+
+            // Defaulter found if balance > 0
+            if (balanceDue > 0) {
                 count++;
                 const phone = s.contact || s.whatsapp || "";
-                const waMsg = `Dear Parent, fee for ${s.name} for ${selMonth} is still pending. Kindly deposit at the earliest. - The Lalit Intl.`;
+                const waMsg = `Dear Parent, fee for ${s.name} (ID:${s.uniqueID}) for ${selMonth} is pending. Total: Rs.${netPayable}, Paid: Rs.${totalPaid}, Balance Due: Rs.${balanceDue}. Please deposit at the earliest. - The Lalit Intl.`;
 
                 html += `
                 <tr class="text-center">
                     <td><img src="${s.photo || ''}" class="defaulter-img" onerror="this.src='https://via.placeholder.com/45x55?text=No+Pic'"></td>
                     <td class="text-start">
-                        <div class="fw-bold" style="color:var(--royal)">${s.name.toUpperCase()}</div>
-                        <code class="text-dark">ID: ${s.uniqueID}</code>
+                        <div class="fw-bold" style="color:var(--royal); font-size:15px;">${s.name.toUpperCase()}</div>
+                        <small class="text-muted">Student ID: ${s.uniqueID}</small>
                     </td>
                     <td>${s.father || 'N/A'}</td>
-                    <td class="fw-bold text-danger">₹${baseFee}</td>
+                    <td class="fw-bold text-danger">
+                        ₹${balanceDue}
+                        <div style="font-size:10px; color:#666; font-weight:normal;">Payable: ₹${netPayable}</div>
+                    </td>
                     <td class="no-print action-btns">
-                        <a href="tel:${phone}" class="btn btn-call btn-sm me-1"><i class="fas fa-phone-alt"></i></a>
-                        <a href="https://wa.me/91${phone}?text=${encodeURIComponent(waMsg)}" target="_blank" class="btn btn-whatsapp btn-sm"><i class="fab fa-whatsapp"></i></a>
+                        <div class="d-flex gap-1 justify-content-center">
+                            <a href="tel:${phone}" class="btn btn-call btn-sm"><i class="fas fa-phone-alt"></i></a>
+                            <a href="https://wa.me/91${phone}?text=${encodeURIComponent(waMsg)}" target="_blank" class="btn btn-whatsapp btn-sm"><i class="fab fa-whatsapp"></i></a>
+                        </div>
                     </td>
                 </tr>`;
             }
         });
 
-        if(count > 0) {
-            tbody.innerHTML = html;
-        } else {
-            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-success fw-bold">Great! No Defaulters found for Class ${selClass} in ${selMonth}.</td></tr>`;
-        }
-        
-        document.getElementById('reportTitle').innerText = `DEFAULTER STATEMENT: CLASS ${selClass} (${selMonth})`;
+        tbody.innerHTML = count > 0 ? html : `<tr><td colspan="5" class="text-center py-5 text-success fw-bold">🎉 Excellent! No defaulters found for this class and month.</td></tr>`;
+        document.getElementById('reportTitle').innerText = `DEFAULTER STATEMENT: ${selClass.toUpperCase()} (${selMonth.toUpperCase()})`;
 
     } catch (e) {
         console.error(e);
-        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">Database Error: ${e.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-danger py-5 border-0">Error loading data. Check console for details.</td></tr>`;
     }
 }
 </script>
