@@ -214,9 +214,8 @@ let compressedBase64 = "";
 let currentViewData = null;
 let allStudents = [];
 
-// Create a secondary app to handle user creation without logging out the admin
-// Note: Replace the config below if it's different from your main firebase-config.js
-const secondaryApp = firebase.initializeApp(firebaseConfig, "Secondary");
+// Secondary app instances to manage user creation without logging out the current admin session
+const secondaryApp = firebase.initializeApp(firebaseConfig, "SecondaryApp");
 const secondaryAuth = secondaryApp.auth();
 
 function processPhoto(input) {
@@ -257,7 +256,7 @@ document.getElementById('admissionForm').addEventListener('submit', async (e) =>
     const btn = document.getElementById('submitBtn');
     const editingId = document.getElementById('editingId').value;
     btn.disabled = true; 
-    btn.innerText = "Processing Admission...";
+    btn.innerText = "Processing...";
 
     try {
         let uniqueID = editingId;
@@ -265,18 +264,17 @@ document.getElementById('admissionForm').addEventListener('submit', async (e) =>
         let generatedPassword = "";
 
         if(!editingId) {
-            // Logic for New Admission
             const lastSnap = await db.collection('students').orderBy('uniqueID', 'desc').limit(1).get();
             uniqueID = lastSnap.empty ? 1001 : Number(lastSnap.docs[0].data().uniqueID) + 1;
 
-            // Generate Credentials
+            // Generate Email and Password
             const cleanName = document.getElementById('sName').value.replace(/\s+/g, '').toLowerCase();
             generatedEmail = `${cleanName}${uniqueID}@lalit.com`;
             generatedPassword = `Lalit@${uniqueID}`;
 
-            // Create Firebase Auth Account (Using secondaryAuth to stay logged in as Admin)
+            // Create account in Firebase Auth
             await secondaryAuth.createUserWithEmailAndPassword(generatedEmail, generatedPassword);
-            await secondaryAuth.signOut(); // Clean up secondary session
+            await secondaryAuth.signOut();
         }
 
         const studentData = {
@@ -301,20 +299,14 @@ document.getElementById('admissionForm').addEventListener('submit', async (e) =>
             photo: compressedBase64 || (currentViewData ? currentViewData.photo : ""),
             timestamp: Date.now(),
             role: 'student',
-            // Only add email/pass for new records
+            // Save login info if it's a new registration
             ...(generatedEmail && { loginEmail: generatedEmail, loginPass: generatedPassword })
         };
 
         await db.collection('students').doc(uniqueID.toString()).set(studentData, {merge: true});
-        
-        let msg = editingId ? "Record Updated!" : `Admission Successful!\nID: ${uniqueID}\nEmail: ${generatedEmail}\nPass: ${generatedPassword}`;
-        alert(msg);
+        alert("Success! ID: " + uniqueID + (generatedEmail ? "\nLogin: " + generatedEmail : ""));
         location.reload();
-    } catch (err) { 
-        alert("Error: " + err.message); 
-        btn.disabled = false; 
-        btn.innerText = "PROCEED WITH REGISTRATION";
-    }
+    } catch (err) { alert("Error: " + err.message); btn.disabled = false; }
 });
 
 async function loadAllData() {
@@ -344,6 +336,10 @@ function renderList(dataArray) {
             <div class="id-info">
                 <h4>${data.name}</h4>
                 <p><b>ID:</b> ${data.uniqueID} | <b>Class:</b> ${data.class}</p>
+                <div style="background:#fff7e6; padding:5px; border-radius:4px; margin:5px 0; font-size:0.75rem; border:1px solid #ffe7ba;">
+                    <div>📧 ${data.loginEmail || 'N/A'}</div>
+                    <div>🔑 ${data.loginPass || 'N/A'}</div>
+                </div>
                 <span class="status-badge" style="background:${data.hostel==='Yes'?'#e8f5e9':'#f3f3f3'}; color:${data.hostel==='Yes'?'#2e7d32':'#666'};">
                     ${data.hostel === 'Yes' ? '🏠 Hosteller' : '🚌 Day Scholar'}
                 </span>
@@ -366,7 +362,8 @@ function showDetails(data) {
     document.getElementById('modalPhoto').src = data.photo || 'https://via.placeholder.com/150';
     document.getElementById('modalDetails').innerHTML = `
         <p><strong>Student ID:</strong> ${data.uniqueID}</p>
-        <p><strong>Login Email:</strong> ${data.loginEmail || 'N/A'}</p>
+        <p><strong>Login Email:</strong> <span style="color:var(--royal-blue)">${data.loginEmail || 'N/A'}</span></p>
+        <p><strong>Password:</strong> <span style="color:var(--royal-blue)">${data.loginPass || 'N/A'}</span></p>
         <p><strong>Class:</strong> ${data.class}-${data.section}</p>
         <p><strong>Father's Name:</strong> ${data.father}</p>
         <p><strong>Call:</strong> ${data.contact}</p>
