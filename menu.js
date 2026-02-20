@@ -1,11 +1,21 @@
-/* THE LALIT INTERNATIONAL SCHOOL - UNIVERSAL SECURE MENU */
+/* THE LALIT INTERNATIONAL SCHOOL - UPDATED SECURE MODULAR MENU */
+
+// 1. Security Guard: Redirect to login if not authenticated
+firebase.auth().onAuthStateChanged((user) => {
+    const currentPage = window.location.pathname.split("/").pop();
+    // Allow access to login and reset pages without authentication
+    if (!user && currentPage !== 'login.html' && currentPage !== 'reset.html') {
+        window.location.href = "login.html";
+    }
+});
 
 const menuConfig = [
     { title: "Dashboard", icon: "fa-home", link: "index.html", role: "all" },
     { title: "Admission", icon: "fa-user-plus", link: "add-student.html", role: "admin" },
+    
     { type: "divider", title: "Academic & Exams" },
     { title: "Attendance", icon: "fa-calendar-check", link: "attendance.html", role: "all" },
-    { title: "Staff Attendance", icon: "fa-user-tie", link: "staff-attendance.html", role: "admin" },
+    { title: "Staff Attendance", icon: "fa-calendar-check", link: "staff-attendance.html", role: "admin" },
     { title: "Exam Master", icon: "fa-layer-group", link: "exam-master.html", role: "admin" },
     { title: "Marks Entry", icon: "fa-pen-nib", link: "exam-marks-entry.html", role: "teacher" },
     { title: "Report Card", icon: "fa-file-alt", link: "exam-repot-card.html", role: "all" },
@@ -24,17 +34,23 @@ const menuConfig = [
     { title: "Logout Registry", icon: "fa-sign-out-alt", link: "#", role: "all", id: "logoutBtn" }
 ];
 
-// 1. SECURITY GUARD: Check Login Status before anything else
-firebase.auth().onAuthStateChanged((user) => {
-    const currentPage = window.location.pathname.split("/").pop() || 'index.html';
-    const publicPages = ['login.html', 'reset.html'];
+async function initUniversalMenu() {
+    // Current User aur Role Fetch karna
+    const user = firebase.auth().currentUser;
+    let userRole = 'teacher'; // Default role safely
 
-    if (!user && !publicPages.includes(currentPage)) {
-        window.location.href = "login.html";
+    if(user) {
+        // Firestore se user ka role check karna (Agar 'users' collection banaya hai)
+        try {
+            const userDoc = await firebase.firestore().collection('users').doc(user.uid).get();
+            if(userDoc.exists) {
+                userRole = userDoc.data().role;
+            } else if (user.email === "admin@lalit.com") { // Fail-safe for super admin
+                userRole = 'admin';
+            }
+        } catch(e) { console.log("Role fetch error, defaulting to teacher."); }
     }
-});
 
-function initUniversalMenu() {
     const menuWrapper = document.createElement('div');
     menuWrapper.id = 'imperial-menu-wrapper';
 
@@ -43,13 +59,17 @@ function initUniversalMenu() {
 
     menuConfig.forEach(item => {
         if (item.type === "divider") {
+            // Check if divider has items to show for this role
             menuItemsHTML += `<div class="menu-divider">${item.title}</div>`;
         } else {
-            const isActive = currentPage === item.link ? 'active-link' : '';
-            menuItemsHTML += `
-                <a href="${item.link}" class="nav-item ${isActive}" id="${item.id || ''}">
-                    <i class="fas ${item.icon}"></i> <span>${item.title}</span>
-                </a>`;
+            // Role Based Visibility Logic
+            if(item.role === "all" || item.role === userRole) {
+                const isActive = currentPage === item.link ? 'active-link' : '';
+                menuItemsHTML += `
+                    <a href="${item.link}" class="nav-item ${isActive}" id="${item.id || ''}">
+                        <i class="fas ${item.icon}"></i> <span>${item.title}</span>
+                    </a>`;
+            }
         }
     });
 
@@ -60,7 +80,7 @@ function initUniversalMenu() {
                 <img src="logo.png" class="menu-logo" onerror="this.src='https://via.placeholder.com/60'">
                 <h3>THE LALIT</h3>
                 <p>INTERNATIONAL SCHOOL</p>
-                <div id="user-display" class="mt-2 small opacity-75 text-gold"></div>
+                ${user ? `<div class="user-badge">${user.email.split('@')[0].toUpperCase()}</div>` : ''}
             </div>
             <nav class="nav-links">${menuItemsHTML}</nav>
         </div>
@@ -71,52 +91,25 @@ function initUniversalMenu() {
 
     document.body.prepend(menuWrapper);
 
-    // Dynamic User Email Display
-    firebase.auth().onAuthStateChanged(user => {
-        if(user) document.getElementById('user-display').innerText = user.email;
-    });
-
-    // CSS Injection
+    // CSS Styling (Pehle wali + User Badge)
     const style = document.createElement('style');
     style.textContent = `
-        #menu-trigger-btn {
-            position: fixed; top: 15px; left: 15px; width: 45px; height: 45px;
-            background: #002366; border: 1px solid #D4AF37; border-radius: 8px;
-            z-index: 20001; cursor: pointer; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; gap: 5px; transition: 0.3s;
-        }
+        #menu-trigger-btn { position: fixed; top: 15px; left: 15px; width: 45px; height: 45px; background: #002366; border: 1px solid #D4AF37; border-radius: 8px; z-index: 20001; cursor: pointer; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; transition: 0.3s; }
         #menu-trigger-btn span { width: 25px; height: 3px; background: #D4AF37; border-radius: 2px; transition: 0.4s; }
-        
-        #sidebar-panel {
-            position: fixed; top: 0; left: -300px; width: 280px; height: 100vh;
-            background: #002366; z-index: 20000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 5px 0 25px rgba(0,0,0,0.3); overflow-y: auto; color: white;
-            border-right: 3px solid #D4AF37;
-        }
+        #sidebar-panel { position: fixed; top: 0; left: -300px; width: 280px; height: 100vh; background: #002366; z-index: 20000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 5px 0 25px rgba(0,0,0,0.3); overflow-y: auto; color: white; border-right: 3px solid #D4AF37; }
         #sidebar-panel.open { left: 0; }
-        
-        #menu-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); z-index: 19999; display: none; backdrop-filter: blur(3px);
-        }
-
+        #menu-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 19999; display: none; backdrop-filter: blur(3px); }
         .sidebar-header { padding: 30px 20px; text-align: center; background: rgba(0,0,0,0.2); border-bottom: 1px solid rgba(212,175,55,0.2); }
         .menu-logo { width: 65px; height: 65px; border-radius: 50%; border: 2px solid #D4AF37; padding: 3px; background: white; }
         .sidebar-header h3 { font-family: 'Cinzel', serif; color: #D4AF37; margin: 10px 0 0; font-size: 1.2rem; }
         .sidebar-header p { font-size: 0.6rem; letter-spacing: 2px; margin: 0; color: #aaa; }
-        .text-gold { color: #D4AF37; font-size: 11px; }
-
+        .user-badge { font-size: 10px; background: #D4AF37; color: #002366; display: inline-block; padding: 2px 10px; border-radius: 10px; margin-top: 10px; font-weight: 800; }
         .nav-links { padding: 15px; }
         .menu-divider { font-size: 10px; text-transform: uppercase; color: #D4AF37; opacity: 0.6; padding: 20px 10px 5px; letter-spacing: 1.5px; font-weight: bold; }
-        
-        .nav-item { 
-            display: flex; align-items: center; padding: 12px 15px; color: white; text-decoration: none;
-            margin-bottom: 5px; border-radius: 6px; transition: 0.3s; font-size: 0.9rem;
-        }
+        .nav-item { display: flex; align-items: center; padding: 12px 15px; color: white; text-decoration: none; margin-bottom: 5px; border-radius: 6px; transition: 0.3s; font-size: 0.9rem; }
         .nav-item i { width: 25px; color: #D4AF37; font-size: 1.1rem; margin-right: 12px; text-align: center; }
         .nav-item:hover { background: rgba(212,175,55,0.15); color: #D4AF37; }
         .active-link { background: rgba(212,175,55,0.2) !important; border-left: 4px solid #D4AF37; color: #D4AF37 !important; font-weight: bold; }
-
         .open-btn span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
         .open-btn span:nth-child(2) { opacity: 0; }
         .open-btn span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
@@ -136,23 +129,18 @@ function initUniversalMenu() {
     trigger.onclick = toggle;
     overlay.onclick = toggle;
 
-    // Logout Functionality
     const logoutBtn = document.getElementById('logoutBtn');
     if(logoutBtn) {
         logoutBtn.onclick = (e) => {
             e.preventDefault();
-            if(confirm("Do you want to secure and exit the system?")) {
-                firebase.auth().signOut().then(() => {
-                    window.location.href = "login.html";
-                });
+            if(confirm("Do you want to exit Control Tower?")) {
+                firebase.auth().signOut().then(() => { window.location.href = "login.html"; });
             }
         };
     }
 }
 
-// Ensure execution
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initUniversalMenu);
-} else {
+// Initialization with Auth state
+firebase.auth().onAuthStateChanged(() => {
     initUniversalMenu();
-}
+});
