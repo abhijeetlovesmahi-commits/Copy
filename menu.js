@@ -3,6 +3,7 @@
 const menuConfig = [
     { title: "Dashboard", icon: "fa-home", link: "index.html", role: "all" },
     { title: "Admission", icon: "fa-user-plus", link: "add-student.html", role: "admin" },
+    { title: "Admission", icon: "fa-user-plus", link: "add-staff.html", role: "admin" },
     { type: "divider", title: "Academic & Exams" },
     { title: "Attendance", icon: "fa-calendar-check", link: "attendance.html", role: "all" },
     { title: "Staff Attendance", icon: "fa-calendar-check", link: "staff-attendance.html", role: "admin" },
