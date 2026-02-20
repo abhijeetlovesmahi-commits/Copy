@@ -12,27 +12,26 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
     <script src="firebase-config.js"></script>
-    <script src="brand.js"></script>
 
     <style>
         :root { --royal: #002147; --gold: #D4AF37; --danger: #e74c3c; }
-        body { background: #f4f7f6; }
+        body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
         .filter-section { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid var(--gold); margin-bottom: 20px; }
-        .stat-card-def { background: white; border-radius: 12px; padding: 15px; text-align: center; border-bottom: 5px solid var(--danger); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .stat-card-def h3 { color: var(--danger); font-weight: bold; margin-top: 5px; }
         
-        /* Action Buttons */
-        .call-btn { background: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 4px; text-decoration: none; font-size: 12px; }
-        .whatsapp-btn { background: #25D366; color: white; border: none; padding: 5px 10px; border-radius: 4px; text-decoration: none; font-size: 12px; }
+        /* Buttons */
+        .call-btn { background: #007bff; color: white !important; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 600; }
+        .whatsapp-btn { background: #25D366; color: white !important; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 13px; }
         
-        /* Print Styling */
+        /* Summary Cards */
+        .stat-box { background: white; padding: 15px; border-radius: 10px; border-bottom: 4px solid var(--danger); text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+
         @media print {
-            .no-print, #menu-container, .btn-actions, .filter-section { display: none !important; }
-            body { background: white; padding: 0; }
-            .main-content { margin: 0; padding: 0; }
-            .printable-header { display: block !important; text-align: center; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px; }
-            table { width: 100%; border: 1px solid #000 !important; }
-            th, td { border: 1px solid #000 !important; padding: 8px !important; font-size: 12px; }
+            .no-print { display: none !important; }
+            body { background: white; }
+            .printable-header { display: block !important; text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
+            .table-responsive { overflow: visible !important; }
+            table { width: 100% !important; border: 1px solid #000 !important; }
+            th, td { border: 1px solid #000 !important; padding: 6px !important; color: black !important; }
         }
         .printable-header { display: none; }
     </style>
@@ -43,79 +42,77 @@
 
 <div class="container-fluid mt-4">
     <div class="printable-header">
-        <img src="logo.png" style="width: 80px;">
-        <h2 style="margin:0;">THE LALIT INTERNATIONAL SCHOOL</h2>
-        <p>FEES DEFAULTER LIST - <span id="printMonthLabel"></span></p>
+        <h2 style="color: var(--royal); font-weight: bold;">THE LALIT INTERNATIONAL SCHOOL</h2>
+        <h4>FEES DEFAULTER LIST - <span id="printMonthLabel"></span></h4>
+        <p>Class: <span id="printClassLabel">All</span> | Section: <span id="printSecLabel">All</span></p>
     </div>
 
     <div class="filter-section no-print shadow-sm">
         <div class="row g-3">
             <div class="col-md-3">
-                <label class="small fw-bold">UPTO MONTH</label>
+                <label class="fw-bold small mb-1">UPTO MONTH</label>
                 <select id="fMonth" class="form-select" onchange="generateDefaulterList()">
-                    <option value="April">April</option><option value="May">May</option>
-                    <option value="June">June</option><option value="July">July</option>
-                    <option value="August">August</option><option value="September">September</option>
-                    <option value="October">October</option><option value="November">November</option>
-                    <option value="December">December</option><option value="January">January</option>
-                    <option value="February">February</option><option value="March" selected>Full Session (March)</option>
+                    <option value="April">April</option><option value="May">May</option><option value="June">June</option>
+                    <option value="July">July</option><option value="August">August</option><option value="September">September</option>
+                    <option value="October">October</option><option value="November">November</option><option value="December">December</option>
+                    <option value="January">January</option><option value="February">February</option><option value="March" selected>Full Session (March)</option>
                 </select>
             </div>
-            <div class="col-md-2">
-                <label class="small fw-bold">CLASS</label>
+            <div class="col-md-3">
+                <label class="fw-bold small mb-1">CLASS</label>
                 <select id="fClass" class="form-select" onchange="generateDefaulterList()">
                     <option value="All">All Classes</option>
-                    <option>Nursery</option><option>LKG</option><option>UKG</option>
-                    <option>1st</option><option>2nd</option><option>3rd</option>
-                    <option>4th</option><option>5th</option><option>6th</option>
-                    <option>7th</option><option>8th</option><option>9th</option><option>10th</option>
+                    <option>Pre-Nursery</option><option>Nursery</option><option>LKG</option><option>UKG</option>
+                    <option>1st</option><option>2nd</option><option>3rd</option><option>4th</option><option>5th</option>
+                    <option>6th</option><option>7th</option><option>8th</option><option>9th</option><option>10th</option>
+                    <option>11th</option><option>12th</option>
                 </select>
             </div>
             <div class="col-md-2">
-                <label class="small fw-bold">SECTION</label>
+                <label class="fw-bold small mb-1">SECTION</label>
                 <select id="fSection" class="form-select" onchange="generateDefaulterList()">
                     <option value="All">All</option>
-                    <option>A</option><option>B</option><option>C</option>
+                    <option>A</option><option>B</option><option>C</option><option>D</option>
                 </select>
             </div>
-            <div class="col-md-5 d-flex align-items-end gap-2">
-                <button class="btn btn-dark w-100 fw-bold" onclick="window.print()">
+            <div class="col-md-4 d-flex align-items-end gap-2">
+                <button class="btn btn-danger w-100 fw-bold" onclick="window.print()">
                     <i class="fas fa-print me-2"></i> PRINT REPORT
                 </button>
             </div>
         </div>
     </div>
 
-    <div class="row mb-4 no-print">
-        <div class="col-md-6">
-            <div class="stat-card-def">
-                <p class="m-0 small">Total Defaulters</p>
-                <h3 id="totalCount">0</h3>
+    <div class="row g-3 mb-4 no-print">
+        <div class="col-6 col-md-3">
+            <div class="stat-box">
+                <p class="m-0 text-muted small">Defaulters</p>
+                <h3 id="totalCount" class="fw-bold m-0">0</h3>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="stat-card-def">
-                <p class="m-0 small">Total Pending Dues</p>
-                <h3 id="totalPending">₹0</h3>
+        <div class="col-6 col-md-3">
+            <div class="stat-box">
+                <p class="m-0 text-muted small">Total Dues</p>
+                <h3 id="totalPending" class="fw-bold m-0 text-danger">₹0</h3>
             </div>
         </div>
     </div>
 
-    <div class="bg-white p-3 rounded-3 shadow-sm border">
+    <div class="card shadow-sm border-0">
         <div class="table-responsive">
-            <table class="table table-hover align-middle">
-                <thead class="table-dark">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="bg-dark text-white">
                     <tr>
-                        <th>ID</th>
+                        <th class="ps-3">ID</th>
                         <th>Student Name</th>
-                        <th>Class/Sec</th>
-                        <th>Father's Name</th>
-                        <th>Balance Due</th>
-                        <th class="no-print">Action</th>
+                        <th class="text-center">Class/Sec</th>
+                        <th>Father Name</th>
+                        <th class="text-center">Balance Due</th>
+                        <th class="text-center no-print">Recovery Action</th>
                     </tr>
                 </thead>
                 <tbody id="listBody">
-                    <tr><td colspan="6" class="text-center p-5 text-muted">Scanning Ledgers...</td></tr>
+                    <tr><td colspan="6" class="text-center p-5"><b>Loading Financial Records... Please Wait.</b></td></tr>
                 </tbody>
             </table>
         </div>
@@ -132,7 +129,11 @@ async function generateDefaulterList() {
     const targetSec = document.getElementById('fSection').value;
     const targetIdx = monthsArr.indexOf(targetMonth);
     
+    // Update Labels for Print
     document.getElementById('printMonthLabel').innerText = targetMonth;
+    document.getElementById('printClassLabel').innerText = targetClass;
+    document.getElementById('printSecLabel').innerText = targetSec;
+
     const tbody = document.getElementById('listBody');
     
     try {
@@ -154,33 +155,33 @@ async function generateDefaulterList() {
             const s = doc.data();
             const fm = masters[s.class];
             
-            // Filter Logic
+            // Filters
             if(targetClass !== 'All' && s.class !== targetClass) return;
             if(targetSec !== 'All' && s.section !== targetSec) return;
 
             if (fm) {
                 const d = s.discounts || { tui:0, hos:0, tra:0, adm:0, dev:0, exa:0, boo:0, mis:0 };
                 
-                // Ledger Formula match
+                // Ledger Math
                 const annual = (Number(fm.admission||0)*(1-(d.adm||0)/100)) + (Number(fm.development||0)*(1-(d.dev||0)/100)) + (Number(fm.exam||0)*(1-(d.exa||0)/100)) + (Number(fm.books||0)*(1-(d.boo||0)/100)) + (Number(fm.misc||0)*(1-(d.mis||0)/100));
                 const monthly = (Number(fm.tuition||0)*(1-(d.tui||0)/100)) + ((s.hostel==='Yes'?Number(fm.hostel||0):0)*(1-(d.hos||0)/100)) + ((s.transport==='Yes'?Number(s.transport_fee||0):0)*(1-(d.tra||0)/100));
 
                 const expected = annual + (monthly * (targetIdx + 1));
                 const balance = Math.round(expected - (pays[s.uniqueID] || 0));
 
-                if (balance > 50) { // Jo ₹50 se upar bache hain
+                if (balance > 100) { // Shows only those owing more than 100
                     count++; grandTotal += balance;
                     const phone = s.contact || s.pContact || '';
                     
                     html += `
                     <tr>
-                        <td><b>${s.uniqueID}</b></td>
+                        <td class="ps-3"><b>${s.uniqueID}</b></td>
                         <td>${s.name.toUpperCase()}</td>
-                        <td>${s.class} - ${s.section || 'A'}</td>
+                        <td class="text-center">${s.class} - ${s.section || 'A'}</td>
                         <td>${s.father || 'N/A'}</td>
-                        <td class="text-danger fw-bold">₹ ${balance.toLocaleString('en-IN')}</td>
-                        <td class="no-print">
-                            <div class="d-flex gap-2">
+                        <td class="text-center text-danger fw-bold">₹ ${balance.toLocaleString('en-IN')}</td>
+                        <td class="no-print text-center">
+                            <div class="d-flex justify-content-center gap-2">
                                 <a href="tel:${phone}" class="call-btn"><i class="fas fa-phone-alt"></i> Call</a>
                                 <button class="whatsapp-btn" onclick="sendWA('${phone}','${s.name}','${balance}')"><i class="fab fa-whatsapp"></i></button>
                             </div>
@@ -190,16 +191,19 @@ async function generateDefaulterList() {
             }
         });
 
-        tbody.innerHTML = html || '<tr><td colspan="6" class="text-center p-4">No defaulters found for this filter.</td></tr>';
+        tbody.innerHTML = html || '<tr><td colspan="6" class="text-center p-5 text-muted">No Defaulters Found. Sabka Fees Jama Hai!</td></tr>';
         document.getElementById('totalCount').innerText = count;
-        document.getElementById('totalPending').innerText = "₹" + grandTotal.toLocaleString('en-IN');
+        document.getElementById('totalPending').innerText = "₹" + Math.round(grandTotal).toLocaleString('en-IN');
 
-    } catch (e) { console.error(e); }
+    } catch (e) { 
+        console.error(e);
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-danger">Error fetching data. Check Console.</td></tr>`;
+    }
 }
 
 function sendWA(num, name, amt) {
-    if(!num) return alert("No number!");
-    const msg = `*THE LALIT INTERNATIONAL SCHOOL*%0A*FEE REMINDER*%0AStudent: ${name}%0APending Due: *₹${amt}*%0APlease clear as soon as possible.`;
+    if(!num) return alert("Contact Number missing!");
+    const msg = `*THE LALIT INTERNATIONAL SCHOOL*%0A*FEE REMINDER*%0ADear Parent, pending fee for *${name}* is *₹${amt}*. Please clear this by the end of this week. Thank you.`;
     window.open(`https://wa.me/91${num}?text=${msg}`, '_blank');
 }
 
