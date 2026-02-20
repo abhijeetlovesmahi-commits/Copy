@@ -1,17 +1,17 @@
-/* THE LALIT INTERNATIONAL SCHOOL - UNIVERSAL MODULAR MENU */
+/* THE LALIT INTERNATIONAL SCHOOL - UNIVERSAL SECURE MENU */
 
 const menuConfig = [
     { title: "Dashboard", icon: "fa-home", link: "index.html", role: "all" },
     { title: "Admission", icon: "fa-user-plus", link: "add-student.html", role: "admin" },
     { type: "divider", title: "Academic & Exams" },
     { title: "Attendance", icon: "fa-calendar-check", link: "attendance.html", role: "all" },
-    { title: "Staff Attendance", icon: "fa-calendar-check", link: "staff-attendance.html", role: "admin" },
+    { title: "Staff Attendance", icon: "fa-user-tie", link: "staff-attendance.html", role: "admin" },
     { title: "Exam Master", icon: "fa-layer-group", link: "exam-master.html", role: "admin" },
     { title: "Marks Entry", icon: "fa-pen-nib", link: "exam-marks-entry.html", role: "teacher" },
     { title: "Report Card", icon: "fa-file-alt", link: "exam-repot-card.html", role: "all" },
 
     { type: "divider", title: "Treasury & Accounts" },
-    { title: "Fees Settings", icon: "fa-cog", icon: "fa-file-invoice-dollar", link: "fee-master.html", role: "admin" },
+    { title: "Fees Settings", icon: "fa-file-invoice-dollar", link: "fee-master.html", role: "admin" },
     { title: "Collect Fees", icon: "fa-vault", link: "collect-fees.html", role: "admin" },
     { title: "Ledger", icon: "fa-history", link: "fee-history.html", role: "admin" },
     { title: "Fee Demand Slip", icon: "fa-receipt", link: "fee-demand-slip.html", role: "admin" },
@@ -24,8 +24,17 @@ const menuConfig = [
     { title: "Logout Registry", icon: "fa-sign-out-alt", link: "#", role: "all", id: "logoutBtn" }
 ];
 
+// 1. SECURITY GUARD: Check Login Status before anything else
+firebase.auth().onAuthStateChanged((user) => {
+    const currentPage = window.location.pathname.split("/").pop() || 'index.html';
+    const publicPages = ['login.html', 'reset.html'];
+
+    if (!user && !publicPages.includes(currentPage)) {
+        window.location.href = "login.html";
+    }
+});
+
 function initUniversalMenu() {
-    // 1. Sidebar aur Overlay ka Structure create karna
     const menuWrapper = document.createElement('div');
     menuWrapper.id = 'imperial-menu-wrapper';
 
@@ -51,6 +60,7 @@ function initUniversalMenu() {
                 <img src="logo.png" class="menu-logo" onerror="this.src='https://via.placeholder.com/60'">
                 <h3>THE LALIT</h3>
                 <p>INTERNATIONAL SCHOOL</p>
+                <div id="user-display" class="mt-2 small opacity-75 text-gold"></div>
             </div>
             <nav class="nav-links">${menuItemsHTML}</nav>
         </div>
@@ -61,7 +71,12 @@ function initUniversalMenu() {
 
     document.body.prepend(menuWrapper);
 
-    // 2. CSS Inject Karna
+    // Dynamic User Email Display
+    firebase.auth().onAuthStateChanged(user => {
+        if(user) document.getElementById('user-display').innerText = user.email;
+    });
+
+    // CSS Injection
     const style = document.createElement('style');
     style.textContent = `
         #menu-trigger-btn {
@@ -89,6 +104,7 @@ function initUniversalMenu() {
         .menu-logo { width: 65px; height: 65px; border-radius: 50%; border: 2px solid #D4AF37; padding: 3px; background: white; }
         .sidebar-header h3 { font-family: 'Cinzel', serif; color: #D4AF37; margin: 10px 0 0; font-size: 1.2rem; }
         .sidebar-header p { font-size: 0.6rem; letter-spacing: 2px; margin: 0; color: #aaa; }
+        .text-gold { color: #D4AF37; font-size: 11px; }
 
         .nav-links { padding: 15px; }
         .menu-divider { font-size: 10px; text-transform: uppercase; color: #D4AF37; opacity: 0.6; padding: 20px 10px 5px; letter-spacing: 1.5px; font-weight: bold; }
@@ -120,17 +136,21 @@ function initUniversalMenu() {
     trigger.onclick = toggle;
     overlay.onclick = toggle;
 
+    // Logout Functionality
     const logoutBtn = document.getElementById('logoutBtn');
     if(logoutBtn) {
         logoutBtn.onclick = (e) => {
             e.preventDefault();
-            if(confirm("Do you want to exit Imperial Registry?")) {
-                firebase.auth().signOut().then(() => { window.location.href = "login.html"; });
+            if(confirm("Do you want to secure and exit the system?")) {
+                firebase.auth().signOut().then(() => {
+                    window.location.href = "login.html";
+                });
             }
         };
     }
 }
 
+// Ensure execution
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initUniversalMenu);
 } else {
