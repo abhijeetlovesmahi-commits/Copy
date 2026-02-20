@@ -3,77 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Staff Login | The Lalit International</title>
-    
+    <title>Login | The Lalit Intl.</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
     <style>
-        :root { --royal-blue: #002366; --gold: #D4AF37; }
-        
+        :root { --royal: #002147; --gold: #D4AF37; }
         body { 
-            background: linear-gradient(135deg, var(--royal-blue) 0%, #001a4d 100%);
+            background: linear-gradient(135deg, var(--royal) 0%, #001226 100%); 
             height: 100vh; display: flex; align-items: center; justify-content: center;
-            font-family: 'Montserrat', sans-serif; margin: 0;
+            font-family: 'Segoe UI', sans-serif;
         }
-
         .login-card {
-            background: white; padding: 40px; border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
-            width: 100%; max-width: 400px; text-align: center;
-            border-top: 5px solid var(--gold);
+            background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px);
+            border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 20px;
+            padding: 40px; width: 100%; max-width: 400px; color: white;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
         }
-
-        .login-card img { width: 80px; margin-bottom: 15px; }
-
-        .brand-title { 
-            font-family: 'Cinzel', serif; color: var(--royal-blue); 
-            font-weight: bold; font-size: 1.5rem; margin-bottom: 5px;
-        }
-
-        .form-control {
-            border-radius: 10px; padding: 12px;
-            border: 1px solid #ddd; border-bottom: 3px solid var(--gold);
-            margin-bottom: 20px;
-        }
-
-        .btn-auth {
-            background: var(--royal-blue); color: var(--gold);
-            width: 100%; padding: 12px; border-radius: 10px;
-            font-weight: bold; border: none; transition: 0.3s;
-            text-transform: uppercase; letter-spacing: 1px;
-        }
-
-        .btn-auth:hover { background: var(--gold); color: var(--royal-blue); }
-
-        .error-msg { color: #e74c3c; font-size: 0.85rem; display: none; margin-bottom: 15px; }
-        
-        .footer-text { font-size: 0.75rem; color: #888; margin-top: 25px; }
+        .school-logo { width: 80px; height: 80px; border-radius: 50%; border: 2px solid var(--gold); padding: 5px; background: #white; margin-bottom: 20px; }
+        .form-control { background: rgba(255,255,255,0.1); border: 1px solid #444; color: white; }
+        .form-control:focus { background: rgba(255,255,255,0.2); border-color: var(--gold); color: white; box-shadow: none; }
+        .btn-gold { background: var(--gold); color: var(--royal); font-weight: 800; border: none; transition: 0.3s; }
+        .btn-gold:hover { background: #b8962d; transform: scale(1.02); }
     </style>
 </head>
 <body>
 
-<div class="login-card">
-    <img src="logo.png" alt="School Logo">
-    <div class="brand-title">STAFF PORTAL</div>
-    <p class="text-muted small mb-4">The Lalit International School</p>
-
-    <div id="errorMessage" class="error-msg text-center">Invalid Credentials!</div>
+<div class="login-card text-center">
+    <img src="logo.png" class="school-logo" onerror="this.src='https://via.placeholder.com/80'">
+    <h4 class="fw-bold mb-1">THE LALIT</h4>
+    <p class="small text-uppercase tracking-widest mb-4" style="color: var(--gold); letter-spacing: 2px;">International School</p>
+    
+    <div id="loginError" class="alert alert-danger d-none small"></div>
 
     <form id="loginForm">
-        <div class="text-start">
-            <label class="small fw-bold text-muted">Official Email</label>
-            <input type="email" id="email" class="form-control" placeholder="admin@school.com" required>
+        <div class="mb-3 text-start">
+            <label class="form-label small opacity-75">Email Address</label>
+            <input type="email" id="email" class="form-control" placeholder="admin@lalit.com" required>
         </div>
-        <div class="text-start">
-            <label class="small fw-bold text-muted">Password</label>
+        <div class="mb-4 text-start">
+            <label class="form-label small opacity-75">Password</label>
             <input type="password" id="password" class="form-control" placeholder="••••••••" required>
         </div>
-        <button type="submit" class="btn-auth shadow">Secure Access <i class="fas fa-key ms-2"></i></button>
+        <button type="submit" class="btn btn-gold w-100 py-2">ACCESS CONTROL TOWER</button>
     </form>
-
-    <div class="footer-text">
-        &copy; 2026 TLIS Management System <br> Authorized Access Only
+    
+    <div class="mt-4">
+        <a href="reset.html" class="text-decoration-none small" style="color: var(--gold);">Forgot Password?</a>
     </div>
 </div>
 
@@ -83,32 +58,23 @@
 
 <script>
     const loginForm = document.getElementById('loginForm');
-    const errorDiv = document.getElementById('errorMessage');
+    const errorDiv = document.getElementById('loginError');
 
-    loginForm.addEventListener('submit', (e) => {
+    loginForm.onsubmit = (e) => {
         e.preventDefault();
-        
         const email = document.getElementById('email').value;
-        const pass = document.getElementById('password').value;
+        const password = document.getElementById('password').value;
 
-        // Firebase Auth Login
-        firebase.auth().signInWithEmailAndPassword(email, pass)
-        .then((userCredential) => {
-            // Login Successful
-            window.location.href = "index.html"; 
-        })
-        .catch((error) => {
-            // Login Failed
-            errorDiv.style.display = 'block';
-            errorDiv.innerText = "Access Denied: " + error.message;
-        });
-    });
-
-    // Check if already logged in
-    firebase.auth().onAuthStateChanged((user) => {
-        if (user) { window.location.href = "index.html"; }
-    });
+        firebase.auth().signInWithEmailAndPassword(email, password)
+            .then((userCredential) => {
+                // Successful login
+                window.location.href = "index.html";
+            })
+            .catch((error) => {
+                errorDiv.classList.remove('d-none');
+                errorDiv.innerText = "Invalid credentials. Please try again.";
+            });
+    };
 </script>
-
 </body>
 </html>
