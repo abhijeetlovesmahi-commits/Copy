@@ -28,7 +28,7 @@ const menuConfig = [
     { title: "Defaulter List", icon: "fa-exclamation-triangle", link: "defaulter-list.html", role: "admin" },
 
     { type: "divider", title: "Administration" },
-    { title: "Manage Users", icon: "fa-user-shield", link: "manage-users.html", role: "admin" },
+    { title: "Manage Users", icon: "fa-user-shield", link: "add-staff.html", role: "admin" },
 
     { type: "divider", title: "Security" },
     { title: "Logout Registry", icon: "fa-sign-out-alt", link: "#", role: "all", id: "logoutBtn" }
