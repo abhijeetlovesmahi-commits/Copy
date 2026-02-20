@@ -9,6 +9,7 @@
     
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
     
     <script src="firebase-config.js"></script>
     <script src="brand.js"></script>
@@ -213,6 +214,11 @@ let compressedBase64 = "";
 let currentViewData = null;
 let allStudents = [];
 
+// Create a secondary app to handle user creation without logging out the admin
+// Note: Replace the config below if it's different from your main firebase-config.js
+const secondaryApp = firebase.initializeApp(firebaseConfig, "Secondary");
+const secondaryAuth = secondaryApp.auth();
+
 function processPhoto(input) {
     const file = input.files[0];
     if (file) {
@@ -251,13 +257,26 @@ document.getElementById('admissionForm').addEventListener('submit', async (e) =>
     const btn = document.getElementById('submitBtn');
     const editingId = document.getElementById('editingId').value;
     btn.disabled = true; 
-    btn.innerText = "Processing...";
+    btn.innerText = "Processing Admission...";
 
     try {
         let uniqueID = editingId;
+        let generatedEmail = "";
+        let generatedPassword = "";
+
         if(!editingId) {
+            // Logic for New Admission
             const lastSnap = await db.collection('students').orderBy('uniqueID', 'desc').limit(1).get();
             uniqueID = lastSnap.empty ? 1001 : Number(lastSnap.docs[0].data().uniqueID) + 1;
+
+            // Generate Credentials
+            const cleanName = document.getElementById('sName').value.replace(/\s+/g, '').toLowerCase();
+            generatedEmail = `${cleanName}${uniqueID}@lalit.com`;
+            generatedPassword = `Lalit@${uniqueID}`;
+
+            // Create Firebase Auth Account (Using secondaryAuth to stay logged in as Admin)
+            await secondaryAuth.createUserWithEmailAndPassword(generatedEmail, generatedPassword);
+            await secondaryAuth.signOut(); // Clean up secondary session
         }
 
         const studentData = {
@@ -280,13 +299,22 @@ document.getElementById('admissionForm').addEventListener('submit', async (e) =>
             currentAddr: document.getElementById('currAddr').value,
             permanentAddr: document.getElementById('permAddr').value,
             photo: compressedBase64 || (currentViewData ? currentViewData.photo : ""),
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            role: 'student',
+            // Only add email/pass for new records
+            ...(generatedEmail && { loginEmail: generatedEmail, loginPass: generatedPassword })
         };
 
         await db.collection('students').doc(uniqueID.toString()).set(studentData, {merge: true});
-        alert("Success! ID: " + uniqueID);
+        
+        let msg = editingId ? "Record Updated!" : `Admission Successful!\nID: ${uniqueID}\nEmail: ${generatedEmail}\nPass: ${generatedPassword}`;
+        alert(msg);
         location.reload();
-    } catch (err) { alert("Error: " + err.message); btn.disabled = false; }
+    } catch (err) { 
+        alert("Error: " + err.message); 
+        btn.disabled = false; 
+        btn.innerText = "PROCEED WITH REGISTRATION";
+    }
 });
 
 async function loadAllData() {
@@ -338,6 +366,7 @@ function showDetails(data) {
     document.getElementById('modalPhoto').src = data.photo || 'https://via.placeholder.com/150';
     document.getElementById('modalDetails').innerHTML = `
         <p><strong>Student ID:</strong> ${data.uniqueID}</p>
+        <p><strong>Login Email:</strong> ${data.loginEmail || 'N/A'}</p>
         <p><strong>Class:</strong> ${data.class}-${data.section}</p>
         <p><strong>Father's Name:</strong> ${data.father}</p>
         <p><strong>Call:</strong> ${data.contact}</p>
