@@ -3,156 +3,168 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control Tower | The Lalit Intl.</title>
+    <title>Dashboard | The Lalit International</title>
     
-    <link rel="stylesheet" href="style.css"> 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
-    <script src="firebase-config.js"></script>
-    <script src="brand.js"></script>
+    <link rel="stylesheet" href="style.css">
 
     <style>
-        :root { --royal: #002147; --gold: #D4AF37; --bg: #f0f2f5; }
-        body { background: var(--bg); font-family: 'Segoe UI', system-ui, sans-serif; }
+        :root { --royal: #002147; --gold: #D4AF37; }
+        body { background: #f8f9fa; overflow-x: hidden; }
 
-        /* Dashboard Stat Cards */
+        /* --- Royal Splash Animation --- */
+        #splash-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--royal); z-index: 99999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 0.8s ease, visibility 0.8s;
+        }
+        .splash-logo {
+            width: 120px; filter: drop-shadow(0 0 15px rgba(212,175,55,0.5));
+            animation: pulseLogo 2s infinite ease-in-out;
+        }
+        .splash-text {
+            font-family: 'Cinzel', serif; color: white; margin-top: 20px;
+            letter-spacing: 5px; animation: revealText 1.5s forwards; opacity: 0;
+        }
+        @keyframes pulseLogo { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        @keyframes revealText { from { letter-spacing: 15px; opacity: 0; } to { letter-spacing: 5px; opacity: 1; } }
+
+        /* --- Dashboard UI --- */
+        .dashboard-content { padding: 80px 30px 30px 80px; opacity: 0; transform: translateY(20px); transition: 1s ease; }
+        .dashboard-content.visible { opacity: 1; transform: translateY(0); }
+
         .stat-card {
-            background: #fff; border-radius: 15px; padding: 20px;
-            border-bottom: 4px solid var(--royal); transition: 0.3s;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            background: white; border-radius: 15px; padding: 25px;
+            border-left: 5px solid var(--gold); box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            transition: 0.3s;
         }
-        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
-        .stat-icon { font-size: 2.5rem; opacity: 0.2; position: absolute; right: 20px; bottom: 10px; }
-        .stat-value { font-size: 1.8rem; font-weight: 800; color: var(--royal); }
-        .stat-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: #666; font-weight: 600; }
-
-        /* Module Navigation Grid */
-        .module-btn {
-            background: #fff; border: 1px solid #ddd; border-radius: 12px;
-            padding: 20px; text-align: center; color: var(--royal);
-            text-decoration: none; display: block; transition: 0.2s;
-            height: 100%;
-        }
-        .module-btn:hover { background: var(--royal); color: #fff; border-color: var(--royal); }
-        .module-btn i { font-size: 1.5rem; margin-bottom: 10px; display: block; color: var(--gold); }
-        .module-btn:hover i { color: #fff; }
-        .module-title { font-size: 0.9rem; font-weight: 700; margin: 0; }
-
-        .section-title { font-weight: 800; color: var(--royal); font-size: 1.1rem; border-left: 4px solid var(--gold); padding-left: 10px; margin: 25px 0 15px 0; }
+        .stat-card:hover { transform: translateY(-5px); }
+        .stat-icon { font-size: 2.5rem; color: var(--royal); opacity: 0.2; position: absolute; right: 20px; }
         
-        #welcome-strip { background: linear-gradient(45deg, var(--royal), #003366); color: #fff; padding: 30px; border-radius: 15px; margin-bottom: 30px; position: relative; overflow: hidden; }
-        .pattern-bg { position: absolute; right: -20px; top: -20px; font-size: 150px; opacity: 0.1; transform: rotate(-15deg); }
+        .welcome-banner {
+            background: linear-gradient(to right, var(--royal), #003366);
+            color: white; border-radius: 20px; padding: 40px; margin-bottom: 30px;
+            border-bottom: 4px solid var(--gold);
+        }
     </style>
 </head>
 <body>
 
-<div id="menu-container"></div>
+<div id="splash-screen">
+    <img src="logo.png" class="splash-logo" onerror="this.src='https://via.placeholder.com/120'">
+    <h2 class="splash-text">THE LALIT</h2>
+    <p style="color: var(--gold); letter-spacing: 3px; font-size: 0.7rem; margin-top: 10px;">INTERNATIONAL SCHOOL</p>
+</div>
 
-<div class="container py-4">
-    <div id="brand-header-container" class="mb-4"></div>
+<div class="dashboard-content" id="mainDash">
+    <div class="container-fluid">
+        
+        <div class="welcome-banner">
+            <h1 class="display-5 fw-bold">Management Control Tower</h1>
+            <p class="lead">Welcome back, <span id="userNameDisplay" style="color: var(--gold);">Administrator</span>. Here's your school's live overview.</p>
+        </div>
 
-    <div id="welcome-strip" class="shadow">
-        <i class="fas fa-university pattern-bg"></i>
-        <h2 class="fw-bold m-0">Welcome, Administrator</h2>
-        <p class="m-0 opacity-75">Command Center Dashboard | <span id="liveClock"></span></p>
-    </div>
-
-    <div class="row g-3">
-        <div class="col-md-3 col-6">
-            <div class="stat-card position-relative">
-                <p class="stat-label">Total Students</p>
-                <div class="stat-value" id="count-students">--</div>
-                <i class="fas fa-user-graduate stat-icon"></i>
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="stat-card position-relative">
+                    <i class="fas fa-user-graduate stat-icon"></i>
+                    <h6 class="text-uppercase small fw-bold text-muted">Total Students</h6>
+                    <h2 class="fw-bold" id="totalStudents">...</h2>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card position-relative">
+                    <i class="fas fa-user-tie stat-icon"></i>
+                    <h6 class="text-uppercase small fw-bold text-muted">Total Staff</h6>
+                    <h2 class="fw-bold" id="totalStaff">...</h2>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card position-relative">
+                    <i class="fas fa-wallet stat-icon"></i>
+                    <h6 class="text-uppercase small fw-bold text-muted">Today's Fees</h6>
+                    <h2 class="fw-bold" style="color: #28a745;">₹ <span id="todayFees">0</span></h2>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card position-relative">
+                    <i class="fas fa-bell stat-icon"></i>
+                    <h6 class="text-uppercase small fw-bold text-muted">Pending Notices</h6>
+                    <h2 class="fw-bold" style="color: #dc3545;">03</h2>
+                </div>
             </div>
         </div>
-        <div class="col-md-3 col-6">
-            <div class="stat-card position-relative" style="border-bottom-color: #27ae60;">
-                <p class="stat-label">Today's Cash</p>
-                <div class="stat-value" id="count-cash">₹0</div>
-                <i class="fas fa-wallet stat-icon" style="color:#27ae60"></i>
+
+        <div class="row mt-5">
+            <div class="col-md-8">
+                <div class="stat-card">
+                    <h5 class="fw-bold mb-4"><i class="fas fa-chart-line me-2"></i>Recent Activity</h5>
+                    <div id="activityLog" class="small text-muted">
+                        Fetching latest school updates...
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card" style="border-left-color: var(--royal);">
+                    <h5 class="fw-bold mb-3">System Health</h5>
+                    <p class="small text-muted"><i class="fas fa-circle text-success me-2"></i> Database Connected</p>
+                    <p class="small text-muted"><i class="fas fa-circle text-success me-2"></i> Auth Server Online</p>
+                    <p class="small text-muted"><i class="fas fa-circle text-success me-2"></i> Cloud Storage Ready</p>
+                </div>
             </div>
         </div>
-        <div class="col-md-3 col-6">
-            <div class="stat-card position-relative" style="border-bottom-color: var(--gold);">
-                <p class="stat-label">Attendance</p>
-                <div class="stat-value" id="count-attendance">0%</div>
-                <i class="fas fa-calendar-check stat-icon" style="color:var(--gold)"></i>
-            </div>
-        </div>
-        <div class="col-md-3 col-6">
-            <div class="stat-card position-relative" style="border-bottom-color: #e74c3c;">
-                <p class="stat-label">Defaulters</p>
-                <div class="stat-value" id="count-defaulters">--</div>
-                <i class="fas fa-exclamation-triangle stat-icon" style="color:#e74c3c"></i>
-            </div>
-        </div>
-    </div>
 
-    <h5 class="section-title">ACADEMIC & ADMISSIONS</h5>
-    <div class="row g-2">
-        <div class="col-md-2 col-4"><a href="add-student.html" class="module-btn"><i class="fas fa-user-plus"></i><p class="module-title">New Adm.</p></a></div>
-        <div class="col-md-2 col-4"><a href="view-students.html" class="module-btn"><i class="fas fa-users"></i><p class="module-title">Database</p></a></div>
-        <div class="col-md-2 col-4"><a href="attendance.html" class="module-btn"><i class="fas fa-check-double"></i><p class="module-title">Attendance</p></a></div>
-        <div class="col-md-2 col-4"><a href="exam-master.html" class="module-btn"><i class="fas fa-file-invoice"></i><p class="module-title">Exam Master</p></a></div>
-        <div class="col-md-2 col-4"><a href="exam-marks-entry.html" class="module-btn"><i class="fas fa-pen-nib"></i><p class="module-title">Marks Entry</p></a></div>
-        <div class="col-md-2 col-4"><a href="exam-report-card.html" class="module-btn"><i class="fas fa-id-card"></i><p class="module-title">Reports</p></a></div>
-    </div>
-
-    <h5 class="section-title">FEE & ACCOUNTS MANAGEMENT</h5>
-    <div class="row g-2">
-        <div class="col-md-2 col-4"><a href="collect-fees.html" class="module-btn"><i class="fas fa-cash-register"></i><p class="module-title">Collect Fee</p></a></div>
-        <div class="col-md-2 col-4"><a href="fee-history.html" class="module-btn"><i class="fas fa-history"></i><p class="module-title">Transactions</p></a></div>
-        <div class="col-md-2 col-4"><a href="defaulter-list.html" class="module-btn"><i class="fas fa-user-times"></i><p class="module-title">Defaulters</p></a></div>
-        <div class="col-md-2 col-4"><a href="fee-demand-slip.html" class="module-btn"><i class="fas fa-receipt"></i><p class="module-title">Demand Slip</p></a></div>
-        <div class="col-md-2 col-4"><a href="fee-master.html" class="module-btn"><i class="fas fa-cogs"></i><p class="module-title">Fee Setup</p></a></div>
-        <div class="col-md-2 col-4"><a href="index.html" class="module-btn bg-light"><i class="fas fa-chart-line"></i><p class="module-title">Ledger</p></a></div>
-    </div>
-
-    <h5 class="section-title">ADMINISTRATION & STAFF</h5>
-    <div class="row g-2 mb-5">
-        <div class="col-md-2 col-4"><a href="staff-attendance.html" class="module-btn"><i class="fas fa-user-tie"></i><p class="module-title">Staff Attend.</p></a></div>
-        <div class="col-md-2 col-4"><a href="manage-users.html" class="module-btn"><i class="fas fa-user-shield"></i><p class="module-title">Manage Users</p></a></div>
-        <div class="col-md-2 col-4"><a href="reset.html" class="module-btn text-danger"><i class="fas fa-sync-alt"></i><p class="module-title">Reset Pass</p></a></div>
     </div>
 </div>
 
-<script>
-    // Live Clock Function
-    setInterval(() => {
-        document.getElementById('liveClock').innerText = new Date().toLocaleString();
-    }, 1000);
-
-    // Fetch Dashboard Stats from Firebase
-    async function loadDashboardData() {
-        // 1. Total Students
-        const stuSnap = await db.collection('students').get();
-        document.getElementById('count-students').innerText = stuSnap.size;
-
-        // 2. Today's Cash
-        let today = new Date().toLocaleDateString('en-GB'); // Format: DD/MM/YYYY
-        const transSnap = await db.collection('fee_transactions').get();
-        let totalCash = 0;
-        transSnap.forEach(doc => {
-            const data = doc.data();
-            // Assuming timestamp or date field exists
-            if(data.date === today) {
-                totalCash += Number(data.amount);
-            }
-        });
-        document.getElementById('count-cash').innerText = "₹" + totalCash.toLocaleString('en-IN');
-
-        // 3. Attendance Logic (Example: Today's percentage)
-        // const attSnap = await db.collection('attendance').doc(today).get();
-        // Calculation logic here...
-        document.getElementById('count-attendance').innerText = "85%"; // Static for demo
-    }
-
-    loadDashboardData();
-</script>
+<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
+<script src="firebase-config.js"></script>
 
 <script src="menu.js"></script>
+
+<script>
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // Any-time check for Auth
+    auth.onAuthStateChanged(async (user) => {
+        if (!user) {
+            window.location.href = "login.html";
+        } else {
+            loadDashboardData(user);
+            
+            // --- Animation Trigger Logic ---
+            // Animation khatam hone se pehle menu trigger karne ke liye 1.5s delay
+            setTimeout(() => {
+                document.getElementById('splash-screen').style.opacity = '0';
+                document.getElementById('splash-screen').style.visibility = 'hidden';
+                document.getElementById('mainDash').classList.add('visible');
+            }, 2000); 
+        }
+    });
+
+    async function loadDashboardData(user) {
+        try {
+            // Get User Name from Staff/Students collection
+            const staffSnap = await db.collection('staff').where('loginEmail', '==', user.email).get();
+            if(!staffSnap.empty) document.getElementById('userNameDisplay').innerText = staffSnap.docs[0].data().name;
+
+            // Fetch Live Stats
+            const studentCount = await db.collection('students').get();
+            document.getElementById('totalStudents').innerText = studentCount.size;
+
+            const staffCount = await db.collection('staff').get();
+            document.getElementById('totalStaff').innerText = staffCount.size;
+
+        } catch (err) {
+            console.error("Data Load Error:", err);
+        }
+    }
+</script>
+
 </body>
 </html>
