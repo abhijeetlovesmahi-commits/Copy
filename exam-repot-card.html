@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Report Card Master | Brand Central</title>
+    <title>Report Card Master | The Lalit Intl.</title>
     
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -14,7 +14,64 @@
     
     <script src="firebase-config.js"></script>
     <script src="auth-guard.js"></script>
-    <script src="brand.js"></script> </head>
+    <script src="brand.js"></script>
+
+    <style>
+        :root { 
+            --royal-blue: #002366; --gold: #D4AF37; --deep-gold: #aa8a2e;
+            --light-gold: #FDFBF0; --white: #ffffff;
+        }
+
+        /* Printing Adjustments */
+        @page { size: A4; margin: 0; }
+        
+        .admin-container { max-width: 1100px; margin: 0 auto; }
+
+        .controls-grid { 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); 
+            gap: 15px; background: #fff; padding: 25px; border-radius: 12px;
+            border: 1px solid var(--gold); margin-bottom: 25px;
+        }
+
+        .report-card { 
+            width: 210mm; min-height: 296mm; padding: 12mm; background: white; 
+            margin: 40px auto; border: 15px double var(--royal-blue);
+            box-sizing: border-box; position: relative; page-break-after: always;
+            display: flex; flex-direction: column; color: #000;
+        }
+
+        .exam-title-bar { 
+            background: var(--royal-blue); color: var(--gold); text-align: center; 
+            padding: 8px; font-weight: bold; margin: 15px 0; border-radius: 4px; 
+            font-size: 18px; font-family: 'Cinzel', serif;
+        }
+
+        .marks-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 11.5px; }
+        .marks-table th, .marks-table td { border: 1px solid #000; padding: 6px 4px; text-align: center; }
+        .marks-table th { background: #f2f2f2; font-size: 10px; }
+
+        .result-summary { 
+            display: grid; grid-template-columns: repeat(4, 1fr); 
+            border: 2px solid #000; margin-bottom: 15px; background: #f9f9f9; 
+        }
+        .res-item { padding: 10px; text-align: center; border-right: 1px solid #000; }
+        .res-item:last-child { border-right: none; }
+        .res-label { font-size: 10px; font-weight: bold; color: var(--royal-blue); display: block; text-transform: uppercase; }
+        .res-val { font-size: 18px; font-weight: bold; }
+
+        .footer-signs { display: flex; justify-content: space-between; margin-top: auto; padding-bottom: 20px; text-align: center; }
+        .sig-box { width: 160px; }
+        .sig-img { width: 130px; height: 50px; object-fit: contain; mix-blend-mode: multiply; }
+        .sig-text { border-top: 1px solid #000; margin-top: 5px; font-weight: bold; font-size: 13px; }
+
+        @media print { 
+            .no-print, #menu-container { display: none !important; } 
+            body { background: white; padding: 0; }
+            .main-content { margin: 0 !important; padding: 0 !important; }
+            .report-card { margin: 0; border: 10px double var(--royal-blue); } 
+        }
+    </style>
+</head>
 <body>
 
 <div id="menu-container"></div>
@@ -24,7 +81,7 @@
         <div class="royal-card">
             <div class="header" id="brand-header-container"></div>
             
-            <h2 class="brand-font text-center mb-4">Report Card Generation System</h2>
+            <h2 class="brand-font text-center mb-4" style="color: var(--royal-blue);">Report Card Generation System</h2>
 
             <div class="controls-grid">
                 <div>
@@ -61,10 +118,10 @@
             </div>
 
             <div class="d-flex gap-3">
-                <button class="royal-btn" onclick="generateBulk()">
+                <button class="royal-btn btn-block" onclick="generateBulk()">
                     <i class="fas fa-sync-alt me-2"></i>GENERATE CARDS
                 </button>
-                <button class="royal-btn" style="background:var(--success); color:white;" onclick="window.print()">
+                <button class="royal-btn btn-block" style="background:#27ae60;" onclick="window.print()">
                     <i class="fas fa-print me-2"></i>PRINT ALL
                 </button>
             </div>
@@ -85,11 +142,6 @@ function loadSign(input, type) {
 }
 
 async function generateBulk() {
-    // --- Branding Data from brand.js ---
-    const schoolName = typeof schoolConfig !== 'undefined' ? schoolConfig.schoolName : "VIDAYA INTERNATIONAL SCHOOL";
-    const session = typeof schoolConfig !== 'undefined' ? schoolConfig.session : "2026-27";
-    const affiliation = typeof schoolConfig !== 'undefined' ? schoolConfig.affiliation : "Affiliated to CBSE";
-    
     const sClass = document.getElementById('selClass').value;
     const sSec = document.getElementById('selSection').value;
     const mode = document.getElementById('reportMode').value;
@@ -127,6 +179,7 @@ async function generateBulk() {
             students.push(sData);
         });
 
+        // Sorting for Rank
         students.sort((a,b) => b.tempTotal - a.tempTotal);
         students.forEach((s, index) => s.rank = index + 1);
         students.sort((a,b) => (a.rollNo || a.uniqueID) - (b.rollNo || b.uniqueID));
@@ -166,25 +219,25 @@ async function generateBulk() {
 
             html += `
             <div class="report-card">
-                <table class="report-header-table">
+                <table style="width:100%; border:none;">
                     <tr>
-                        <td class="logo-side"><img src="logo.png" class="school-logo-print" onerror="this.src='https://via.placeholder.com/90'"></td>
-                        <td class="brand-side">
-                            <h1>${schoolName}</h1>
-                            <p>${affiliation}<br>Session: ${session}</p>
+                        <td style="width:100px; border:none;"><img src="logo.png" style="width:90px;" onerror="this.src='https://via.placeholder.com/90'"></td>
+                        <td style="text-align:center; border:none;">
+                            <h1 style="font-size:26px; color:var(--royal-blue); margin:0;">THE LALIT INTERNATIONAL SCHOOL</h1>
+                            <p style="margin:5px 0; font-size:12px;">(An English Medium Senior Secondary School, Affiliated to CBSE)<br>Session: 2025-26</p>
                         </td>
-                        <td class="photo-side"><img src="${s.photo || 'https://via.placeholder.com/100'}" class="student-photo-print"></td>
+                        <td style="width:100px; border:none; text-align:right;"><img src="${s.photo || 'https://via.placeholder.com/100'}" style="width:90px; border:1px solid #000;"></td>
                     </tr>
                 </table>
 
                 <div class="exam-title-bar">${examLabel}</div>
 
-                <table class="marks-table student-info-table">
+                <table class="marks-table" style="margin-bottom:10px;">
                     <tr><td style="text-align:left;">Student Name: <b>${s.name.toUpperCase()}</b></td><td style="text-align:left;">Roll No: <b>${s.rollNo || (s.uniqueID-1000)}</b></td></tr>
                     <tr><td style="text-align:left;">Father's Name: <b>${s.father.toUpperCase()}</b></td><td style="text-align:left;">Class-Section: <b>${s.class} - ${s.section}</b></td></tr>
                 </table>
 
-                <table class="marks-table main-marks-grid">
+                <table class="marks-table">
                     <thead>
                         <tr><th rowspan="2">SCHOLASTIC SUBJECTS</th><th colspan="6">TERM - I (100)</th>${mode==="2"?"<th colspan='6'>TERM - II (100)</th>":""}</tr>
                         <tr><th>PT</th><th>NB</th><th>SEA</th><th>EXAM</th><th>TOT</th><th>GR</th>${mode==="2"?"<th>PT</th><th>NB</th><th>SEA</th><th>EXAM</th><th>TOT</th><th>GR</th>":""}</tr>
@@ -199,26 +252,26 @@ async function generateBulk() {
                     <div class="res-item"><span class="res-label">CLASS RANK</span><span class="res-val">${s.rank}</span></div>
                 </div>
 
-                <div class="co-scholastic-header">CO-SCHOLASTIC AREAS & DISCIPLINE</div>
-                <div class="co-scholastic-grid">
+                <div style="background:var(--royal-blue); color:var(--gold); text-align:center; padding:5px; margin-bottom:10px; font-weight:bold; font-size:12px;">CO-SCHOLASTIC AREAS & DISCIPLINE</div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
                     <table class="marks-table"><tr><th>Term I Activity</th><th>Grade</th></tr><tr><td>Work/Art/Health/Disc.</td><td>A</td></tr></table>
                     <table class="marks-table"><tr><th>Term II Activity</th><th>Grade</th></tr><tr><td>Work/Art/Health/Disc.</td><td>A</td></tr></table>
                 </div>
 
-                <div class="remarks-box">
+                <div style="border:1px solid #000; padding:10px; font-size:13px; min-height:60px;">
                     <b>Class Teacher's Remarks:</b> ${perc > 80 ? "Excellent Performance! Keep it up." : perc > 60 ? "Good Progress, can do better in Math." : "Hard work required in core subjects."}
                 </div>
 
                 <div class="footer-signs">
                     <div class="sig-box">${ctSign?`<img src="${ctSign}" class="sig-img">`:''}<div class="sig-text">Class Teacher</div></div>
-                    <div class="sig-box"><div class="sig-text no-border">Parent's Signature</div></div>
+                    <div class="sig-box"><div class="sig-text" style="border:none;">Parent's Signature</div></div>
                     <div class="sig-box">${prSign?`<img src="${prSign}" class="sig-img">`:''}<div class="sig-text">Principal</div></div>
                 </div>
             </div>`;
         });
         container.innerHTML = html;
     } catch (e) { 
-        alert("Error: " + e.message); 
+        alert("Error Generating Reports: " + e.message); 
         container.innerHTML = "";
     }
 }
