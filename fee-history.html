@@ -11,6 +11,8 @@
     
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
+    
     <script src="firebase-config.js"></script>
     <script src="brand.js"></script>
 
@@ -39,7 +41,7 @@
         .f-disc-row { 
             background: #fcfcfc; 
             border-top: 1px solid #eee; 
-            padding: 2px 0; /* Reduced padding */
+            padding: 2px 0; 
             font-size: 11px;
             display: flex;
             justify-content: center;
@@ -47,12 +49,12 @@
             gap: 2px;
         }
         .disc-field { 
-            width: 38px; /* Slightly wider */
+            width: 38px; 
             height: 20px; 
             border: 1px solid #ccc; 
             text-align: center; 
             font-weight: bold; 
-            padding: 0; /* Removed internal padding to show number */
+            padding: 0; 
             margin: 0; 
             font-size: 12px;
         }
@@ -162,7 +164,7 @@
 </div>
 
 <script>
-// Logic remains identical to ensure 100% stability
+const db = firebase.firestore(); // Firestore Initialization
 const months = ["April", "May", "June", "July", "August", "September", "October", "November", "December", "January", "February", "March"];
 let curStu = null;
 let fm = {}; 
@@ -254,11 +256,14 @@ async function calculateLedger() {
     document.getElementById('tPaid').innerText = "₹" + tPaid;
     document.getElementById('tBalance').innerText = "₹" + Math.round(runBal);
 
+    // Save discounts back to student record
     db.collection('students').doc(curStu.uniqueID.toString()).update({
         discounts: { tuition: d.tui, hostel: d.hos, trans: d.tra, adm: d.adm, dev: d.dev, exam: d.exa, books: d.boo, misc: d.mis }
     });
 }
 </script>
+
 <script src="menu.js"></script>
+
 </body>
 </html>
