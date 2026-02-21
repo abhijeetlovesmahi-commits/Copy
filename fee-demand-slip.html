@@ -11,31 +11,33 @@
     
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
+    
     <script src="firebase-config.js"></script>
     <script src="brand.js"></script>
+    <script src="menu.js"></script> 
 
     <style>
         :root { --royal: #002147; --gold: #D4AF37; --table-border: #111; }
         body { background: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         
-        /* Container for multiple slips */
+        /* Menu Container specific styling */
+        #menu-container { width: 100%; position: relative; z-index: 9999; }
+
         #slipsContainer { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 10px; }
 
-        /* Slip Box - Optimized for 2 per page (Half A4) */
         .slip-box { 
-            background: #fff; width: 100%; max-width: 800px; height: 485px; /* Fixed height for 2 per page */
+            background: #fff; width: 100%; max-width: 800px; height: 485px; 
             margin: 5px auto; padding: 25px 35px; border: 1px solid #ccc; position: relative;
             box-shadow: 0 4px 8px rgba(0,0,0,0.05); overflow: hidden;
         }
 
-        /* Currency-style Security Thread */
         .security-thread {
             position: absolute; left: 25px; top: 0; bottom: 0; width: 3px;
             background: repeating-linear-gradient(to bottom, var(--gold) 0%, var(--gold) 5%, var(--royal) 5%, var(--royal) 10%);
             opacity: 0.15; z-index: 2;
         }
 
-        /* Logo Watermark */
         .watermark {
             position: absolute; top: 55%; left: 50%; transform: translate(-50%, -50%);
             width: 320px; opacity: 0.05; z-index: 0; pointer-events: none;
@@ -126,12 +128,11 @@
     </div>
 </div>
 
-<div id="slipsContainer">
-    </div>
+<div id="slipsContainer"></div>
 
 <script>
 const months = ["April", "May", "June", "July", "August", "September", "October", "November", "December", "January", "February", "March"];
-let globalSign = ""; // Stores uploaded signature data
+let globalSign = ""; 
 
 function handleSignature(input) {
     if (input.files && input.files[0]) {
@@ -195,7 +196,6 @@ async function generateBulk() {
         <div class="slip-box">
             <div class="security-thread"></div>
             <img src="logo.png" class="watermark">
-            
             <div class="slip-header d-flex justify-content-between align-items-end">
                 <div class="d-flex align-items-center">
                     <img src="logo.png" style="width:50px; margin-right:12px;">
@@ -209,7 +209,6 @@ async function generateBulk() {
                     <small style="font-size:9px;">DATE: ${new Date().toLocaleDateString('en-GB')}</small>
                 </div>
             </div>
-
             <div class="student-info-grid">
                 <img src="${s.photo || 'placeholder.png'}" class="stu-photo">
                 <div class="info-col">
@@ -223,13 +222,9 @@ async function generateBulk() {
                     <p>DUE DATE: <b class="text-danger">10th ${month}</b></p>
                 </div>
             </div>
-
             <table class="fee-table">
                 <thead>
-                    <tr>
-                        <th>Fee Descriptions</th>
-                        <th class="text-end">Amount (₹)</th>
-                    </tr>
+                    <tr><th>Fee Descriptions</th><th class="text-end">Amount (₹)</th></tr>
                 </thead>
                 <tbody>
                     ${prevDues > 0 ? `<tr><td>PREVIOUS BALANCE (DUE)</td><td class="text-end">₹${Math.round(prevDues)}</td></tr>` : ''}
@@ -245,11 +240,9 @@ async function generateBulk() {
                     </tr>
                 </tfoot>
             </table>
-
             <div class="note-box">
                 <b>Terms:</b> Please clear the dues by the 10th of every month. Late fine of ₹50/day will be applicable thereafter. This is a system-generated notice.
             </div>
-
             <div class="row mt-3">
                 <div class="col-6 text-center"><br><hr class="mx-4 mb-0"><small style="font-size:10px;">Parent/Guardian Signature</small></div>
                 <div class="col-6 text-center">
@@ -262,10 +255,8 @@ async function generateBulk() {
             </div>
         </div>`;
     }
-
     container.innerHTML = allHtml;
 }
 </script>
-<script src="menu.js"></script>
 </body>
 </html>
