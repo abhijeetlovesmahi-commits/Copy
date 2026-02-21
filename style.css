@@ -1,1 +1,140 @@
+/* ==========================================================================
+   MASTER UNIVERSAL FRAMEWORK (V4.0 - PRINT FIX EDITION)
+   Theme: Imperial Burgundy & Antique Champagne
+   Includes: All-in-One Styles + Single Page Report Card Engine
+==========================================================================
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+    /* --- COLOR PALETTE --- */
+    --royal-blue: #4a0404;          /* Deep Imperial Burgundy */
+    --royal-blue-light: #630606;
+    --gold: #c5a059;               /* Antique Champagne Gold */
+    --deep-gold: #8e6f3e;
+    --light-gold: #fffbf2;
+    --text-dark: #2c1810;
+    --border-color: #d8c3a5;
+    --shadow-md: 0 10px 30px rgba(74, 4, 4, 0.1);
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --- BASE RESET --- */
+* { box-sizing: border-box; -webkit-font-smoothing: antialiased; outline: none; }
+body { background: #f4ece2; font-family: 'Poppins', sans-serif; margin: 0; padding: 0; color: var(--text-dark); }
+h1, h2, h3, .brand-font { font-family: 'Cinzel', serif; text-transform: uppercase; }
+
+/* --- UNIVERSAL MENU & SIDEBAR --- */
+#menu-trigger-btn { position: fixed; top: 15px; left: 15px; width: 45px; height: 45px; z-index: 20001; cursor: pointer; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; background: transparent; border: none; }
+#menu-trigger-btn span { width: 25px; height: 3px; background: var(--royal-blue); border-radius: 2px; transition: 0.4s; }
+.open-btn span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+.open-btn span:nth-child(2) { opacity: 0; }
+.open-btn span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+#sidebar-panel { position: fixed; top: 0; left: -300px; width: 280px; height: 100vh; background: var(--royal-blue); z-index: 20000; transition: 0.4s; border-right: 3px solid var(--gold); overflow-y: auto; color: white; }
+#sidebar-panel.open { left: 0; }
+#menu-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 19999; display: none; backdrop-filter: blur(3px); }
+
+.sidebar-header { padding: 30px 20px; text-align: center; background: rgba(0,0,0,0.2); border-bottom: 1px solid rgba(197, 160, 89, 0.2); }
+.menu-logo { width: 65px; height: 65px; border-radius: 50%; border: 2px solid var(--gold); padding: 3px; background: white; object-fit: contain; }
+.nav-item { display: flex; align-items: center; padding: 12px 15px; color: white; text-decoration: none; transition: 0.3s; font-size: 0.9rem; }
+.nav-item i { color: var(--gold); margin-right: 12px; }
+.nav-item:hover, .active-link { background: rgba(197, 160, 89, 0.2); color: var(--gold); }
+.menu-divider { font-size: 10px; text-transform: uppercase; color: var(--gold); opacity: 0.6; padding: 20px 10px 5px; letter-spacing: 1.5px; font-weight: bold; }
+
+/* --- MAIN LAYOUT & UI --- */
+.main-content { padding: 30px 20px 40px; display: flex; flex-direction: column; align-items: center; }
+.royal-card { width: 100%; max-width: 1300px; background: var(--paper-white); background-image: url('https://www.transparenttextures.com/patterns/pinstriped-suit.png'); border: 1px solid var(--border-color); border-radius: 15px; padding: 30px; box-shadow: var(--shadow-md); position: relative; overflow: hidden; }
+.royal-card::after { content: ""; position: absolute; top: 15px; left: 15px; right: 15px; bottom: 15px; border: 1px solid rgba(197, 160, 89, 0.2); pointer-events: none; border-radius: 10px; }
+
+.royal-btn { background: var(--royal-blue); color: var(--gold); border: 1px solid var(--gold); padding: 12px 28px; font-weight: 600; cursor: pointer; transition: var(--transition); text-transform: uppercase; border-radius: 5px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; }
+.royal-btn:hover { background: var(--gold); color: white; transform: translateY(-2px); }
+
+.controls-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; background: var(--light-gold); padding: 25px; border-radius: 12px; border: 1px solid var(--gold); margin-bottom: 25px; }
+input, select { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-bottom: 3px solid var(--gold); border-radius: 6px; background: white; }
+
+/* ==========================================================================
+   REPORT CARD PRINT ENGINE (SINGLE PAGE LOGIC)
+========================================================================== */
+.report-card { 
+    width: 210mm; 
+    height: 297mm; /* Fixed A4 Height */
+    max-height: 297mm;
+    padding: 10mm; 
+    background: white; 
+    margin: 20px auto; 
+    border: 10px double var(--royal-blue);
+    box-sizing: border-box; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: space-between; /* Distributes space evenly */
+    color: #000;
+    overflow: hidden; /* Prevents spillover */
+    box-shadow: var(--shadow-lg);
+}
+
+/* Header Section (Logo, Name, Photo) */
+.report-header-table { width: 100%; border-bottom: 2px solid var(--royal-blue); margin-bottom: 5px; padding-bottom: 5px; }
+.report-header-table td { vertical-align: middle; }
+.school-logo-print { width: 80px; height: 80px; object-fit: contain; }
+.student-photo-print { width: 80px; height: 90px; border: 2px solid var(--royal-blue); object-fit: cover; }
+.brand-side { text-align: center; }
+.brand-side h1 { font-size: 22px; color: var(--royal-blue); margin: 0; line-height: 1.2; }
+.brand-side p { margin: 2px 0; font-size: 10px; font-weight: 600; color: var(--text-dark); }
+
+/* Titles & Tables */
+.exam-title-bar { background: var(--royal-blue); color: var(--gold); text-align: center; padding: 5px; font-weight: bold; margin: 5px 0; border-radius: 4px; font-size: 14px; text-transform: uppercase; }
+
+.marks-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.marks-table th, .marks-table td { border: 1px solid #000; padding: 4px 2px; text-align: center; }
+.marks-table th { background: rgba(197, 160, 89, 0.2); color: var(--royal-blue); font-weight: bold; }
+.student-info-table td { text-align: left; padding: 5px; border: none; border-bottom: 1px solid #ddd; font-size: 12px; }
+
+/* Main Content Container - This will stretch/shrink */
+.report-content-body {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    justify-content: flex-start;
+    padding: 10px 0;
+}
+
+/* Summary, Co-Scholastic & Remarks */
+.result-summary { display: grid; grid-template-columns: repeat(4, 1fr); border: 2px solid var(--royal-blue); background: var(--light-gold); }
+.res-item { padding: 5px; text-align: center; border-right: 1px solid var(--royal-blue); }
+.res-item:last-child { border-right: none; }
+.res-label { font-size: 9px; font-weight: bold; color: var(--royal-blue); display: block; }
+.res-val { font-size: 14px; font-weight: bold; }
+
+.co-scholastic-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.remarks-box { border: 2px solid var(--royal-blue); padding: 8px; font-size: 12px; min-height: 40px; background: rgba(255, 251, 242, 0.5); }
+
+/* Footer Signatures - Always at bottom */
+.footer-signs { display: flex; justify-content: space-between; margin-top: 5px; padding-top: 5px; text-align: center; border-top: 1px solid #ccc; }
+.sig-box { width: 150px; }
+.sig-img { width: 120px; height: 40px; object-fit: contain; mix-blend-mode: multiply; }
+.sig-text { border-top: 1px solid #000; margin-top: 2px; font-weight: bold; font-size: 11px; color: var(--royal-blue); }
+
+/* --- PRINT SPECIFIC MEDIA QUERY --- */
+@media print { 
+    @page { size: A4; margin: 0mm; }
+    html, body { height: 297mm; width: 210mm; background: white !important; }
+    .no-print, #menu-container, #menu-trigger-btn, .main-content > .admin-container { display: none !important; } 
+    .main-content { margin: 0 !important; padding: 0 !important; height: 297mm; }
+    
+    .report-card { 
+        margin: 0 !important; 
+        border: none !important; /* Remove outer border for actual print */
+        box-shadow: none !important;
+        height: 297mm !important;
+        page-break-after: always;
+        page-break-inside: avoid;
+        padding: 8mm !important; /* Slightly reduce padding for safe margins */
+    }
+    
+    /* Final Safety Net: Scale down slightly if content is still too big */
+    body { transform: scale(0.99); transform-origin: top center; }
+}
 
