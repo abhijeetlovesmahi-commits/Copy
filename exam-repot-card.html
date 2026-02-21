@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Report Card Master | Brand Central</title>
+    <title>Report Card Master | The Lalit Intl.</title>
     
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -11,10 +11,11 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
-    
     <script src="firebase-config.js"></script>
     <script src="auth-guard.js"></script>
-    <script src="brand.js"></script> </head>
+    
+    <script src="brand.js"></script>
+</head>
 <body>
 
 <div id="menu-container"></div>
@@ -22,14 +23,12 @@
 <div class="main-content">
     <div class="admin-container no-print">
         <div class="royal-card">
-            <div class="header" id="brand-header-container"></div>
-            
-            <h2 class="brand-font text-center mb-4">Report Card Generation System</h2>
+            <h2 class="brand-font text-center mb-4" style="color: var(--royal-blue);">Report Card Generation System</h2>
 
             <div class="controls-grid">
                 <div>
                     <label>Target Class</label>
-                    <select id="selClass" class="form-select">
+                    <select id="selClass">
                         <option value="Pre-Nursery">Pre-Nursery</option>
                         <option value="Nursery">Nursery</option>
                         <option value="LKG">LKG</option>
@@ -39,32 +38,32 @@
                 </div>
                 <div>
                     <label>Section</label>
-                    <select id="selSection" class="form-select">
+                    <select id="selSection">
                         <option value="A">A</option><option value="B">B</option><option value="C">C</option>
                     </select>
                 </div>
                 <div>
                     <label>Report Mode</label>
-                    <select id="reportMode" class="form-select">
+                    <select id="reportMode">
                         <option value="1">Half Yearly (Term-I)</option>
                         <option value="2">Annual (Term-I + II)</option>
                     </select>
                 </div>
                 <div>
                     <label>Teacher Sign</label>
-                    <input type="file" class="form-control form-control-sm" onchange="loadSign(this, 'ct')">
+                    <input type="file" accept="image/*" onchange="loadSign(this, 'ct')">
                 </div>
                 <div>
                     <label>Principal Sign</label>
-                    <input type="file" class="form-control form-control-sm" onchange="loadSign(this, 'pr')">
+                    <input type="file" accept="image/*" onchange="loadSign(this, 'pr')">
                 </div>
             </div>
 
-            <div class="d-flex gap-3">
+            <div class="d-flex gap-3" style="display: flex; gap: 15px; justify-content: center;">
                 <button class="royal-btn" onclick="generateBulk()">
                     <i class="fas fa-sync-alt me-2"></i>GENERATE CARDS
                 </button>
-                <button class="royal-btn" style="background:var(--success); color:white;" onclick="window.print()">
+                <button class="royal-btn" style="background:var(--success); border-color: var(--success); color:white;" onclick="window.print()">
                     <i class="fas fa-print me-2"></i>PRINT ALL
                 </button>
             </div>
@@ -75,6 +74,7 @@
 </div>
 
 <script>
+// Signatures Loader
 let ctSign = "", prSign = "";
 function loadSign(input, type) { 
     if (input.files && input.files[0]) { 
@@ -84,39 +84,53 @@ function loadSign(input, type) {
     } 
 }
 
+// Grade Calculator
+function calcGrade(m) {
+    if(m>=91) return 'A1'; if(m>=81) return 'A2'; if(m>=71) return 'B1'; if(m>=61) return 'B2';
+    if(m>=51) return 'C1'; if(m>=41) return 'C2'; if(m>=33) return 'D'; return 'E';
+}
+
+// Main Generation Function
 async function generateBulk() {
-    // --- Branding Data from brand.js ---
-    const schoolName = typeof schoolConfig !== 'undefined' ? schoolConfig.schoolName : "THE LALIT INTERNATIONAL SCHOOL";
-    const session = typeof schoolConfig !== 'undefined' ? schoolConfig.session : "2025-26";
-    const affiliation = typeof schoolConfig !== 'undefined' ? schoolConfig.affiliation : "Affiliated to CBSE";
-    
+    // 1. Get Branding Data safely
+    const sName = (typeof schoolConfig !== 'undefined' && schoolConfig.schoolName) ? schoolConfig.schoolName : "THE LALIT INTERNATIONAL SCHOOL";
+    const sAffil = (typeof schoolConfig !== 'undefined' && schoolConfig.affiliation) ? schoolConfig.affiliation : "Affiliated to CBSE";
+    const sSession = (typeof schoolConfig !== 'undefined' && schoolConfig.session) ? schoolConfig.session : "2025-26";
+    const sLogo = (typeof schoolConfig !== 'undefined' && schoolConfig.logoPath) ? schoolConfig.logoPath : "logo.png";
+
     const sClass = document.getElementById('selClass').value;
     const sSec = document.getElementById('selSection').value;
     const mode = document.getElementById('reportMode').value;
     const container = document.getElementById('bulkContainer');
     
-    container.innerHTML = "<div class='text-center p-5'><i class='fas fa-spinner fa-spin fa-3x mb-3'></i><p>Compiling Scholastic Data...</p></div>";
+    container.innerHTML = "<div class='text-center p-5 no-print' style='text-align:center; padding:50px;'><i class='fas fa-spinner fa-spin fa-3x mb-3' style='color:var(--royal-blue);'></i><p>Compiling Scholastic Data...</p></div>";
 
     try {
+        // Fetch Data
         const stdSnap = await db.collection('students').where('class','==',sClass).where('section','==',sSec).get();
         const marksSnap = await db.collection('marks_entry').where('class','==',sClass).where('section','==',sSec).get();
 
+        if(stdSnap.empty) {
+             container.innerHTML = "<div class='no-print' style='text-align:center; padding:30px; color:red;'>No students found in this class/section.</div>";
+             return;
+        }
+
+        // Process Marks
         let allMarks = {};
         marksSnap.forEach(doc => { 
             let d = doc.data(); 
-            let sID = d.uID; 
-            if(!allMarks[sID]) allMarks[sID] = {}; 
-            allMarks[sID][`${d.subject}_${d.exam}`] = d; 
+            if(!allMarks[d.uID]) allMarks[d.uID] = {}; 
+            allMarks[d.uID][`${d.subject}_${d.exam}`] = d; 
         });
 
         const subjects = ["English", "Hindi", "Mathematics", "Science", "Social Science", "Computer", "General Knowledge"];
         let students = [];
 
+        // Calculate Totals & Rank
         stdSnap.forEach(doc => {
             let sData = doc.data();
             let sid = sData.uniqueID;
             let grandTotal = 0;
-            
             subjects.forEach(sub => {
                 const sm = allMarks[sid] || {};
                 const t1 = Math.round((Number(sm[`${sub}_Periodic Test -I`]?.marks || 0)/4) + Number(sm[`${sub}_Term -I`]?.notebook || 0) + Number(sm[`${sub}_Term -I`]?.sea || 0) + Number(sm[`${sub}_Term -I`]?.marks || 0));
@@ -131,6 +145,7 @@ async function generateBulk() {
         students.forEach((s, index) => s.rank = index + 1);
         students.sort((a,b) => (a.rollNo || a.uniqueID) - (b.rollNo || b.uniqueID));
 
+        // Generate HTML
         let html = "";
         students.forEach(s => {
             let rows = ""; let totalObtained = 0;
@@ -138,12 +153,13 @@ async function generateBulk() {
             
             subjects.forEach(sub => {
                 const sm = allMarks[sid] || {};
+                // Term 1 Data
                 const t1_pt = sm[`${sub}_Periodic Test -I`]?.marks || 0;
                 const t1_nb = sm[`${sub}_Term -I`]?.notebook || 0;
                 const t1_sea = sm[`${sub}_Term -I`]?.sea || 0;
                 const t1_exam = sm[`${sub}_Term -I`]?.marks || 0;
                 const t1 = Math.round((t1_pt/4) + t1_nb + t1_sea + t1_exam);
-
+                // Term 2 Data
                 const t2_pt = sm[`${sub}_Periodic -II`]?.marks || 0;
                 const t2_nb = sm[`${sub}_Term -II`]?.notebook || 0;
                 const t2_sea = sm[`${sub}_Term -II`]?.sea || 0;
@@ -154,78 +170,77 @@ async function generateBulk() {
                 totalObtained += subFinal;
 
                 rows += `<tr>
-                    <td style="text-align:left; padding-left:10px;"><b>${sub.toUpperCase()}</b></td>
-                    <td>${t1_pt}</td><td>${t1_nb}</td><td>${t1_sea}</td><td>${t1_exam}</td><td><b>${t1}</b></td><td>${calcGrade(t1)}</td>
-                    ${mode==="2"?`<td>${t2_pt}</td><td>${t2_nb}</td><td>${t2_sea}</td><td>${t2_exam}</td><td><b>${t2}</b></td><td>${calcGrade(t2)}</td>`:""}
+                    <td style="text-align:left; padding-left:5px; font-weight:bold;">${sub}</td>
+                    <td>${t1_pt}</td><td>${t1_nb}</td><td>${t1_sea}</td><td>${t1_exam}</td><td style="background:#f9f9f9; font-weight:bold;">${t1}</td><td>${calcGrade(t1)}</td>
+                    ${mode==="2"?`<td>${t2_pt}</td><td>${t2_nb}</td><td>${t2_sea}</td><td>${t2_exam}</td><td style="background:#f9f9f9; font-weight:bold;">${t2}</td><td>${calcGrade(t2)}</td>`:""}
                 </tr>`;
             });
 
             const maxTotal = mode === "2" ? (subjects.length * 200) : (subjects.length * 100);
             const perc = ((totalObtained / maxTotal) * 100).toFixed(1);
             const examLabel = mode === "1" ? "HALF YEARLY EXAMINATION (TERM-I)" : "ANNUAL PROGRESS REPORT";
+            const remarks = perc > 90 ? "Outstanding performance!" : perc > 75 ? "Very Good, keep it up." : perc > 60 ? "Good, but needs more focus." : "Needs improvement in core subjects.";
 
+            // THE FINAL REPORT CARD STRUCTURE (Uses new CSS classes)
             html += `
             <div class="report-card">
                 <table class="report-header-table">
                     <tr>
-                        <td class="logo-side"><img src="logo.png" class="school-logo-print" onerror="this.src='https://via.placeholder.com/90'"></td>
+                        <td style="width:90px;"><img src="${sLogo}" class="school-logo-print" onerror="this.src='https://via.placeholder.com/90'"></td>
                         <td class="brand-side">
-                            <h1>${schoolName}</h1>
-                            <p>${affiliation}<br>Session: ${session}</p>
+                            <h1>${sName}</h1>
+                            <p>${sAffil}<br>Session: ${sSession}</p>
                         </td>
-                        <td class="photo-side"><img src="${s.photo || 'https://via.placeholder.com/100'}" class="student-photo-print"></td>
+                        <td style="width:90px; text-align:right;"><img src="${s.photo || 'https://via.placeholder.com/100'}" class="student-photo-print"></td>
                     </tr>
                 </table>
 
-                <div class="exam-title-bar">${examLabel}</div>
+                <div class="report-content-body">
+                    <div class="exam-title-bar">${examLabel}</div>
 
-                <table class="marks-table student-info-table">
-                    <tr><td style="text-align:left;">Student Name: <b>${s.name.toUpperCase()}</b></td><td style="text-align:left;">Roll No: <b>${s.rollNo || (s.uniqueID-1000)}</b></td></tr>
-                    <tr><td style="text-align:left;">Father's Name: <b>${s.father.toUpperCase()}</b></td><td style="text-align:left;">Class-Section: <b>${s.class} - ${s.section}</b></td></tr>
-                </table>
+                    <table class="marks-table student-info-table">
+                        <tr><td>Student Name: <b>${s.name.toUpperCase()}</b></td><td>Roll No: <b>${s.rollNo || (s.uniqueID-1000)}</b></td></tr>
+                        <tr><td>Father's Name: <b>${s.father.toUpperCase()}</b></td><td>Class-Section: <b>${s.class} - ${s.section}</b></td></tr>
+                        <tr><td>Date of Birth: <b>${s.dob || 'N/A'}</b></td><td>Attendance: <b>${s.attendance || 'N/A'}</b></td></tr>
+                    </table>
 
-                <table class="marks-table main-marks-grid">
-                    <thead>
-                        <tr><th rowspan="2">SCHOLASTIC SUBJECTS</th><th colspan="6">TERM - I (100)</th>${mode==="2"?"<th colspan='6'>TERM - II (100)</th>":""}</tr>
-                        <tr><th>PT</th><th>NB</th><th>SEA</th><th>EXAM</th><th>TOT</th><th>GR</th>${mode==="2"?"<th>PT</th><th>NB</th><th>SEA</th><th>EXAM</th><th>TOT</th><th>GR</th>":""}</tr>
-                    </thead>
-                    <tbody>${rows}</tbody>
-                </table>
+                    <table class="marks-table">
+                        <thead>
+                            <tr><th rowspan="2" style="text-align:left; padding-left:5px;">SCHOLASTIC AREAS</th><th colspan="6">TERM - I (100)</th>${mode==="2"?"<th colspan='6'>TERM - II (100)</th>":""}</tr>
+                            <tr><th>PT (10)</th><th>NB (5)</th><th>SEA (5)</th><th>EXAM (80)</th><th>TOT</th><th>GR</th>${mode==="2"?"<th>PT (10)</th><th>NB (5)</th><th>SEA (5)</th><th>EXAM (80)</th><th>TOT</th><th>GR</th>":""}</tr>
+                        </thead>
+                        <tbody>${rows}</tbody>
+                    </table>
 
-                <div class="result-summary">
-                    <div class="res-item"><span class="res-label">GRAND TOTAL</span><span class="res-val">${totalObtained} / ${maxTotal}</span></div>
-                    <div class="res-item"><span class="res-label">PERCENTAGE</span><span class="res-val">${perc}%</span></div>
-                    <div class="res-item"><span class="res-label">RESULT</span><span class="res-val">${perc > 33 ? 'PASS' : 'FAIL'}</span></div>
-                    <div class="res-item"><span class="res-label">CLASS RANK</span><span class="res-val">${s.rank}</span></div>
-                </div>
+                    <div class="result-summary">
+                        <div class="res-item"><span class="res-label">GRAND TOTAL</span><span class="res-val">${totalObtained} / ${maxTotal}</span></div>
+                        <div class="res-item"><span class="res-label">PERCENTAGE</span><span class="res-val">${perc}%</span></div>
+                        <div class="res-item"><span class="res-label">RESULT</span><span class="res-val">${perc > 33 ? 'PASS' : 'FAIL'}</span></div>
+                        <div class="res-item"><span class="res-label">CLASS RANK</span><span class="res-val">${s.rank}</span></div>
+                    </div>
 
-                <div class="co-scholastic-header">CO-SCHOLASTIC AREAS & DISCIPLINE</div>
-                <div class="co-scholastic-grid">
-                    <table class="marks-table"><tr><th>Term I Activity</th><th>Grade</th></tr><tr><td>Work/Art/Health/Disc.</td><td>A</td></tr></table>
-                    <table class="marks-table"><tr><th>Term II Activity</th><th>Grade</th></tr><tr><td>Work/Art/Health/Disc.</td><td>A</td></tr></table>
-                </div>
+                    <div class="exam-title-bar" style="font-size:12px; margin:5px 0;">CO-SCHOLASTIC AREAS & DISCIPLINE</div>
+                    <div class="co-scholastic-grid">
+                        <table class="marks-table"><tr><th>Activity (Term I)</th><th>Grade</th></tr><tr><td>Work Education</td><td>A</td></tr><tr><td>Art Education</td><td>A</td></tr><tr><td>Health & Phy. Edu.</td><td>A</td></tr><tr><td>Discipline</td><td>A</td></tr></table>
+                        ${mode==="2" ? `<table class="marks-table"><tr><th>Activity (Term II)</th><th>Grade</th></tr><tr><td>Work Education</td><td>A</td></tr><tr><td>Art Education</td><td>A</td></tr><tr><td>Health & Phy. Edu.</td><td>A</td></tr><tr><td>Discipline</td><td>A</td></tr></table>` : ''}
+                    </div>
 
-                <div class="remarks-box">
-                    <b>Class Teacher's Remarks:</b> ${perc > 80 ? "Excellent Performance! Keep it up." : perc > 60 ? "Good Progress, can do better in Math." : "Hard work required in core subjects."}
-                </div>
-
-                <div class="footer-signs">
+                    <div class="remarks-box">
+                        <b>Class Teacher's Remarks:</b> ${remarks}
+                    </div>
+                </div> <div class="footer-signs">
                     <div class="sig-box">${ctSign?`<img src="${ctSign}" class="sig-img">`:''}<div class="sig-text">Class Teacher</div></div>
-                    <div class="sig-box"><div class="sig-text no-border">Parent's Signature</div></div>
+                    <div class="sig-box"><div class="sig-text" style="border-top:none; margin-top:45px;">Parent's Signature</div></div>
                     <div class="sig-box">${prSign?`<img src="${prSign}" class="sig-img">`:''}<div class="sig-text">Principal</div></div>
                 </div>
             </div>`;
         });
         container.innerHTML = html;
     } catch (e) { 
-        alert("Error: " + e.message); 
+        console.error(e);
+        alert("Error Generating Reports: " + e.message); 
         container.innerHTML = "";
     }
-}
-
-function calcGrade(m) {
-    if(m>=91) return 'A1'; if(m>=81) return 'A2'; if(m>=71) return 'B1'; if(m>=61) return 'B2';
-    if(m>=51) return 'C1'; if(m>=41) return 'C2'; if(m>=33) return 'D'; return 'E';
 }
 </script>
 
