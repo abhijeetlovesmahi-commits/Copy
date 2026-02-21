@@ -1,4 +1,4 @@
-/* THE LALIT INTERNATIONAL SCHOOL - UNIVERSAL MODULAR MENU */
+/* THE LALIT INTERNATIONAL SCHOOL - UNIVERSAL SECURE MENU */
 
 const menuConfig = [
     { title: "Dashboard", icon: "fa-home", link: "index.html", role: "all" },
@@ -30,18 +30,24 @@ const menuConfig = [
     { title: "Logout", icon: "fa-sign-out-alt", link: "#", role: "all", id: "logoutBtn" }
 ];
 
+// Helper function to check role access
+function hasAccess(item, userRole) {
+    if (item.role === "all") return true;
+    if (Array.isArray(item.role)) return item.role.includes(userRole);
+    return item.role === userRole;
+}
+
 async function initUniversalMenu() {
-    // 1. Firebase से यूजर का Role प्राप्त करना
     const user = firebase.auth().currentUser;
     let userRole = "guest";
 
     if (user) {
-        // पहले Staff कलेक्शन में चेक करें
+        // Step 1: Check Staff Collection
         const staffDoc = await firebase.firestore().collection('staff').where('loginEmail', '==', user.email).get();
         if (!staffDoc.empty) {
             userRole = staffDoc.docs[0].data().role;
         } else {
-            // फिर Student कलेक्शन में चेक करें
+            // Step 2: Check Student Collection
             const studentDoc = await firebase.firestore().collection('students').where('loginEmail', '==', user.email).get();
             if (!studentDoc.empty) {
                 userRole = "student";
@@ -49,20 +55,23 @@ async function initUniversalMenu() {
         }
     }
 
-    // 2. Sidebar Structure Create करना
+    // --- SECURITY GUARD: Check if user has permission for CURRENT page ---
+    const currentPage = window.location.pathname.split("/").pop() || 'index.html';
+    const currentMenuItem = menuConfig.find(m => m.link === currentPage);
+
+    if (currentMenuItem && !hasAccess(currentMenuItem, userRole)) {
+        alert("⛔ Access Denied! You don't have permission for this page.");
+        window.location.href = "index.html"; // Redirect unauthorized users to dashboard
+        return;
+    }
+
+    // Render Menu
     const menuWrapper = document.createElement('div');
     menuWrapper.id = 'imperial-menu-wrapper';
 
     let menuItemsHTML = '';
-    const currentPage = window.location.pathname.split("/").pop() || 'index.html';
-
     menuConfig.forEach(item => {
-        // Role filtering logic
-        const canSee = (item.role === "all") || 
-                       (Array.isArray(item.role) && item.role.includes(userRole)) || 
-                       (item.role === userRole);
-
-        if (canSee) {
+        if (hasAccess(item, userRole)) {
             if (item.type === "divider") {
                 menuItemsHTML += `<div class="menu-divider">${item.title}</div>`;
             } else {
@@ -82,7 +91,7 @@ async function initUniversalMenu() {
                 <img src="logo.png" class="menu-logo" onerror="this.src='https://via.placeholder.com/60'">
                 <h3>THE LALIT</h3>
                 <p>INTERNATIONAL SCHOOL</p>
-                <div style="font-size:0.6rem; color:#D4AF37; margin-top:5px; text-transform:uppercase;">Role: ${userRole}</div>
+                <div style="font-size:0.6rem; color:#D4AF37; margin-top:5px; text-transform:uppercase;">User: ${user.email.split('@')[0]} | Role: ${userRole}</div>
             </div>
             <nav class="nav-links">${menuItemsHTML}</nav>
         </div>
@@ -92,28 +101,16 @@ async function initUniversalMenu() {
     `;
 
     document.body.prepend(menuWrapper);
+    document.body.style.opacity = "1"; // Show page after security check
 
-    // 3. CSS Injection
+    // CSS Injection (Same as your original)
     const style = document.createElement('style');
     style.textContent = `
-        #menu-trigger-btn {
-            position: fixed; top: 15px; left: 15px; width: 45px; height: 45px;
-            background: #002366; border: 1px solid #D4AF37; border-radius: 8px;
-            z-index: 20001; cursor: pointer; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; gap: 5px; transition: 0.3s;
-        }
+        #menu-trigger-btn { position: fixed; top: 15px; left: 15px; width: 45px; height: 45px; background: #002366; border: 1px solid #D4AF37; border-radius: 8px; z-index: 20001; cursor: pointer; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; transition: 0.3s; }
         #menu-trigger-btn span { width: 25px; height: 3px; background: #D4AF37; border-radius: 2px; transition: 0.4s; }
-        #sidebar-panel {
-            position: fixed; top: 0; left: -300px; width: 280px; height: 100vh;
-            background: #002366; z-index: 20000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 5px 0 25px rgba(0,0,0,0.3); overflow-y: auto; color: white;
-            border-right: 3px solid #D4AF37;
-        }
+        #sidebar-panel { position: fixed; top: 0; left: -300px; width: 280px; height: 100vh; background: #002366; z-index: 20000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 5px 0 25px rgba(0,0,0,0.3); overflow-y: auto; color: white; border-right: 3px solid #D4AF37; }
         #sidebar-panel.open { left: 0; }
-        #menu-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); z-index: 19999; display: none; backdrop-filter: blur(3px);
-        }
+        #menu-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 19999; display: none; backdrop-filter: blur(3px); }
         .sidebar-header { padding: 30px 20px; text-align: center; background: rgba(0,0,0,0.2); border-bottom: 1px solid rgba(212,175,55,0.2); }
         .menu-logo { width: 65px; height: 65px; border-radius: 50%; border: 2px solid #D4AF37; padding: 3px; background: white; }
         .sidebar-header h3 { font-family: 'Cinzel', serif; color: #D4AF37; margin: 10px 0 0; font-size: 1.2rem; }
@@ -130,7 +127,6 @@ async function initUniversalMenu() {
     `;
     document.head.appendChild(style);
 
-    // 4. Menu Actions
     const trigger = document.getElementById('menu-trigger-btn');
     const panel = document.getElementById('sidebar-panel');
     const overlay = document.getElementById('menu-overlay');
@@ -155,7 +151,21 @@ async function initUniversalMenu() {
     }
 }
 
-// Auth State Check के साथ इनिशियलाइज़ करना ताकि Role मिल सके
-firebase.auth().onAuthStateChanged(() => {
-    initUniversalMenu();
+// Global Security Guard
+firebase.auth().onAuthStateChanged((user) => {
+    const currentPage = window.location.pathname.split("/").pop() || 'index.html';
+
+    if (!user) {
+        // Not logged in
+        if (currentPage !== "login.html") {
+            window.location.href = "login.html";
+        }
+    } else {
+        // Logged in
+        if (currentPage === "login.html") {
+            window.location.href = "index.html";
+        } else {
+            initUniversalMenu();
+        }
+    }
 });
