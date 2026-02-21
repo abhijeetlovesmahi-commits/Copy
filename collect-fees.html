@@ -10,15 +10,16 @@
     <link rel="stylesheet" href="style.css">
     
     <style>
-        /* Aapka Original Layout CSS */
+        /* Maintaining your original layout specifics while integrating with style.css */
         .school-logo-main { width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px; }
         .student-profile-img { 
             width: 120px; height: 120px; border-radius: 10px; border: 3px solid var(--gold); 
             object-fit: cover; margin-bottom: 10px; background: #f0f0f0;
         }
+        /* Portal container styled as a Royal Card */
         .portal-container {
             max-width: 850px; margin: 20px auto; background: #fff;
-            border: 2px solid var(--gold); border-radius: 20px; padding: 30px;
+            border-top: 5px solid var(--gold); border-radius: 20px; padding: 30px;
             box-shadow: var(--shadow-lg);
         }
         .search-inner-box {
@@ -44,22 +45,22 @@
 <div id="menu-container" class="no-print"></div>
 
 <div class="main-content">
-    <div class="header no-print text-center">
+    <div class="header no-print text-center" id="brand-header-container">
         <img src="logo.png" class="school-logo-main" onerror="this.src='https://via.placeholder.com/100'">
         <h1 class="brand-font">The Lalit International School</h1>
         <p style="color: var(--gold); letter-spacing: 2px;">Nurturing Global Citizens</p>
     </div>
 
-    <div class="portal-container no-print">
-        <h2 class="portal-title text-center mb-4" style="color: var(--royal-blue);">
-            <i class="fas fa-file-invoice-dollar"></i> Fee Collection Portal
+    <div class="portal-container no-print royal-card">
+        <h2 class="portal-title text-center mb-4" style="color: var(--royal-blue); font-family: 'Cinzel', serif;">
+            <i class="fas fa-file-invoice-dollar" style="color: var(--gold);"></i> FEE COLLECTION PORTAL
         </h2>
 
         <div class="search-inner-box position-relative">
             <div class="row g-3">
                 <div class="col-md-7">
                     <label class="fw-bold small mb-1">ADMISSION ID OR NAME</label>
-                    <input type="text" id="studentSearch" class="form-control" placeholder="Search..." oninput="liveSearch()" autocomplete="off">
+                    <input type="text" id="studentSearch" class="form-control" placeholder="Search Student..." oninput="liveSearch()" autocomplete="off">
                     <div id="searchSuggestions"></div>
                 </div>
                 <div class="col-md-5">
@@ -72,18 +73,20 @@
                     </select>
                 </div>
             </div>
-            <button class="btn-search-black mt-3" onclick="document.getElementById('studentSearch').focus()">SEARCH</button>
+            <button class="royal-btn mt-3" onclick="document.getElementById('studentSearch').focus()" style="width: auto; padding: 10px 30px;">
+                <i class="fas fa-search me-2"></i> SEARCH RECORD
+            </button>
         </div>
 
         <div id="feeDetailsForm">
             <div class="row g-4 align-items-center">
                 <div class="col-md-4 text-center border-end">
                     <img id="studentPhoto" src="" class="student-profile-img" onerror="this.src='https://via.placeholder.com/120?text=No+Photo'">
-                    <h5 id="displayName" class="fw-bold text-primary mb-0">---</h5>
+                    <h5 id="displayName" class="fw-bold text-primary mb-0" style="color: var(--royal-blue) !important;">---</h5>
                     <p id="displayId" class="small text-muted">ID: ---</p>
                 </div>
                 <div class="col-md-8 text-center">
-                    <p class="text-muted small mb-1">TOTAL OUTSTANDING</p>
+                    <p class="text-muted small mb-1">TOTAL OUTSTANDING BALANCE</p>
                     <div id="dueAmount" class="fw-bold text-danger" style="font-size: 2.5rem;">₹ 0.00</div>
                     
                     <div class="row g-3 mt-2 text-start">
@@ -92,14 +95,14 @@
                             <input type="number" id="payAmt" class="form-control" placeholder="0.00">
                         </div>
                         <div class="col-md-6">
-                            <label class="small fw-bold">Pay Mode</label>
+                            <label class="small fw-bold">Payment Mode</label>
                             <select id="payMode" class="form-select">
                                 <option>Cash</option><option>Online</option><option>Cheque</option>
                             </select>
                         </div>
                         <div class="col-12">
                             <button class="royal-btn w-100 py-3" onclick="submitPayment()">
-                                <i class="fas fa-check-circle"></i> COLLECT & GENERATE RECEIPT
+                                <i class="fas fa-check-circle me-2"></i> COLLECT & GENERATE RECEIPT
                             </button>
                         </div>
                     </div>
@@ -113,7 +116,9 @@
 
 <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
 <script src="firebase-config.js"></script>
+<script src="brand.js"></script>
 
 <script>
 let activeStudent = null;
@@ -150,7 +155,7 @@ function selectStudent(student) {
     calculateDue(student);
 }
 
-// 2. FIXED CALCULATION (Exact Ledger Match)
+// 2. FIXED CALCULATION Logic
 async function calculateDue(student) {
     const months = ["April","May","June","July","August","September","October","November","December","January","February","March"];
     const targetIdx = months.indexOf(document.getElementById('calcMonth').value);
@@ -167,14 +172,12 @@ async function calculateDue(student) {
         const fm = mDoc.data();
         const d = student.discounts || { tui:0, hos:0, tra:0, adm:0, dev:0, exa:0, boo:0, mis:0 };
 
-        // Exact Ledger Math for Annual
         const annual = (Number(fm.admission||0)*(1-(d.adm||0)/100)) + 
                        (Number(fm.development||0)*(1-(d.dev||0)/100)) + 
                        (Number(fm.exam||0)*(1-(d.exa||0)/100)) +
                        (Number(fm.books||0)*(1-(d.boo||0)/100)) +
                        (Number(fm.misc||0)*(1-(d.mis||0)/100));
 
-        // Exact Ledger Math for Monthly
         const tuiNet = Number(fm.tuition||0)*(1-(d.tui||0)/100);
         const hosNet = (student.hostel === 'Yes' ? Number(fm.hostel||0) : 0) * (1-(d.hos||0)/100);
         const traNet = (student.transport === 'Yes' ? Number(student.transport_fee||0) : 0) * (1-(d.tra||0)/100);
@@ -188,7 +191,7 @@ async function calculateDue(student) {
     }
 }
 
-// 3. Submit Payment
+// 3. Submit Payment Logic
 async function submitPayment() {
     const amt = document.getElementById('payAmt').value;
     if(!amt || amt <= 0) return alert("Enter valid amount");
@@ -211,6 +214,8 @@ async function submitPayment() {
     } catch (e) { alert(e.message); }
 }
 </script>
+
+<script src="menu.js"></script>
 
 </body>
 </html>
