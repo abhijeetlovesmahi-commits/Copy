@@ -1,19 +1,22 @@
-/* --- THE LALIT INTERNATIONAL SCHOOL - MASTER UNIVERSAL FRAMEWORK --- 
-   Theme: Imperial Burgundy & Antique Champagne (Premium Vintage)
-   Includes: Integrated Sidebar, Menu, and Content Spacing Fixes
+/* ==========================================================================
+   THE LALIT INTERNATIONAL SCHOOL - MASTER UNIVERSAL FRAMEWORK (V3.0)
+   Author: Dev Raj (AI Collaborator)
+   Theme: Imperial Burgundy & Antique Champagne
+   Includes: Sidebar, Dashboard, Forms, ID Cards, & Report Card Engine
+==========================================================================
 */
 
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Poppins:wght@300;400;500;600;700&display=swap');
 
 :root {
-    /* Main Colors - Change these to change the entire theme! */
+    /* --- COLOR PALETTE (THEME ENGINE) --- */
     --royal-blue: #4a0404;          /* Deep Imperial Burgundy */
     --royal-blue-light: #630606;    /* Rich Crimson */
     --gold: #c5a059;               /* Antique Champagne Gold */
     --deep-gold: #8e6f3e;          /* Burnished Bronze */
     --light-gold: #fffbf2;         /* Soft Parchment */
     
-    /* Functional Colors */
+    /* --- FUNCTIONAL COLORS --- */
     --success: #2d5a27;
     --danger: #96281b;
     --warning: #af6710;
@@ -23,58 +26,61 @@
     --text-muted: #6b5b55;
     --border-color: #d8c3a5;
     
-    /* Shadows & Effects */
+    /* --- EFFECTS --- */
     --shadow-sm: 0 2px 4px rgba(0,0,0,0.08);
     --shadow-md: 0 10px 30px rgba(74, 4, 4, 0.1);
     --shadow-lg: 0 15px 40px rgba(74, 4, 4, 0.15);
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* --- RESET & BASE --- */
-* { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+/* --- 1. BASE RESET --- */
+* { box-sizing: border-box; -webkit-font-smoothing: antialiased; outline: none; }
 
 body { 
-    background: #f4ece2;           /* Warm Sand Background */
+    background: #f4ece2;           /* Warm Sand/Parchment Vibe */
     font-family: 'Poppins', sans-serif; 
     margin: 0; padding: 0; 
     color: var(--text-dark);
     line-height: 1.6;
 }
 
-/* --- UNIVERSAL SIDEBAR & MENU STYLES (Moved from JS) --- */
+h1, h2, h3, .brand-font { font-family: 'Cinzel', serif; text-transform: uppercase; }
+
+/* --- 2. UNIVERSAL SIDEBAR & MENU (Logic Moved from JS) --- */
 
 #menu-trigger-btn {
     position: fixed !important; 
     top: 15px !important; 
     left: 15px !important; 
     width: 45px; height: 45px;
-    background: transparent !important; 
+    background: transparent !important; /* No background as requested */
     border: none !important;             
     z-index: 20001; cursor: pointer; 
     display: flex; flex-direction: column;
     justify-content: center; align-items: center; gap: 5px; 
-    transition: var(--transition); 
-    outline: none;
+    transition: var(--transition);
 }
 
 #menu-trigger-btn span { 
     width: 25px; height: 3px; 
-    background: var(--royal-blue) !important; /* Burgundy Lines */
+    background: var(--royal-blue) !important; /* Dynamic Burgundy Lines */
     border-radius: 2px; transition: 0.4s; 
 }
 
+/* Burger Animation */
+.open-btn span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+.open-btn span:nth-child(2) { opacity: 0; }
+.open-btn span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
 #sidebar-panel { 
     position: fixed; 
-    top: 0; 
-    left: -300px; 
-    width: 280px; 
-    height: 100vh; 
+    top: 0; left: -300px; 
+    width: 280px; height: 100vh; 
     background: var(--royal-blue); 
     z-index: 20000; 
     transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
     box-shadow: var(--shadow-lg); 
-    overflow-y: auto; 
-    color: white; 
+    overflow-y: auto; color: white; 
     border-right: 3px solid var(--gold); 
 }
 
@@ -86,116 +92,49 @@ body {
     width: 100%; height: 100%; 
     background: rgba(0,0,0,0.6); 
     z-index: 19999; 
-    display: none; 
-    backdrop-filter: blur(3px); 
+    display: none; backdrop-filter: blur(3px); 
 }
 
 .sidebar-header { 
-    padding: 30px 20px; 
-    text-align: center; 
+    padding: 30px 20px; text-align: center; 
     background: rgba(0,0,0,0.2); 
     border-bottom: 1px solid rgba(197, 160, 89, 0.2); 
 }
 
 .menu-logo { 
-    width: 65px; height: 65px; 
-    border-radius: 50%; 
-    border: 2px solid var(--gold); 
-    padding: 3px; 
-    background: white; 
-    object-fit: contain;
-}
-
-.sidebar-header h3 { 
-    font-family: 'Cinzel', serif; 
-    color: var(--gold); 
-    margin: 10px 0 0; 
-    font-size: 1.2rem; 
-}
-
-.sidebar-header p { 
-    font-size: 0.6rem; 
-    letter-spacing: 2px; 
-    margin: 0; 
-    color: var(--light-gold); 
-    opacity: 0.7;
-}
-
-.nav-links { padding: 15px; }
-
-.menu-divider { 
-    font-size: 10px; 
-    text-transform: uppercase; 
-    color: var(--gold); 
-    opacity: 0.6; 
-    padding: 20px 10px 5px; 
-    letter-spacing: 1.5px; 
-    font-weight: bold; 
+    width: 65px; height: 65px; border-radius: 50%; 
+    border: 2px solid var(--gold); padding: 3px; 
+    background: white; object-fit: contain;
 }
 
 .nav-item { 
-    display: flex; 
-    align-items: center; 
-    padding: 12px 15px; 
-    color: white; 
-    text-decoration: none; 
-    margin-bottom: 5px; 
-    border-radius: 6px; 
-    transition: var(--transition); 
+    display: flex; align-items: center; 
+    padding: 12px 15px; color: white; 
+    text-decoration: none; margin-bottom: 5px; 
+    border-radius: 6px; transition: var(--transition); 
     font-size: 0.9rem; 
 }
 
-.nav-item i { 
-    width: 25px; 
-    color: var(--gold); 
-    font-size: 1.1rem; 
-    margin-right: 12px; 
-    text-align: center; 
-}
+.nav-item i { width: 25px; color: var(--gold); font-size: 1.1rem; margin-right: 12px; text-align: center; }
+.nav-item:hover { background: rgba(197, 160, 89, 0.15); color: var(--gold); }
+.active-link { background: rgba(197, 160, 89, 0.2) !important; border-left: 4px solid var(--gold); color: var(--gold) !important; font-weight: bold; }
 
-.nav-item:hover { 
-    background: rgba(197, 160, 89, 0.15); 
-    color: var(--gold); 
-}
+.menu-divider { font-size: 10px; text-transform: uppercase; color: var(--gold); opacity: 0.6; padding: 20px 10px 5px; letter-spacing: 1.5px; font-weight: bold; }
 
-.active-link { 
-    background: rgba(197, 160, 89, 0.2) !important; 
-    border-left: 4px solid var(--gold); 
-    color: var(--gold) !important; 
-    font-weight: bold; 
-}
-
-/* Burger Animation */
-.open-btn span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
-.open-btn span:nth-child(2) { opacity: 0; }
-.open-btn span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
-
-
-/* --- MAIN CONTENT & LAYOUT --- */
+/* --- 3. MAIN CONTENT & LAYOUT --- */
 
 .main-content { 
-    padding: 30px 20px 40px; /* Space Fix */
+    padding: 30px 20px 40px; /* Space Removal Fix */
     display: flex; flex-direction: column; align-items: center;
 }
-
-.school-logo { 
-    width: 120px; height: 120px; object-fit: contain; display: block;
-    margin: 0 auto 15px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1)); 
-    transition: var(--transition); 
-}
-.school-logo:hover { transform: scale(1.05); }
-
-.receipt-logo { width: 80px !important; height: 80px !important; object-fit: contain; margin-bottom: 10px; }
 
 .royal-card { 
     width: 100%; max-width: 1300px;
     background: var(--paper-white);
-    background-image: url('https://www.transparenttextures.com/patterns/pinstriped-suit.png');
+    background-image: url('https://www.transparenttextures.com/patterns/pinstriped-suit.png'); /* Premium Texture */
     border: 1px solid var(--border-color);
-    border-radius: 15px;
-    padding: clamp(20px, 5%, 50px);
-    box-shadow: var(--shadow-md);
-    position: relative; overflow: hidden;
+    border-radius: 15px; padding: clamp(20px, 5%, 50px);
+    box-shadow: var(--shadow-md); position: relative; overflow: hidden;
 }
 
 .royal-card::after {
@@ -205,27 +144,26 @@ body {
     pointer-events: none; border-radius: 10px;
 }
 
-.header { 
-    text-align: center; margin-bottom: 40px; 
-    border-bottom: 3px double var(--gold); padding-bottom: 25px; 
+.school-logo { 
+    width: 120px; height: 120px; object-fit: contain; display: block;
+    margin: 0 auto 15px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1)); 
 }
 
-h1, .brand-font { 
-    font-family: 'Cinzel', serif; color: var(--royal-blue); 
-    margin: 0; text-transform: uppercase; 
-}
+.header { text-align: center; margin-bottom: 40px; border-bottom: 3px double var(--gold); padding-bottom: 25px; }
+
+h1 { color: var(--royal-blue); font-size: 2.5rem; margin: 0; }
 
 h2 { 
-    font-family: 'Cinzel', serif; color: var(--royal-blue); 
-    text-align: center; margin: 30px 0; position: relative; 
-    padding-bottom: 10px; width: 100%; 
+    color: var(--royal-blue); text-align: center; 
+    margin: 30px 0; position: relative; padding-bottom: 10px; 
 }
 
 h2::after { 
     content: ""; position: absolute; bottom: 0; left: 50%; 
-    transform: translateX(-50%); width: 80px; height: 3px; 
-    background: var(--gold); 
+    transform: translateX(-50%); width: 80px; height: 3px; background: var(--gold); 
 }
+
+/* --- 4. BUTTONS & INPUTS --- */
 
 .royal-btn {
     background: var(--royal-blue); color: var(--gold);
@@ -236,30 +174,13 @@ h2::after {
     text-decoration: none;
 }
 
-.royal-btn:hover { 
-    background: var(--gold); color: white; 
-    transform: translateY(-3px); 
-    box-shadow: 0 5px 15px rgba(197, 160, 89, 0.4); 
+.royal-btn:hover { background: var(--gold); color: white; transform: translateY(-3px); box-shadow: 0 5px 15px rgba(197, 160, 89, 0.4); }
+
+.controls-grid { 
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); 
+    gap: 15px; background: var(--light-gold); padding: 25px; 
+    border-radius: 12px; border: 1px solid var(--gold); margin-bottom: 25px;
 }
-
-/* --- FORMS & INPUTS --- */
-
-.search-box-wrapper { position: relative; max-width: 600px; margin: 0 auto 30px; width: 100%; }
-.search-input-royal {
-    width: 100%; padding: 15px 25px; padding-right: 60px;
-    border: 2px solid var(--gold); border-radius: 30px;
-    font-size: 16px; outline: none; transition: var(--transition);
-}
-
-.form-section {
-    background: rgba(255, 251, 242, 0.8);
-    border-left: 6px solid var(--royal-blue);
-    padding: 25px; margin-bottom: 30px; border-radius: 8px;
-    box-shadow: var(--shadow-sm);
-}
-
-.input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
-.input-group { display: flex; flex-direction: column; gap: 8px; }
 
 input, select, textarea {
     width: 100%; padding: 14px 16px; border: 1px solid #d1d1d1;
@@ -267,35 +188,74 @@ input, select, textarea {
     font-size: 15px; transition: var(--transition); background: white;
 }
 
-/* --- STUDENT/STAFF CARDS --- */
+input:focus { border-color: var(--royal-blue); box-shadow: 0 0 0 3px rgba(74, 4, 4, 0.1); }
 
-.profile-grid-custom { 
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
-    gap: 25px; margin-top: 30px; width: 100%; 
-}
+/* --- 5. ID CARDS & PROFILE GRIDS --- */
+
+.profile-grid-custom { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-top: 30px; width: 100%; }
 
 .custom-id-card {
     background: white; border: 1px solid var(--gold); border-radius: 12px;
     padding: 18px; display: flex; align-items: center; gap: 20px;
-    cursor: pointer; transition: var(--transition); position: relative; overflow: hidden;
+    cursor: pointer; transition: var(--transition); position: relative;
 }
 
-.custom-id-card:hover { 
-    transform: scale(1.03) translateY(-5px); 
-    box-shadow: var(--shadow-lg); 
-    border-color: var(--royal-blue); 
+.custom-id-card:hover { transform: scale(1.03) translateY(-5px); box-shadow: var(--shadow-lg); border-color: var(--royal-blue); }
+
+.id-photo { width: 85px; height: 105px; object-fit: cover; border: 2px solid var(--gold); border-radius: 6px; }
+
+/* --- 6. REPORT CARD ENGINE (PRINT & DISPLAY) --- */
+
+.report-card { 
+    width: 210mm; min-height: 296mm; padding: 12mm; background: white; 
+    margin: 40px auto; border: 12px double var(--royal-blue);
+    box-sizing: border-box; position: relative; display: flex; flex-direction: column; color: #000;
+    box-shadow: var(--shadow-lg);
 }
 
-.id-photo { 
-    width: 85px; height: 105px; object-fit: cover; 
-    border: 2px solid var(--gold); border-radius: 6px; 
+.report-header-table { width: 100%; border: none; margin-bottom: 10px; }
+.report-header-table td { border: none !important; }
+
+.school-logo-print { width: 90px; }
+.student-photo-print { width: 90px; border: 1px solid #000; }
+
+.exam-title-bar { 
+    background: var(--royal-blue); color: var(--gold); text-align: center; 
+    padding: 8px; font-weight: bold; margin: 15px 0; border-radius: 4px; 
+    font-size: 18px;
 }
 
-/* --- RESPONSIVE --- */
+.marks-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 11.5px; }
+.marks-table th, .marks-table td { border: 1px solid #000; padding: 6px 4px; text-align: center; }
+.marks-table th { background: #f2f2f2; font-size: 10px; color: var(--royal-blue); }
+
+.result-summary { display: grid; grid-template-columns: repeat(4, 1fr); border: 2px solid #000; margin-bottom: 15px; background: #f9f9f9; }
+.res-item { padding: 10px; text-align: center; border-right: 1px solid #000; }
+.res-item:last-child { border-right: none; }
+.res-label { font-size: 9px; font-weight: bold; color: var(--royal-blue); display: block; }
+.res-val { font-size: 18px; font-weight: bold; }
+
+.footer-signs { display: flex; justify-content: space-between; margin-top: auto; padding-bottom: 20px; text-align: center; }
+.sig-box { width: 160px; }
+.sig-img { width: 130px; height: 50px; object-fit: contain; mix-blend-mode: multiply; } /* Removes white background from signs */
+.sig-text { border-top: 1px solid #000; margin-top: 5px; font-weight: bold; font-size: 13px; }
+
+/* --- 7. RESPONSIVE & PRINT MEDIA --- */
+
+@page { size: A4; margin: 0; }
+
+@media print { 
+    .no-print, #menu-container, #menu-trigger-btn { display: none !important; } 
+    body { background: white !important; padding: 0 !important; }
+    .main-content { margin: 0 !important; padding: 0 !important; }
+    .report-card { margin: 0 !important; border: 10px double var(--royal-blue) !important; box-shadow: none !important; page-break-after: always; } 
+    .royal-card { border: none !important; box-shadow: none !important; }
+}
 
 @media (max-width: 768px) {
     .main-content { padding-top: 20px !important; }
+    h1 { font-size: 1.8rem; }
     .royal-card { padding: 20px; }
-    .school-logo { width: 90px; height: 90px; }
+    .controls-grid { grid-template-columns: 1fr; }
     #sidebar-panel { width: 260px; }
 }
