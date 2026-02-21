@@ -11,7 +11,6 @@
     
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
     <script src="firebase-config.js"></script>
     <script src="brand.js"></script>
 
@@ -19,72 +18,65 @@
         :root { --royal: #002147; --gold: #D4AF37; --table-border: #000; }
         body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
         
-        /* --- Sundar Suggestion Box Styling --- */
-        #searchSuggestions {
-            position: absolute; 
-            width: 100%; 
-            z-index: 9999; 
-            background: white; 
-            border-radius: 12px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2); 
-            max-height: 400px; 
-            overflow-y: auto; 
-            display: none;
-            border: 1px solid var(--gold);
-            margin-top: 5px;
-        }
-
-        .suggestion-card {
-            display: flex;
-            align-items: center;
-            padding: 12px 15px;
-            border-bottom: 1px solid #eee;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .suggestion-card:hover {
-            background: #fdfbf0;
-        }
-
-        .sugg-photo {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            border: 2px solid var(--gold);
-            object-fit: cover;
-            margin-right: 15px;
-            background: #eee;
-        }
-
-        .sugg-details b { color: var(--royal); font-size: 0.95rem; display: block; }
-        .sugg-details span { color: #666; font-size: 0.75rem; font-weight: 600; }
-
-        /* --- Existing Ledger Area Styling --- */
         #ledgerArea { 
             display: none; background: #fff; width: 1000px; margin: 20px auto; 
             padding: 30px; border: 1px solid var(--table-border); box-shadow: 0 0 15px rgba(0,0,0,0.1);
         }
 
-        .master-fee-grid { display: grid; grid-template-columns: repeat(8, 1fr); border: 1px solid var(--table-border); margin-bottom: 15px; }
+        /* Top Grid Styles */
+        .master-fee-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            border: 1px solid var(--table-border);
+            margin-bottom: 15px;
+        }
         .fee-col { border-right: 1px solid var(--table-border); text-align: center; }
         .fee-col:last-child { border-right: none; }
         .f-label { background: var(--royal); color: #fff; font-size: 10px; font-weight: bold; padding: 4px; border-bottom: 1px solid var(--table-border); }
         .f-base { font-size: 13px; font-weight: 800; padding: 5px 0; background: #fff; }
-        .f-disc-row { background: #fcfcfc; border-top: 1px solid #eee; padding: 2px 0; font-size: 11px; display: flex; justify-content: center; align-items: center; gap: 2px; }
-        .disc-field { width: 38px; height: 20px; border: 1px solid #ccc; text-align: center; font-weight: bold; font-size: 12px; }
+        
+        /* FIXED DISCOUNT CELL DISPLAY */
+        .f-disc-row { 
+            background: #fcfcfc; 
+            border-top: 1px solid #eee; 
+            padding: 5px 0; 
+            font-size: 11px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 4px;
+        }
+        .disc-field { 
+            width: 45px;
+            height: 24px; 
+            border: 1px solid #bbb; 
+            text-align: center; 
+            font-weight: 800; 
+            padding: 0;
+            margin: 0; 
+            font-size: 13px;
+            line-height: 24px;
+            color: #000;
+            outline: none;
+        }
+
+        /* Ledger Table */
         .table-ledger { width: 100%; border-collapse: collapse; border: 1px solid var(--table-border); }
         .table-ledger th { background: #f8f9fa !important; font-size: 11px; border: 1px solid var(--table-border); padding: 8px; text-transform: uppercase; color: #555; }
         .table-ledger td { border: 1px solid var(--table-border); padding: 6px; font-size: 12px; text-align: center; font-weight: 600; }
         .text-left { text-align: left !important; padding-left: 10px !important; }
+
+        /* Student Strip */
         .student-box { display: flex; border: 1px solid var(--table-border); padding: 12px; margin-bottom: 15px; align-items: center; }
         .stu-img { width: 100px; height: 120px; border: 1px solid var(--table-border); object-fit: cover; margin-right: 15px; }
         .stu-info { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; flex-grow: 1; font-size: 12px; }
+
         .btn-print { background: var(--gold); color: #000; border: none; padding: 10px 25px; font-weight: bold; border-radius: 5px; }
         
         @media print {
-            .no-print, #menu-container { display: none !important; }
+            .no-print { display: none !important; }
             #ledgerArea { display: block !important; border: none; width: 100%; margin: 0; padding: 0; box-shadow: none; }
+            .disc-field { border: none; background: transparent; }
         }
     </style>
 </head>
@@ -92,114 +84,112 @@
 
 <div id="menu-container" class="no-print"></div>
 
-<div class="main-content">
-    <div class="container mt-4 no-print">
-        <div id="brand-header-container" class="mb-4 text-center">
-            <img src="logo.png" style="width: 80px; margin-bottom: 10px;">
-            <h2 class="brand-font" style="color: var(--royal); font-family: 'Cinzel', serif;">The Lalit International School</h2>
+<div class="container mt-4 no-print">
+    <div id="brand-header-container" class="mb-4"></div>
+    <div class="row justify-content-center">
+        <div class="col-md-5 d-flex gap-2">
+            <input type="text" id="searchID" class="form-control" placeholder="Search Name or ID..." oninput="liveSearch()">
+            <button class="btn-print" onclick="window.print()"><i class="fas fa-print"></i> PRINT</button>
         </div>
+        <div id="searchSuggestions" class="list-group position-absolute mt-5 w-25" style="z-index: 1000; display:none;"></div>
+    </div>
+</div>
 
-        <div class="row justify-content-center">
-            <div class="col-md-6 position-relative">
-                <div class="d-flex gap-2">
-                    <input type="text" id="searchID" class="form-control" placeholder="Type Student Name or Admission ID..." oninput="liveSearch()" style="border: 1px solid var(--gold); padding: 12px;">
-                    <button class="btn-print" onclick="window.print()"><i class="fas fa-print"></i> PRINT</button>
-                </div>
-                <div id="searchSuggestions"></div>
+<div id="ledgerArea">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex align-items-center">
+            <img src="logo.png" style="width:65px; margin-right:15px;">
+            <div>
+                <h1 style="margin:0; color:var(--royal); font-weight:800; font-size: 28px;">THE LALIT INTERNATIONAL SCHOOL</h1>
+                <p class="m-0 small fw-bold">MASTER LEDGER STATEMENT | SESSION 2025-26</p>
             </div>
+        </div>
+        <div class="text-end small">
+            <b>Print Date:</b> <span id="pDate"></span><br>
+            <span style="color:var(--gold); font-size: 10px; font-weight:bold;">OFFICIAL REGISTRY COPY</span>
         </div>
     </div>
 
-    <div id="ledgerArea">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <div class="d-flex align-items-center">
-                <img src="logo.png" style="width:65px; margin-right:15px;">
-                <div>
-                    <h1 style="margin:0; color:var(--royal); font-weight:800; font-size: 28px;">THE LALIT INTERNATIONAL SCHOOL</h1>
-                    <p class="m-0 small fw-bold">MASTER LEDGER STATEMENT | SESSION 2025-26</p>
-                </div>
-            </div>
-            <div class="text-end small"><b>Print Date:</b> <span id="pDate"></span><br><span style="color:var(--gold); font-size: 10px; font-weight:bold;">OFFICIAL REGISTRY COPY</span></div>
+    <div class="student-box">
+        <img id="lPhoto" src="" class="stu-img">
+        <div class="stu-info">
+            <div>NAME: <b id="lName"></b></div>
+            <div>ID: <b id="lID"></b></div>
+            <div>CLASS: <b id="lClass"></b></div>
+            <div>FATHER: <b id="lFather"></b></div>
+            <div>TRANSPORT: <b id="lTrans"></b></div>
+            <div>STATUS: <b style="color:green">ACTIVE</b></div>
         </div>
+    </div>
 
-        <div class="student-box">
-            <img id="lPhoto" src="" class="stu-img" onerror="this.src='https://via.placeholder.com/100x120?text=No+Photo'">
-            <div class="stu-info">
-                <div>NAME: <b id="lName"></b></div>
-                <div>ID: <b id="lID"></b></div>
-                <div>CLASS: <b id="lClass"></b></div>
-                <div>FATHER: <b id="lFather"></b></div>
-                <div>TRANSPORT: <b id="lTrans"></b></div>
-                <div>STATUS: <b style="color:green">ACTIVE</b></div>
-            </div>
-        </div>
+    <div class="master-fee-grid">
+        <div class="fee-col"><div class="f-label">TUITION</div><div class="f-base" id="hTuition">₹0</div><div class="f-disc-row no-print">Disc <input type="number" id="dTuition" class="disc-field" oninput="calculateLedger()">%</div></div>
+        <div class="fee-col"><div class="f-label">HOSTEL</div><div class="f-base" id="hHostel">₹0</div><div class="f-disc-row no-print">Disc <input type="number" id="dHostel" class="disc-field" oninput="calculateLedger()">%</div></div>
+        <div class="fee-col"><div class="f-label">TRANS.</div><div class="f-base" id="hTrans">₹0</div><div class="f-disc-row no-print">Disc <input type="number" id="dTrans" class="disc-field" oninput="calculateLedger()">%</div></div>
+        <div class="fee-col"><div class="f-label">ADM. FEE</div><div class="f-base" id="hAdm">₹0</div><div class="f-disc-row no-print">Disc <input type="number" id="dAdm" class="disc-field" oninput="calculateLedger()">%</div></div>
+        <div class="fee-col"><div class="f-label">DEVELOPMENT</div><div class="f-base" id="hDev">₹0</div><div class="f-disc-row no-print">Disc <input type="number" id="dDev" class="disc-field" oninput="calculateLedger()">%</div></div>
+        <div class="fee-col"><div class="f-label">EXAMINATION</div><div class="f-base" id="hExam">₹0</div><div class="f-disc-row no-print">Disc <input type="number" id="dExam" class="disc-field" oninput="calculateLedger()">%</div></div>
+        <div class="fee-col"><div class="f-label">BOOKS/KIT</div><div class="f-base" id="hBooks">₹0</div><div class="f-disc-row no-print">Disc <input type="number" id="dBooks" class="disc-field" oninput="calculateLedger()">%</div></div>
+        <div class="fee-col"><div class="f-label">MISC.</div><div class="f-base" id="hMisc">₹0</div><div class="f-disc-row no-print">Disc <input type="number" id="dMisc" class="disc-field" oninput="calculateLedger()">%</div></div>
+    </div>
 
-        <div class="master-fee-grid">
-            <div class="fee-col"><div class="f-label">TUITION</div><div class="f-base" id="hTuition">₹0</div><div class="f-disc-row no-print">Disc <input type="number" id="dTuition" class="disc-field" oninput="calculateLedger()">%</div></div>
-            <div class="fee-col"><div class="f-label">HOSTEL</div><div class="f-base" id="hHostel">₹0</div><div class="f-disc-row no-print">Disc <input type="number" id="dHostel" class="disc-field" oninput="calculateLedger()">%</div></div>
-            <div class="fee-col"><div class="f-label">TRANS.</div><div class="f-base" id="hTrans">₹0</div><div class="f-disc-row no-print">Disc <input type="number" id="dTrans" class="disc-field" oninput="calculateLedger()">%</div></div>
-            <div class="fee-col"><div class="f-label">ADM. FEE</div><div class="f-base" id="hAdm">₹0</div><div class="f-disc-row no-print">Disc <input type="number" id="dAdm" class="disc-field" oninput="calculateLedger()">%</div></div>
-            <div class="fee-col"><div class="f-label">DEVELOPMENT</div><div class="f-base" id="hDev">₹0</div><div class="f-disc-row no-print">Disc <input type="number" id="dDev" class="disc-field" oninput="calculateLedger()">%</div></div>
-            <div class="fee-col"><div class="f-label">EXAMINATION</div><div class="f-base" id="hExam">₹0</div><div class="f-disc-row no-print">Disc <input type="number" id="dExam" class="disc-field" oninput="calculateLedger()">%</div></div>
-            <div class="fee-col"><div class="f-label">BOOKS/KIT</div><div class="f-base" id="hBooks">₹0</div><div class="f-disc-row no-print">Disc <input type="number" id="dBooks" class="disc-field" oninput="calculateLedger()">%</div></div>
-            <div class="fee-col"><div class="f-label">MISC.</div><div class="f-base" id="hMisc">₹0</div><div class="f-disc-row no-print">Disc <input type="number" id="dMisc" class="disc-field" oninput="calculateLedger()">%</div></div>
-        </div>
+    <table class="table-ledger">
+        <thead>
+            <tr>
+                <th style="width:22%">PARTICULARS</th>
+                <th>TUITION</th>
+                <th>HOSTEL</th>
+                <th>TRANS.</th>
+                <th>ANNUAL</th>
+                <th>PAYABLE</th>
+                <th>PAID</th>
+                <th>BALANCE</th>
+            </tr>
+        </thead>
+        <tbody id="lBody"></tbody>
+        <tfoot>
+            <tr style="background:#f2f2f2">
+                <td colspan="5" class="text-end pe-3">NET CONSOLIDATED TOTAL</td>
+                <td id="tPayable">₹0</td>
+                <td id="tPaid">₹0</td>
+                <td id="tBalance" style="color:red">₹0</td>
+            </tr>
+        </tfoot>
+    </table>
 
-        <table class="table-ledger">
-            <thead><tr><th style="width:22%">PARTICULARS</th><th>TUITION</th><th>HOSTEL</th><th>TRANS.</th><th>ANNUAL</th><th>PAYABLE</th><th>PAID</th><th>BALANCE</th></tr></thead>
-            <tbody id="lBody"></tbody>
-            <tfoot><tr style="background:#f2f2f2"><td colspan="5" class="text-end pe-3">NET CONSOLIDATED TOTAL</td><td id="tPayable">₹0</td><td id="tPaid">₹0</td><td id="tBalance" style="color:red">₹0</td></tr></tfoot>
-        </table>
-
-        <div class="row mt-5">
-            <div class="col-4 text-center small"><hr class="mx-4">Accountant</div>
-            <div class="col-4 text-center small"><hr class="mx-4">Parent/Guardian</div>
-            <div class="col-4 text-center small"><hr class="mx-4">Principal</div>
-        </div>
+    <div class="row mt-5">
+        <div class="col-4 text-center small"><hr class="mx-4">Accountant</div>
+        <div class="col-4 text-center small"><hr class="mx-4">Parent/Guardian</div>
+        <div class="col-4 text-center small"><hr class="mx-4">Principal</div>
     </div>
 </div>
 
 <script>
-const db = firebase.firestore();
 const months = ["April", "May", "June", "July", "August", "September", "October", "November", "December", "January", "February", "March"];
 let curStu = null;
 let fm = {}; 
 
-// --- Updated Live Search with Photo ---
 async function liveSearch() {
     const val = document.getElementById('searchID').value.toLowerCase();
     const sugg = document.getElementById('searchSuggestions');
-    
     if(val.length < 2) { sugg.style.display='none'; return; }
-    
     const snap = await db.collection('students').get();
     let html = '';
-    
     snap.forEach(doc => {
         const d = doc.data();
-        if(d.name.toLowerCase().includes(val) || String(d.uniqueID).includes(val)) {
-            html += `
-                <div class="suggestion-card" onclick='loadLedger(${JSON.stringify(d)})'>
-                    <img src="${d.photo || 'https://via.placeholder.com/50'}" class="sugg-photo">
-                    <div class="sugg-details">
-                        <b>${d.name.toUpperCase()}</b>
-                        <span>ID: ${d.uniqueID} | Class: ${d.class}-${d.section || ''}</span>
-                    </div>
-                </div>`;
+        if(d.name.toLowerCase().includes(val) || d.uniqueID.toString().includes(val)) {
+            html += `<button class="list-group-item list-group-item-action" onclick='loadLedger(${JSON.stringify(d)})'>${d.name} (${d.uniqueID})</button>`;
         }
     });
-    
-    sugg.innerHTML = html; 
-    sugg.style.display = html ? 'block' : 'none';
+    sugg.innerHTML = html; sugg.style.display='block';
 }
 
-// --- Ledger Loading & Calculation Logic (100% Identical to original) ---
 async function loadLedger(s) {
     curStu = s;
     document.getElementById('searchSuggestions').style.display='none';
-    document.getElementById('searchID').value = s.name;
     document.getElementById('ledgerArea').style.display='block';
     document.getElementById('pDate').innerText = new Date().toLocaleDateString('en-GB');
+    
     document.getElementById('lName').innerText = s.name.toUpperCase();
     document.getElementById('lID').innerText = s.uniqueID;
     document.getElementById('lClass').innerText = s.class;
@@ -235,7 +225,10 @@ async function loadLedger(s) {
 async function calculateLedger() {
     if(!curStu) return;
     const getD = (id) => Number(document.getElementById(id).value);
-    const d = { tui: getD('dTuition'), hos: getD('dHostel'), tra: getD('dTrans'), adm: getD('dAdm'), dev: getD('dDev'), exa: getD('dExam'), boo: getD('dBooks'), mis: getD('dMisc') };
+    const d = {
+        tui: getD('dTuition'), hos: getD('dHostel'), tra: getD('dTrans'),
+        adm: getD('dAdm'), dev: getD('dDev'), exa: getD('dExam'), boo: getD('dBooks'), mis: getD('dMisc')
+    };
 
     const netAnnual = (Number(fm.admission||0)*(1-d.adm/100))+(Number(fm.development||0)*(1-d.dev/100))+(Number(fm.exam||0)*(1-d.exa/100))+(Number(fm.books||0)*(1-d.boo/100))+(Number(fm.misc||0)*(1-d.mis/100));
     const tuiNet = Number(fm.tuition||0)*(1-d.tui/100);
@@ -246,6 +239,7 @@ async function calculateLedger() {
     let pays = []; tSnap.forEach(p => pays.push(p.data()));
 
     let html = '', runBal = 0, tPay = 0, tPaid = 0;
+
     let aPaid = pays.filter(p => p.month === 'Annual').reduce((s, p) => s + Number(p.amount), 0);
     runBal += (netAnnual - aPaid); tPay += netAnnual; tPaid += aPaid;
     html += `<tr><td class="text-left">REGISTRATION & ANNUAL FEE</td><td>-</td><td>-</td><td>-</td><td>₹${Math.round(netAnnual)}</td><td>₹${Math.round(netAnnual)}</td><td>₹${aPaid}</td><td>₹${Math.round(runBal)}</td></tr>`;
@@ -267,8 +261,6 @@ async function calculateLedger() {
     });
 }
 </script>
-
 <script src="menu.js"></script>
-
 </body>
 </html>
