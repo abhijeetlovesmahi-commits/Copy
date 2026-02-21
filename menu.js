@@ -1,4 +1,4 @@
-/* THE LALIT INTERNATIONAL SCHOOL - COMPLETE SECURE MENU */
+/* THE LALIT INTERNATIONAL SCHOOL - SECURE MANUAL PASSWORD RESET */
 
 const menuConfig = [
     { title: "Dashboard", icon: "fa-home", link: "index.html", role: "all" },
@@ -26,7 +26,6 @@ const menuConfig = [
     { title: "Manage Users", icon: "fa-user-shield", link: "manage-users.html", role: ["admin"] },
 
     { type: "divider", title: "Security", role: "all" },
-    // Yahan Reset Password fix kar diya hai (link ab '#' hai aur ID de di hai)
     { title: "Reset Password", icon: "fa-key", link: "#", role: "all", id: "resetPasswordBtn" },
     { title: "Logout", icon: "fa-sign-out-alt", link: "#", role: "all", id: "logoutBtn" }
 ];
@@ -47,27 +46,23 @@ async function initUniversalMenu() {
         }
     }
 
-    // Security Check: Current page permissions
     const currentPage = window.location.pathname.split("/").pop() || 'index.html';
     const currentMenuItem = menuConfig.find(m => m.link === currentPage);
     const hasAccess = (item) => (item.role === "all") || (Array.isArray(item.role) && item.role.includes(userRole)) || (item.role === userRole);
 
     if (currentMenuItem && !hasAccess(currentMenuItem)) {
-        alert("⛔ Access Denied! Wapas Dashboard par bheja ja raha hai.");
+        alert("⛔ Access Denied!");
         window.location.href = "index.html";
         return;
     }
 
-    // Sidebar Creation
     const menuWrapper = document.createElement('div');
     menuWrapper.id = 'imperial-menu-wrapper';
-
     let menuItemsHTML = '';
     menuConfig.forEach(item => {
         if (hasAccess(item)) {
-            if (item.type === "divider") {
-                menuItemsHTML += `<div class="menu-divider">${item.title}</div>`;
-            } else {
+            if (item.type === "divider") { menuItemsHTML += `<div class="menu-divider">${item.title}</div>`; } 
+            else {
                 const isActive = currentPage === item.link ? 'active-link' : '';
                 menuItemsHTML += `<a href="${item.link}" class="nav-item ${isActive}" id="${item.id || ''}"><i class="fas ${item.icon}"></i> <span>${item.title}</span></a>`;
             }
@@ -87,31 +82,44 @@ async function initUniversalMenu() {
         </div>
         <button id="menu-trigger-btn"><span></span><span></span><span></span></button>
     `;
-
     document.body.prepend(menuWrapper);
-    document.body.style.opacity = "1"; // Security Check ke baad page dikhao
+    document.body.style.opacity = "1";
 
-    // Menu Toggle Actions
     const trigger = document.getElementById('menu-trigger-btn');
     const panel = document.getElementById('sidebar-panel');
     const overlay = document.getElementById('menu-overlay');
     const toggle = () => { panel.classList.toggle('open'); trigger.classList.toggle('open-btn'); overlay.style.display = panel.classList.contains('open') ? 'block' : 'none'; };
     trigger.onclick = toggle; overlay.onclick = toggle;
 
-    // RESET PASSWORD FUNCTION
+    // --- MANUAL PASSWORD RESET (NO EMAIL NEEDED) ---
     const resetBtn = document.getElementById('resetPasswordBtn');
     if(resetBtn) {
-        resetBtn.onclick = (e) => {
+        resetBtn.onclick = async (e) => {
             e.preventDefault();
-            if(confirm("Password reset link aapki registered email par bhej dein?")) {
-                firebase.auth().sendPasswordResetEmail(user.email).then(() => {
-                    alert("Success! Check your Email Inbox.");
-                }).catch((error) => { alert("Error: " + error.message); });
+            const newPass = prompt("Apna Naya Password likhein (Kam se kam 6 characters):");
+            if (newPass && newPass.length >= 6) {
+                const confirmPass = prompt("Password dobara likhein confirm karne ke liye:");
+                if (newPass === confirmPass) {
+                    try {
+                        await user.updatePassword(newPass);
+                        alert("✅ Password safaltapoorvak badal gaya hai! Agli baar naye password se login karein.");
+                    } catch (error) {
+                        if (error.code === 'auth/requires-recent-login') {
+                            alert("Security Note: Password badalne ke liye aapko ek baar logout karke dubara login karna hoga.");
+                            firebase.auth().signOut().then(() => { window.location.href = "login.html"; });
+                        } else {
+                            alert("Error: " + error.message);
+                        }
+                    }
+                } else {
+                    alert("❌ Password match nahi huye!");
+                }
+            } else if (newPass) {
+                alert("❌ Password kam se kam 6 aksharon ka hona chahiye.");
             }
         };
     }
 
-    // LOGOUT FUNCTION
     const logoutBtn = document.getElementById('logoutBtn');
     if(logoutBtn) {
         logoutBtn.onclick = (e) => {
@@ -122,7 +130,6 @@ async function initUniversalMenu() {
         };
     }
 
-    // CSS injection remains same
     const style = document.createElement('style');
     style.textContent = `
         #menu-trigger-btn { position: fixed; top: 15px; left: 15px; width: 45px; height: 45px; background: #002366; border: 1px solid #D4AF37; border-radius: 8px; z-index: 20001; cursor: pointer; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; transition: 0.3s; }
@@ -147,14 +154,9 @@ async function initUniversalMenu() {
     document.head.appendChild(style);
 }
 
-// Global Auth Check
 firebase.auth().onAuthStateChanged((user) => {
     const currentPage = window.location.pathname.split("/").pop() || 'index.html';
-    if (!user && currentPage !== "login.html") {
-        window.location.href = "login.html";
-    } else if (user && currentPage === "login.html") {
-        window.location.href = "index.html";
-    } else if (user) {
-        initUniversalMenu();
-    }
+    if (!user && currentPage !== "login.html") { window.location.href = "login.html"; } 
+    else if (user && currentPage === "login.html") { window.location.href = "index.html"; } 
+    else if (user) { initUniversalMenu(); }
 });
