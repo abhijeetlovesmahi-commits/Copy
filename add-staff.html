@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Staff Portal - The Lalit International</title>
+    <title>Executive Dashboard - The Lalit International</title>
     
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
@@ -15,37 +16,94 @@
     <script src="brand.js"></script>
 
     <style>
-        .modal {
-            display: none; 
-            position: fixed; 
-            z-index: 9999; 
-            left: 0; top: 0;
-            width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.7);
-            backdrop-filter: blur(4px);
+        /* Welcome Banner with Royal Gradient */
+        .welcome-banner {
+            background: linear-gradient(135deg, var(--royal-blue), #001540);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border-left: 6px solid var(--gold);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-md);
+            position: relative;
+            overflow: hidden;
         }
-        .modal-content {
-            background-color: #fff;
-            margin: 5% auto;
+        
+        /* Subtle pattern overlay for premium feel */
+        .welcome-banner::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23d4af37' fill-opacity='0.05' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.5;
+        }
+
+        .welcome-text h2 { 
+            margin: 0; font-family: 'Cinzel', serif; color: var(--gold); font-size: 1.8rem; letter-spacing: 1px;
+        }
+        .welcome-text p { margin: 5px 0 0; opacity: 0.8; }
+        
+        .role-badge-dash { 
+            background: rgba(212, 175, 55, 0.2); color: var(--gold); 
+            padding: 8px 20px; border: 1px solid var(--gold);
+            border-radius: 30px; font-weight: bold; font-size: 0.85rem; 
+            text-transform: uppercase; letter-spacing: 1px;
+            backdrop-filter: blur(5px);
+        }
+
+        /* Stats Grid Layout */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        /* Premium Stats Cards */
+        .royal-stat-card {
+            background: #fff;
             padding: 25px;
             border-radius: 15px;
-            width: 90%;
-            max-width: 600px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border-bottom: 4px solid var(--gold);
             position: relative;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-            animation: slideDown 0.3s ease-out;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
         }
-        @keyframes slideDown {
-            from { transform: translateY(-30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+        .royal-stat-card:hover { 
+            transform: translateY(-7px); 
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
         }
-        .security-box {
-            background: #fff5f5;
-            border: 1px solid #feb2b2;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
-            display: none;
+
+        /* Background Icon Faded */
+        .stat-bg-icon {
+            position: absolute;
+            right: -15px;
+            bottom: -15px;
+            font-size: 6rem;
+            color: var(--royal-blue);
+            opacity: 0.06;
+            transform: rotate(-20deg);
+            transition: 0.3s;
+        }
+        .royal-stat-card:hover .stat-bg-icon { transform: rotate(0deg) scale(1.1); opacity: 0.08; }
+
+        .stat-value { 
+            font-size: 2.5rem; font-weight: 800; color: var(--royal-blue); margin: 10px 0; 
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .stat-label { 
+            color: #666; font-size: 0.95rem; text-transform: uppercase; 
+            letter-spacing: 1.2px; font-weight: 600;
+        }
+        .loading-placeholder { color: #ccc; font-size: 1.5rem; }
+
+        /* Section Titles */
+        .dash-section-title {
+            font-family: 'Cinzel', serif; color: var(--royal-blue);
+            border-bottom: 2px solid rgba(212, 175, 55, 0.3);
+            padding-bottom: 10px; margin-bottom: 25px; margin-top: 40px;
         }
     </style>
 </head>
@@ -60,317 +118,118 @@
             <p style="text-align:center; color:var(--gold);">Loading Royal Branding...</p>
         </div>
 
-        <h2 id="formTitle" style="margin-top:0;">STAFF ENROLLMENT FORM</h2>
+        <h2 style="margin-top:0; text-align:center; color:var(--royal-blue); font-family:'Cinzel',serif; letter-spacing:2px; border-bottom:none;">EXECUTIVE CONTROL TOWER</h2>
+        <hr style="margin: 10px auto 30px; width: 100px; border: 2px solid var(--gold);">
 
-        <form id="staffForm">
-            <input type="hidden" id="editingId">
+        <div class="welcome-banner">
+            <div class="welcome-text">
+                <h2 id="welcomeGreeting">Welcome back, User</h2>
+                <p>Here's the real-time overview of The Lalit International.</p>
+            </div>
+            <div class="role-badge-dash" id="userRoleDisplay">Loading Role...</div>
+        </div>
+
+        <h4 class="dash-section-title">INSTITUTION OVERVIEW</h4>
+        <div class="stats-grid">
             
-            <section class="form-section">
-                <span class="section-title">Step 1: Staff Identity</span>
-                <div style="text-align: center;">
-                    <input type="file" id="staffPhoto" accept="image/*" onchange="processPhoto(this)" style="max-width:300px;">
-                    <div style="margin-top:20px;">
-                        <img id="imgPreview" style="width:140px; height:180px; border:3px solid var(--gold); display:none; object-fit:cover; border-radius:8px; box-shadow: var(--shadow-md);">
-                    </div>
-                </div>
-            </section>
-
-            <section class="form-section">
-                <span class="section-title">Step 2: Personal & Professional</span>
-                <div class="input-grid">
-                    <input type="text" id="stName" placeholder="Full Name" required>
-                    <select id="stDesignation" required>
-                        <option value="">Select Designation</option>
-                        <option value="Director">Director</option>
-                        <option value="Principal">Principal</option>
-                        <option value="Vice Principal">Vice Principal</option>
-                        <option value="Coordinator">Coordinator</option>
-                        <option value="Teacher (PGT)">Teacher (PGT)</option>
-                        <option value="Teacher (TGT)">Teacher (TGT)</option>
-                        <option value="Teacher (PRT)">Teacher (PRT)</option>
-                        <option value="Accountant">Accountant</option>
-                        <option value="Clerk">Clerk</option>
-                        <option value="Librarian">Librarian</option>
-                        <option value="Lab Assistant">Lab Assistant</option>
-                        <option value="Receptionist">Receptionist</option>
-                        <option value="Driver">Driver</option>
-                        <option value="Peon">Peon</option>
-                        <option value="Sweeper">Sweeper</option>
-                        <option value="Guard">Security Guard</option>
-                    </select>
-
-                    <select id="stRole" required>
-                        <option value="">Select Account Role</option>
-                        <option value="admin">Admin (Full Access)</option>
-                        <option value="accountant">Accountant/Clerk (Fee & Admission)</option>
-                        <option value="teacher">Teacher (Academic Access)</option>
-                        <option value="staff">General Staff (No Login Access)</option>
-                    </select>
-                        
-                    <input type="text" id="stDob" placeholder="Date of Birth" onfocus="(this.type='date')" required>
-                    <input type="number" id="stAadhar" placeholder="12 Digit Aadhar Number" oninput="this.value=this.value.slice(0,12)" required>
-                    <input type="text" id="stQualification" placeholder="Highest Qualification" required>
-                </div>
-            </section>
-
-            <section class="form-section">
-                <span class="section-title">Step 3: Contact Details</span>
-                <div class="input-grid">
-                    <input type="tel" id="stContact" placeholder="Phone Number" required>
-                    <input type="email" id="stPersonalEmail" placeholder="Personal Email ID">
-                </div>
-                <div style="margin-top:20px;">
-                    <textarea id="stAddr" placeholder="Residential Address" rows="2" required style="width:100%; padding:14px; border-bottom:3px solid var(--gold); border-radius:6px; font-family:inherit;"></textarea>
-                </div>
-            </section>
-
-            <div style="display: flex; gap: 15px;">
-                <button type="submit" id="submitBtn" class="royal-btn btn-block btn-success">GENERATE STAFF ID & ACCOUNT</button>
-                <button type="button" id="cancelEdit" class="royal-btn btn-danger" style="display:none;" onclick="resetForm()">CANCEL EDIT</button>
+            <div class="royal-stat-card">
+                <i class="fas fa-user-graduate stat-bg-icon"></i>
+                <div class="stat-label">Total Students</div>
+                <div class="stat-value" id="countStudents"><span class="loading-placeholder">...</span></div>
             </div>
-        </form>
 
-        <hr style="margin: 60px 0; border: 0; border-top: 2px double var(--gold); opacity: 0.3;">
-
-        <div>
-            <h2>STAFF DIRECTORY LOG</h2>
-            <div style="display: flex; gap: 10px; margin-bottom: 30px; justify-content: center; flex-wrap: wrap;">
-                <input type="text" id="searchInput" placeholder="Quick Search (Name, ID or Role)..." style="max-width: 450px;">
-                <button class="royal-btn" onclick="searchStaff()">SEARCH RECORD</button>
+            <div class="royal-stat-card">
+                <i class="fas fa-chalkboard-teacher stat-bg-icon"></i>
+                <div class="stat-label">Total Staff</div>
+                <div class="stat-value" id="countStaff"><span class="loading-placeholder">...</span></div>
             </div>
-            
-            <div id="staffList" class="profile-grid-custom">
-                <p style="text-align:center; grid-column:1/-1;">Synchronizing with database...</p>
-            </div>
-        </div>
-    </div>
-</div>
 
-<div id="detailModal" class="modal">
-    <div class="modal-content">
-        <span onclick="closeModal()" style="position:absolute; right:20px; top:10px; font-size:35px; cursor:pointer; color:var(--royal-blue);">&times;</span>
-        <h2 id="modalName" style="border-bottom: 2px solid var(--gold); padding-bottom:10px; color:var(--royal-blue);">STAFF PROFILE</h2>
-        
-        <div style="display: flex; gap: 25px; flex-wrap: wrap; margin-top:20px;">
-            <img id="modalPhoto" src="" style="width:160px; height:200px; border:3px solid var(--gold); border-radius:10px; object-fit:cover; box-shadow: var(--shadow-md);">
-            <div id="modalDetails" style="flex:1; display:grid; grid-template-columns: 1fr; gap:10px; font-size:0.95rem;">
-                </div>
+            <div class="royal-stat-card">
+                <i class="fas fa-calendar-day stat-bg-icon"></i>
+                <div class="stat-label">Today's Admissions</div>
+                <div class="stat-value" id="countToday" style="color: var(--gold);">0</div>
+            </div>
+
+            <div class="royal-stat-card" style="border-bottom-color: #28a745;">
+                <i class="fas fa-shield-alt stat-bg-icon" style="color: #28a745;"></i>
+                <div class="stat-label">System Status</div>
+                <div class="stat-value" style="font-size: 1.5rem; color: #28a745; margin-top: 20px;"> Let's do it..</div>
+            </div>
+
         </div>
 
-        <div id="securityCheck" class="security-box">
-            <p style="color:#c53030; font-weight:bold; margin-bottom:10px;">🛡️ Secure Deletion</p>
-            <p style="font-size:0.85rem; margin-bottom:10px;">Type ID <span id="confirmIdText" style="font-weight:bold; color:black;"></span> to confirm delete:</p>
-            <input type="text" id="deleteConfirmInput" placeholder="Confirm Staff ID" style="width:100%; margin-bottom:10px; border:1px solid #ccc; padding:8px;">
-            <div style="display:flex; gap:10px;">
-                <button class="royal-btn btn-danger" onclick="confirmDeleteProcess()" style="flex:1;">DELETE NOW</button>
-                <button class="royal-btn" onclick="hideSecurity()" style="flex:1; background:#666;">CANCEL</button>
-            </div>
+        <h4 class="dash-section-title">QUICK ACTIONS</h4>
+        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+            <button onclick="window.location.href='add-student.html'" class="royal-btn" style="flex: 1; min-width: 200px;">
+                <i class="fas fa-plus-circle me-2"></i> New Admission
+            </button>
+            <button onclick="window.location.href='staff.html'" class="royal-btn" style="flex: 1; min-width: 200px; background: var(--royal-blue); border: 1px solid var(--gold);">
+                <i class="fas fa-user-tie me-2"></i> Manage Staff
+            </button>
         </div>
 
-        <div id="modalBtnGroup" style="margin-top:30px; display:flex; gap:15px; justify-content:flex-end; border-top:1px solid #eee; padding-top:20px;">
-            <button class="royal-btn btn-sm" id="modalEditBtn">EDIT DATA</button>
-            <button class="royal-btn btn-sm btn-danger" onclick="showSecurity()">DELETE RECORD</button>
-        </div>
     </div>
 </div>
 
 <script>
-let compressedBase64 = "";
-let currentViewData = null;
-let allStaff = [];
+    const db = firebase.firestore();
+    const auth = firebase.auth();
 
-const secondaryApp = firebase.initializeApp(firebaseConfig, "SecondaryStaffApp");
-const secondaryAuth = secondaryApp.auth();
-
-function processPhoto(input) {
-    const file = input.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = function(e) {
-            const img = new Image();
-            img.src = e.target.result;
-            img.onload = function() {
-                const canvas = document.createElement('canvas');
-                canvas.width = 150; canvas.height = 190;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, 150, 190);
-                compressedBase64 = canvas.toDataURL('image/jpeg', 0.6);
-                const preview = document.getElementById('imgPreview');
-                preview.src = compressedBase64;
-                preview.style.display = 'block';
-            }
+    // Auth listener to load data only when logged in
+    auth.onAuthStateChanged(async (user) => {
+        if (user) {
+            initDashboard(user);
+        } else {
+            // menu.js will handle redirect, but this is a fallback
+            // window.location.href = 'login.html';
         }
-    }
-}
-
-document.getElementById('staffForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = document.getElementById('submitBtn');
-    const editingId = document.getElementById('editingId').value;
-    btn.disabled = true; 
-    btn.innerText = "Processing...";
-
-    try {
-        let staffID = editingId;
-        let generatedEmail = "";
-        let generatedPassword = "";
-
-        if(!editingId) {
-            const lastSnap = await db.collection('staff').orderBy('staffID', 'desc').limit(1).get();
-            staffID = lastSnap.empty ? 5001 : Number(lastSnap.docs[0].data().staffID) + 1;
-
-            const cleanName = document.getElementById('stName').value.replace(/\s+/g, '').toLowerCase();
-            generatedEmail = `${cleanName}${staffID}@staff.lalit.com`;
-            generatedPassword = `Staff@${staffID}`;
-
-            await secondaryAuth.createUserWithEmailAndPassword(generatedEmail, generatedPassword);
-            await secondaryAuth.signOut();
-        }
-
-        const staffData = {
-            staffID: Number(staffID),
-            name: document.getElementById('stName').value,
-            designation: document.getElementById('stDesignation').value,
-            role: document.getElementById('stRole').value,
-            dob: document.getElementById('stDob').value,
-            aadhar: document.getElementById('stAadhar').value,
-            qualification: document.getElementById('stQualification').value,
-            contact: document.getElementById('stContact').value,
-            personalEmail: document.getElementById('stPersonalEmail').value,
-            address: document.getElementById('stAddr').value,
-            photo: compressedBase64 || (currentViewData ? currentViewData.photo : ""),
-            timestamp: Date.now(),
-            ...(generatedEmail && { loginEmail: generatedEmail, loginPass: generatedPassword })
-        };
-
-        await db.collection('staff').doc(staffID.toString()).set(staffData, {merge: true});
-        alert("Success! Staff ID: " + staffID + (generatedEmail ? "\nLogin: " + generatedEmail : ""));
-        location.reload();
-    } catch (err) { alert("Error: " + err.message); btn.disabled = false; }
-});
-
-async function loadAllStaff() {
-    try {
-        db.collection('staff').onSnapshot(snapshot => {
-            allStaff = [];
-            snapshot.forEach(doc => allStaff.push(doc.data()));
-            allStaff.sort((a, b) => b.timestamp - a.timestamp);
-            renderList(allStaff);
-        });
-    } catch (err) { document.getElementById('staffList').innerHTML = `<p style="color:red;">Sync Failed.</p>`; }
-}
-
-function renderList(dataArray) {
-    const list = document.getElementById('staffList');
-    list.innerHTML = "";
-    if(dataArray.length === 0) {
-        list.innerHTML = '<p style="text-align:center; grid-column:1/-1;">No records found.</p>';
-        return;
-    }
-    dataArray.forEach(data => {
-        const card = document.createElement('div');
-        card.className = 'custom-id-card';
-        card.onclick = () => showDetails(data);
-        card.innerHTML = `
-            <img src="${data.photo || 'https://via.placeholder.com/150'}" class="id-photo">
-            <div class="id-info">
-                <h4>${data.name}</h4>
-                <p><b>ID:</b> ${data.staffID} | <b>${data.designation}</b></p>
-                <div style="background:#fff7e6; padding:5px; border-radius:4px; margin:5px 0; font-size:0.75rem; border:1px solid #ffe7ba;">
-                    <div>📧 ${data.loginEmail || 'N/A'}</div>
-                    <div>🔑 ${data.loginPass || 'N/A'}</div>
-                </div>
-                <span class="status-badge" style="background:#e3f2fd; color:#1565c0;">${data.role.toUpperCase()}</span>
-            </div>`;
-        list.appendChild(card);
     });
-}
 
-function searchStaff() {
-    const val = document.getElementById('searchInput').value.toLowerCase();
-    const filtered = allStaff.filter(s => s.name.toLowerCase().includes(val) || s.staffID.toString().includes(val) || s.designation.toLowerCase().includes(val));
-    renderList(filtered);
-}
-document.getElementById('searchInput').addEventListener('input', searchStaff);
+    async function initDashboard(user) {
+        console.log("Initializing Dashboard for:", user.email);
 
-function showDetails(data) {
-    currentViewData = data;
-    hideSecurity(); 
-    document.getElementById('modalName').innerText = data.name;
-    document.getElementById('modalPhoto').src = data.photo || 'https://via.placeholder.com/150';
-    document.getElementById('modalDetails').innerHTML = `
-        <p><strong>Staff ID:</strong> ${data.staffID}</p>
-        <p><strong>Designation:</strong> ${data.designation}</p>
-        <p><strong>Login Email:</strong> <span style="color:var(--royal-blue)">${data.loginEmail || 'N/A'}</span></p>
-        <p><strong>Password:</strong> <span style="color:var(--royal-blue)">${data.loginPass || 'N/A'}</span></p>
-        <p><strong>Aadhar:</strong> ${data.aadhar}</p>
-        <p><strong>Phone:</strong> ${data.contact}</p>
-        <p><strong>Role:</strong> ${data.role}</p>
-        <p><strong>Address:</strong> ${data.address}</p>
-    `;
-    document.getElementById('modalEditBtn').onclick = () => startEdit(data);
-    document.getElementById('detailModal').style.display = 'block';
-}
+        try {
+            // 1. Fetch User Details (Name & Role) from Staff Collection
+            let userName = "Authorized User";
+            let userRole = "Staff";
+            
+            const staffQuery = await db.collection('staff').where('loginEmail', '==', user.email).get();
+            if (!staffQuery.empty) {
+                const data = staffQuery.docs[0].data();
+                userName = data.name;
+                userRole = data.designation + " (" + data.role + ")";
+            } else {
+                // Check student if not staff (optional)
+                 const studentQuery = await db.collection('students').where('loginEmail', '==', user.email).get();
+                 if(!studentQuery.empty) {
+                     userName = studentQuery.docs[0].data().name;
+                     userRole = "Student";
+                 }
+            }
 
-function showSecurity() {
-    document.getElementById('modalBtnGroup').style.display = 'none';
-    document.getElementById('securityCheck').style.display = 'block';
-    document.getElementById('confirmIdText').innerText = currentViewData.staffID;
-    document.getElementById('deleteConfirmInput').value = "";
-}
+            document.getElementById('welcomeGreeting').innerText = `Welcome back, ${userName}`;
+            document.getElementById('userRoleDisplay').innerText = userRole;
 
-function hideSecurity() {
-    document.getElementById('modalBtnGroup').style.display = 'flex';
-    document.getElementById('securityCheck').style.display = 'none';
-}
 
-async function confirmDeleteProcess() {
-    const inputId = document.getElementById('deleteConfirmInput').value;
-    if(inputId == currentViewData.staffID) {
-        if(confirm("Are you absolutely sure you want to delete this staff record?")) {
-            await db.collection('staff').doc(currentViewData.staffID.toString()).delete();
-            closeModal();
+            // 2. Fetch Live Counts from Firestore
+            // Students Count
+            db.collection('students').onSnapshot(snap => {
+                document.getElementById('countStudents').innerText = snap.size;
+            });
+
+            // Staff Count
+            db.collection('staff').onSnapshot(snap => {
+                document.getElementById('countStaff').innerText = snap.size;
+            });
+
+            // (Optional) Today's Admission Count Logic could go here
+            // For now, it's static 0 as per placeholder.
+
+        } catch (error) {
+            console.error("Dashboard Error:", error);
+            document.getElementById('welcomeGreeting').innerText = "Welcome back";
         }
-    } else {
-        alert("ID Mismatch! Please enter correct ID to delete.");
     }
-}
-
-function startEdit(data) {
-    closeModal();
-    currentViewData = data;
-    window.scrollTo({top: 0, behavior: 'smooth'});
-    document.getElementById('formTitle').innerText = "Update Staff Record";
-    document.getElementById('editingId').value = data.staffID;
-    document.getElementById('stName').value = data.name;
-    document.getElementById('stDesignation').value = data.designation;
-    document.getElementById('stRole').value = data.role;
-    document.getElementById('stDob').value = data.dob;
-    document.getElementById('stAadhar').value = data.aadhar;
-    document.getElementById('stQualification').value = data.qualification;
-    document.getElementById('stContact').value = data.contact;
-    document.getElementById('stPersonalEmail').value = data.personalEmail || "";
-    document.getElementById('stAddr').value = data.address;
-
-    if(data.photo) {
-        const preview = document.getElementById('imgPreview');
-        preview.src = data.photo;
-        preview.style.display = 'block';
-    }
-
-    document.getElementById('submitBtn').innerText = "SAVE CHANGES";
-    document.getElementById('cancelEdit').style.display = 'inline-block';
-}
-
-function closeModal() { document.getElementById('detailModal').style.display = 'none'; }
-function resetForm() { location.reload(); }
-
-window.onclick = function(event) {
-    if (event.target == document.getElementById('detailModal')) closeModal();
-}
-
-loadAllStaff();
 </script>
 
 <script src="menu.js"></script>
