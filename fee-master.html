@@ -5,15 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fee Master Control | The Lalit Intl.</title>
     
+    <link rel="stylesheet" href="style.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
 
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
     
     <script src="firebase-config.js"></script>
     <script src="brand.js"></script>
+    <script src="menu.js"></script>
 
     <style>
         :root {
@@ -24,6 +26,9 @@
         }
 
         body { background: var(--light-bg); color: var(--royal-blue); font-family: 'Segoe UI', sans-serif; }
+
+        /* Menu Container specific styling */
+        #menu-container { width: 100%; position: relative; z-index: 1000; }
 
         .form-section { 
             margin-bottom: 30px; 
@@ -182,7 +187,7 @@
         </div>
 
         <div class="col-md-8">
-            <div class="royal-card p-4 mb-4">
+            <div class="royal-card p-4 mb-4" style="background:white; border-radius:15px; box-shadow:0 10px 30px rgba(0,0,0,0.05);">
                 <h5 class="card-header-custom"><i class="fas fa-route me-2"></i>Active Transport Rates</h5>
                 <div class="table-responsive">
                     <table class="table table-hover master-table">
@@ -198,7 +203,7 @@
 
     <div class="row mt-4">
         <div class="col-12">
-            <div class="royal-card p-4">
+            <div class="royal-card p-4" style="background:white; border-radius:15px; box-shadow:0 10px 30px rgba(0,0,0,0.05);">
                 <h5 class="card-header-custom"><i class="fas fa-table me-2"></i>Master Academic Rate Card</h5>
                 <div class="table-responsive">
                     <table class="table table-hover master-table align-middle">
@@ -223,6 +228,7 @@
 </div>
 
 <script>
+// Logic functions bilkul same rakhi hain taaki koi functionality na toote
 async function saveFeeMaster() {
     const cls = document.getElementById('mClass').value;
     if(!cls) return alert("Please select a Class!");
@@ -259,6 +265,8 @@ async function saveTransportFee() {
 }
 
 async function loadData() {
+    if(typeof db === 'undefined') return;
+
     // Load Academic
     const aSnap = await db.collection('fee_master').get();
     const aBody = document.getElementById('masterFeeBody');
@@ -332,7 +340,8 @@ function editT(slab, amt) {
 function clearFields(type) {
     if(type === 'academic') {
         document.getElementById('mClass').value = "";
-        document.querySelectorAll('#academic-form input').forEach(i => i.value = "");
+        // Select all inputs within the first form section
+        document.querySelectorAll('.form-section:first-of-type input').forEach(i => i.value = "");
     } else {
         document.getElementById('tSlab').value = "";
         document.getElementById('tAmount').value = "";
@@ -341,7 +350,5 @@ function clearFields(type) {
 
 window.onload = loadData;
 </script>
-
-<script src="menu.js"></script>
 </body>
 </html>
