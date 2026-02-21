@@ -1,34 +1,34 @@
 /* --- THE LALIT INTERNATIONAL SCHOOL - MASTER UNIVERSAL FRAMEWORK --- 
-   Theme: Emerald & Silver (Premium Modern)
+   Theme: Royal Luxury (Blue & Gold)
    Fixes: Background-less Menu & Space Removal
 */
 
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Poppins:wght@300;400;500;600;700&display=swap');
 
 :root {
-    --royal-blue: #064e3b;          /* Deep Emerald Green */
-    --royal-blue-light: #065f46;    /* Medium Emerald */
-    --gold: #94a3b8;               /* Metallic Silver */
-    --deep-gold: #64748b;          /* Dark Steel Silver */
-    --light-gold: #f8fafc;         /* Off-white Silver Tint */
-    --success: #10b981;
-    --danger: #ef4444;
-    --warning: #f59e0b;
-    --info: #3b82f6;
+    --royal-blue: #002366;
+    --royal-blue-light: #003399;
+    --gold: #D4AF37;
+    --deep-gold: #aa8a2e;
+    --light-gold: #fdfbf0;
+    --success: #27ae60;
+    --danger: #c0392b;
+    --warning: #f39c12;
+    --info: #2980b9;
     --paper-white: #ffffff;
-    --text-dark: #0f172a;
-    --text-muted: #475569;
-    --border-color: #cbd5e1;
+    --text-dark: #1a1a1a;
+    --text-muted: #555555;
+    --border-color: #e0d0b0;
     --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
-    --shadow-md: 0 10px 30px rgba(0,0,0,0.08);
-    --shadow-lg: 0 15px 40px rgba(0,0,0,0.12);
+    --shadow-md: 0 10px 30px rgba(0,0,0,0.1);
+    --shadow-lg: 0 15px 40px rgba(0,0,0,0.15);
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
 
 body { 
-    background: #f1f5f9; 
+    background: #f4f4f2; 
     font-family: 'Poppins', sans-serif; 
     margin: 0; padding: 0; 
     color: var(--text-dark);
@@ -41,8 +41,8 @@ body {
     top: 15px !important; 
     left: 15px !important; 
     width: 45px; height: 45px;
-    background: transparent !important; 
-    border: none !important;             
+    background: transparent !important; /* Background removed */
+    border: none !important;             /* Border removed */
     z-index: 20001; cursor: pointer; 
     display: flex; flex-direction: column;
     justify-content: center; align-items: center; gap: 5px; 
@@ -51,16 +51,16 @@ body {
 
 #menu-trigger-btn span { 
     width: 25px; height: 3px; 
-    background: var(--royal-blue) !important; /* Lines changed to Emerald */
+    background: var(--gold) !important; /* Lines kept Gold */
     border-radius: 2px; transition: 0.4s; 
 }
 
 .main-content { 
-    padding: 30px 20px 40px; 
+    padding: 30px 20px 40px; /* Reduced from 100px to 30px to remove blank space */
     display: flex; flex-direction: column; align-items: center;
 }
 
-/* --- REST OF THE THEME (STRUCTURE UNTOUCHED) --- */
+/* --- REST OF THE ROYAL THEME (UNTOUCHED) --- */
 .school-logo { 
     width: 120px; height: 120px; object-fit: contain; display: block;
     margin: 0 auto 15px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1)); 
@@ -73,7 +73,7 @@ body {
 .royal-card { 
     width: 100%; max-width: 1300px;
     background: var(--paper-white);
-    background-image: url('https://www.transparenttextures.com/patterns/white-diamond.png');
+    background-image: url('https://www.transparenttextures.com/patterns/cream-paper.png');
     border: 1px solid var(--border-color);
     border-radius: 15px;
     padding: clamp(20px, 5%, 50px);
@@ -84,7 +84,7 @@ body {
 .royal-card::after {
     content: ""; position: absolute;
     top: 15px; left: 15px; right: 15px; bottom: 15px;
-    border: 1px solid rgba(148, 163, 184, 0.2);
+    border: 1px solid rgba(212, 175, 55, 0.3);
     pointer-events: none; border-radius: 10px;
 }
 
@@ -96,15 +96,15 @@ h2 { font-family: 'Cinzel', serif; color: var(--royal-blue); text-align: center;
 h2::after { content: ""; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 80px; height: 3px; background: var(--gold); }
 
 .royal-btn {
-    background: var(--royal-blue); color: #ffffff;
-    border: 1px solid var(--royal-blue); padding: 12px 28px;
+    background: var(--royal-blue); color: var(--gold);
+    border: 1px solid var(--gold); padding: 12px 28px;
     font-weight: 600; cursor: pointer; transition: var(--transition);
     text-transform: uppercase; letter-spacing: 1.5px;
     border-radius: 5px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
     text-decoration: none;
 }
 
-.royal-btn:hover { background: var(--gold); color: white; transform: translateY(-3px); box-shadow: 0 5px 15px rgba(148, 163, 184, 0.4); }
+.royal-btn:hover { background: var(--gold); color: var(--royal-blue); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4); }
 
 .search-box-wrapper { position: relative; max-width: 600px; margin: 0 auto 30px; width: 100%; }
 .search-input-royal {
@@ -114,8 +114,8 @@ h2::after { content: ""; position: absolute; bottom: 0; left: 50%; transform: tr
 }
 
 .form-section {
-    background: rgba(248, 250, 252, 0.8);
-    border-left: 6px solid var(--royal-blue);
+    background: rgba(253, 251, 240, 0.6);
+    border-left: 6px solid var(--gold);
     padding: 25px; margin-bottom: 30px; border-radius: 8px;
     box-shadow: var(--shadow-sm);
 }
