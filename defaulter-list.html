@@ -11,12 +11,18 @@
     
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
+    
     <script src="firebase-config.js"></script>
     <script src="brand.js"></script>
+    <script src="menu.js"></script> 
 
     <style>
         :root { --royal: #002147; --gold: #D4AF37; --danger: #d32f2f; }
         body { background: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
+
+        /* Menu Container specific styling */
+        #menu-container { width: 100%; position: relative; z-index: 1000; }
 
         /* Dashboard Cards */
         .stat-card {
@@ -39,8 +45,8 @@
         }
 
         /* Action Buttons */
-        .btn-call { color: #2ecc71; background: #eafaf1; border: none; padding: 5px 10px; border-radius: 4px; transition: 0.3s; }
-        .btn-wa { color: #25d366; background: #e9fbf0; border: none; padding: 5px 10px; border-radius: 4px; transition: 0.3s; }
+        .btn-call { color: #2ecc71; background: #eafaf1; border: none; padding: 5px 10px; border-radius: 4px; transition: 0.3s; display: inline-flex; align-items: center; justify-content: center; }
+        .btn-wa { color: #25d366; background: #e9fbf0; border: none; padding: 5px 10px; border-radius: 4px; transition: 0.3s; display: inline-flex; align-items: center; justify-content: center; }
         .btn-call:hover { background: #2ecc71; color: #fff; }
         .btn-wa:hover { background: #25d366; color: #fff; }
 
@@ -120,8 +126,7 @@
                     <th class="no-print">Connect</th>
                 </tr>
             </thead>
-            <tbody id="listBody">
-                </tbody>
+            <tbody id="listBody"></tbody>
         </table>
     </div>
 </div>
@@ -130,7 +135,11 @@
 const months = ["April", "May", "June", "July", "August", "September", "October", "November", "December", "January", "February", "March"];
 
 // Initial Load: Calculate Global School Dues
-window.onload = () => { calculateGlobalDues(); };
+window.onload = () => { 
+    if(typeof db !== 'undefined') {
+        calculateGlobalDues(); 
+    }
+};
 
 async function calculateGlobalDues() {
     const month = document.getElementById('targetMonth').value;
@@ -165,11 +174,9 @@ async function calculateStudentDue(s, month, feeMasters, transRates) {
     let totalDue = 0;
     let targetIdx = months.indexOf(month);
 
-    // Annual
     let annualPaid = trans.filter(p => p.month === 'Annual').reduce((acc, p) => acc + Number(p.amount), 0);
     totalDue += (annualFee - annualPaid);
 
-    // Months
     for(let i = 0; i <= targetIdx; i++) {
         let mPaid = trans.filter(p => p.month === months[i]).reduce((acc, p) => acc + Number(p.amount), 0);
         totalDue += (monthlyFee - mPaid);
@@ -199,9 +206,9 @@ async function generateList() {
         const s = doc.data();
         const due = await calculateStudentDue(s, month, feeMasters, transRates);
 
-        if(due > 1) { // Only show those with balance > 1 Rupee
+        if(due > 1) { 
             rowsFound++;
-            const phone = s.phone || s.mobile || "";
+            const phone = s.contact || s.pContact || s.whatsapp || "";
             const waMsg = `Dear Parent, your ward ${s.name}'s school fee of ₹${Math.round(due)} is pending for the month of ${month}. Please ignore if already paid. - The Lalit Intl.`;
             
             html += `
@@ -223,10 +230,8 @@ async function generateList() {
     }
 
     body.innerHTML = rowsFound > 0 ? html : '<tr><td colspan="7" class="text-center py-5 text-muted">No Defaulters Found for this month!</td></tr>';
-    // Update global total every time we filter to keep it fresh
     calculateGlobalDues();
 }
 </script>
-<script src="menu.js"></script>
 </body>
 </html>
