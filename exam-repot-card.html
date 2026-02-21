@@ -12,6 +12,8 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
     
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
     <script src="firebase-config.js"></script>
     <script src="auth-guard.js"></script>
     <script src="brand.js"></script>
@@ -22,7 +24,7 @@
             --light-gold: #FDFBF0; --white: #ffffff;
         }
 
-        /* Printing Adjustments */
+        /* Printing & PDF Adjustments */
         @page { size: A4; margin: 0; }
         
         .admin-container { max-width: 1100px; margin: 0 auto; }
@@ -33,12 +35,50 @@
             border: 1px solid var(--gold); margin-bottom: 25px;
         }
 
+        /* Report Card Design with Watermark & Security Pattern */
         .report-card { 
-            width: 210mm; min-height: 296mm; padding: 12mm; background: white; 
+            width: 210mm; height: 296mm; padding: 12mm; background: white; 
             margin: 40px auto; border: 15px double var(--royal-blue);
             box-sizing: border-box; position: relative; page-break-after: always;
             display: flex; flex-direction: column; color: #000;
+            overflow: hidden;
+            background-image: radial-gradient(rgba(212, 175, 55, 0.1) 0.5px, transparent 0.5px);
+            background-size: 4px 4px; /* Micro-dots like stamp paper */
         }
+
+        /* The Logo Watermark */
+        .report-card::before {
+            content: "";
+            position: absolute;
+            top: 55%; left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            width: 450px; height: 450px;
+            background-image: url('logo.png'); /* Ensure logo path is correct */
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+            opacity: 0.07;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Guilloche / Security Line Pattern */
+        .report-card::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(0, 35, 102, 0.02) 0px,
+                rgba(0, 35, 102, 0.02) 0.5px,
+                transparent 0.5px,
+                transparent 8px
+            );
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .report-card * { position: relative; z-index: 1; }
 
         .exam-title-bar { 
             background: var(--royal-blue); color: var(--gold); text-align: center; 
@@ -46,13 +86,13 @@
             font-size: 18px; font-family: 'Cinzel', serif;
         }
 
-        .marks-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 11.5px; }
+        .marks-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 11.5px; background: rgba(255,255,255,0.8); }
         .marks-table th, .marks-table td { border: 1px solid #000; padding: 6px 4px; text-align: center; }
         .marks-table th { background: #f2f2f2; font-size: 10px; }
 
         .result-summary { 
             display: grid; grid-template-columns: repeat(4, 1fr); 
-            border: 2px solid #000; margin-bottom: 15px; background: #f9f9f9; 
+            border: 2px solid #000; margin-bottom: 15px; background: rgba(249, 249, 249, 0.9); 
         }
         .res-item { padding: 10px; text-align: center; border-right: 1px solid #000; }
         .res-item:last-child { border-right: none; }
@@ -68,7 +108,7 @@
             .no-print, #menu-container { display: none !important; } 
             body { background: white; padding: 0; }
             .main-content { margin: 0 !important; padding: 0 !important; }
-            .report-card { margin: 0; border: 10px double var(--royal-blue); } 
+            .report-card { margin: 0; border: 10px double var(--royal-blue); box-shadow: none; } 
         }
     </style>
 </head>
@@ -117,11 +157,14 @@
                 </div>
             </div>
 
-            <div class="d-flex gap-3">
-                <button class="royal-btn btn-block" onclick="generateBulk()">
+            <div class="d-flex gap-2 flex-wrap">
+                <button class="royal-btn" onclick="generateBulk()" style="flex:1">
                     <i class="fas fa-sync-alt me-2"></i>GENERATE CARDS
                 </button>
-                <button class="royal-btn btn-block" style="background:#27ae60;" onclick="window.print()">
+                <button class="royal-btn" onclick="downloadPDF()" style="background:#c0392b; flex:1">
+                    <i class="fas fa-file-pdf me-2"></i>DOWNLOAD PDF
+                </button>
+                <button class="royal-btn" onclick="window.print()" style="background:#27ae60; flex:1">
                     <i class="fas fa-print me-2"></i>PRINT ALL
                 </button>
             </div>
@@ -133,12 +176,30 @@
 
 <script>
 let ctSign = "", prSign = "";
+
 function loadSign(input, type) { 
     if (input.files && input.files[0]) { 
         let r = new FileReader(); 
         r.onload = e => { if(type==='ct') ctSign = e.target.result; else prSign = e.target.result; }; 
         r.readAsDataURL(input.files[0]); 
     } 
+}
+
+async function downloadPDF() {
+    const element = document.getElementById('bulkContainer');
+    if(!element.innerHTML || element.innerHTML.includes('fa-spinner')) {
+        return alert("Pehle 'GENERATE CARDS' button par click karein!");
+    }
+    
+    const opt = {
+        margin: 0,
+        filename: `Report_Cards_${new Date().getTime()}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().set(opt).from(element).save();
 }
 
 async function generateBulk() {
@@ -179,7 +240,6 @@ async function generateBulk() {
             students.push(sData);
         });
 
-        // Sorting for Rank
         students.sort((a,b) => b.tempTotal - a.tempTotal);
         students.forEach((s, index) => s.rank = index + 1);
         students.sort((a,b) => (a.rollNo || a.uniqueID) - (b.rollNo || b.uniqueID));
@@ -223,7 +283,7 @@ async function generateBulk() {
                     <tr>
                         <td style="width:100px; border:none;"><img src="logo.png" style="width:90px;" onerror="this.src='https://via.placeholder.com/90'"></td>
                         <td style="text-align:center; border:none;">
-                            <h1 style="font-size:26px; color:var(--royal-blue); margin:0;">VIDYA INTERNATIONAL SCHOOL</h1>
+                            <h1 style="font-size:26px; color:var(--royal-blue); margin:0;">THE LALIT INTERNATIONAL SCHOOL</h1>
                             <p style="margin:5px 0; font-size:12px;">(An English Medium Senior Secondary School, Affiliated to CBSE)<br>Session: 2025-26</p>
                         </td>
                         <td style="width:100px; border:none; text-align:right;"><img src="${s.photo || 'https://via.placeholder.com/100'}" style="width:90px; border:1px solid #000;"></td>
@@ -258,7 +318,7 @@ async function generateBulk() {
                     <table class="marks-table"><tr><th>Term II Activity</th><th>Grade</th></tr><tr><td>Work/Art/Health/Disc.</td><td>A</td></tr></table>
                 </div>
 
-                <div style="border:1px solid #000; padding:10px; font-size:13px; min-height:60px;">
+                <div style="border:1px solid #000; padding:10px; font-size:13px; min-height:60px; background:rgba(255,255,255,0.7);">
                     <b>Class Teacher's Remarks:</b> ${perc > 80 ? "Excellent Performance! Keep it up." : perc > 60 ? "Good Progress, can do better in Math." : "Hard work required in core subjects."}
                 </div>
 
