@@ -3,168 +3,236 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard | The Lalit International</title>
+    <title>Executive Dashboard - The Lalit International</title>
     
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
+    
+    <script src="firebase-config.js"></script>
+    <script src="brand.js"></script>
 
     <style>
-        :root { --royal: #002147; --gold: #D4AF37; }
-        body { background: #f8f9fa; overflow-x: hidden; }
-
-        /* --- Royal Splash Animation --- */
-        #splash-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--royal); z-index: 99999;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: opacity 0.8s ease, visibility 0.8s;
+        /* Welcome Banner with Royal Gradient */
+        .welcome-banner {
+            background: linear-gradient(135deg, var(--royal-blue), #001540);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border-left: 6px solid var(--gold);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-md);
+            position: relative;
+            overflow: hidden;
         }
-        .splash-logo {
-            width: 120px; filter: drop-shadow(0 0 15px rgba(212,175,55,0.5));
-            animation: pulseLogo 2s infinite ease-in-out;
+        
+        /* Subtle pattern overlay for premium feel */
+        .welcome-banner::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23d4af37' fill-opacity='0.05' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.5;
         }
-        .splash-text {
-            font-family: 'Cinzel', serif; color: white; margin-top: 20px;
-            letter-spacing: 5px; animation: revealText 1.5s forwards; opacity: 0;
+
+        .welcome-text h2 { 
+            margin: 0; font-family: 'Cinzel', serif; color: var(--gold); font-size: 1.8rem; letter-spacing: 1px;
         }
-        @keyframes pulseLogo { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
-        @keyframes revealText { from { letter-spacing: 15px; opacity: 0; } to { letter-spacing: 5px; opacity: 1; } }
+        .welcome-text p { margin: 5px 0 0; opacity: 0.8; }
+        
+        .role-badge-dash { 
+            background: rgba(212, 175, 55, 0.2); color: var(--gold); 
+            padding: 8px 20px; border: 1px solid var(--gold);
+            border-radius: 30px; font-weight: bold; font-size: 0.85rem; 
+            text-transform: uppercase; letter-spacing: 1px;
+            backdrop-filter: blur(5px);
+        }
 
-        /* --- Dashboard UI --- */
-        .dashboard-content { padding: 80px 30px 30px 80px; opacity: 0; transform: translateY(20px); transition: 1s ease; }
-        .dashboard-content.visible { opacity: 1; transform: translateY(0); }
+        /* Stats Grid Layout */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
 
-        .stat-card {
-            background: white; border-radius: 15px; padding: 25px;
-            border-left: 5px solid var(--gold); box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        /* Premium Stats Cards */
+        .royal-stat-card {
+            background: #fff;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border-bottom: 4px solid var(--gold);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .royal-stat-card:hover { 
+            transform: translateY(-7px); 
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        }
+
+        /* Background Icon Faded */
+        .stat-bg-icon {
+            position: absolute;
+            right: -15px;
+            bottom: -15px;
+            font-size: 6rem;
+            color: var(--royal-blue);
+            opacity: 0.06;
+            transform: rotate(-20deg);
             transition: 0.3s;
         }
-        .stat-card:hover { transform: translateY(-5px); }
-        .stat-icon { font-size: 2.5rem; color: var(--royal); opacity: 0.2; position: absolute; right: 20px; }
-        
-        .welcome-banner {
-            background: linear-gradient(to right, var(--royal), #003366);
-            color: white; border-radius: 20px; padding: 40px; margin-bottom: 30px;
-            border-bottom: 4px solid var(--gold);
+        .royal-stat-card:hover .stat-bg-icon { transform: rotate(0deg) scale(1.1); opacity: 0.08; }
+
+        .stat-value { 
+            font-size: 2.5rem; font-weight: 800; color: var(--royal-blue); margin: 10px 0; 
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .stat-label { 
+            color: #666; font-size: 0.95rem; text-transform: uppercase; 
+            letter-spacing: 1.2px; font-weight: 600;
+        }
+        .loading-placeholder { color: #ccc; font-size: 1.5rem; }
+
+        /* Section Titles */
+        .dash-section-title {
+            font-family: 'Cinzel', serif; color: var(--royal-blue);
+            border-bottom: 2px solid rgba(212, 175, 55, 0.3);
+            padding-bottom: 10px; margin-bottom: 25px; margin-top: 40px;
         }
     </style>
 </head>
 <body>
 
-<div id="splash-screen">
-    <img src="logo.png" class="splash-logo" onerror="this.src='https://via.placeholder.com/120'">
-    <h2 class="splash-text">THE LALIT</h2>
-    <p style="color: var(--gold); letter-spacing: 3px; font-size: 0.7rem; margin-top: 10px;">INTERNATIONAL SCHOOL</p>
-</div>
+<div id="menu-container"></div>
 
-<div class="dashboard-content" id="mainDash">
-    <div class="container-fluid">
+<div class="main-content">
+    <div class="royal-card">
         
+        <div class="header" id="brand-header-container">
+            <p style="text-align:center; color:var(--gold);">Loading Royal Branding...</p>
+        </div>
+
+        <h2 style="margin-top:0; text-align:center; color:var(--royal-blue); font-family:'Cinzel',serif; letter-spacing:2px; border-bottom:none;">EXECUTIVE CONTROL TOWER</h2>
+        <hr style="margin: 10px auto 30px; width: 100px; border: 2px solid var(--gold);">
+
         <div class="welcome-banner">
-            <h1 class="display-5 fw-bold">Management Control Tower</h1>
-            <p class="lead">Welcome back, <span id="userNameDisplay" style="color: var(--gold);">Administrator</span>. Here's your school's live overview.</p>
+            <div class="welcome-text">
+                <h2 id="welcomeGreeting">Welcome back, User</h2>
+                <p>Here's the real-time overview of The Lalit International.</p>
+            </div>
+            <div class="role-badge-dash" id="userRoleDisplay">Loading Role...</div>
         </div>
 
-        <div class="row g-4">
-            <div class="col-md-3">
-                <div class="stat-card position-relative">
-                    <i class="fas fa-user-graduate stat-icon"></i>
-                    <h6 class="text-uppercase small fw-bold text-muted">Total Students</h6>
-                    <h2 class="fw-bold" id="totalStudents">...</h2>
-                </div>
+        <h4 class="dash-section-title">INSTITUTION OVERVIEW</h4>
+        <div class="stats-grid">
+            
+            <div class="royal-stat-card">
+                <i class="fas fa-user-graduate stat-bg-icon"></i>
+                <div class="stat-label">Total Students</div>
+                <div class="stat-value" id="countStudents"><span class="loading-placeholder">...</span></div>
             </div>
-            <div class="col-md-3">
-                <div class="stat-card position-relative">
-                    <i class="fas fa-user-tie stat-icon"></i>
-                    <h6 class="text-uppercase small fw-bold text-muted">Total Staff</h6>
-                    <h2 class="fw-bold" id="totalStaff">...</h2>
-                </div>
+
+            <div class="royal-stat-card">
+                <i class="fas fa-chalkboard-teacher stat-bg-icon"></i>
+                <div class="stat-label">Total Staff</div>
+                <div class="stat-value" id="countStaff"><span class="loading-placeholder">...</span></div>
             </div>
-            <div class="col-md-3">
-                <div class="stat-card position-relative">
-                    <i class="fas fa-wallet stat-icon"></i>
-                    <h6 class="text-uppercase small fw-bold text-muted">Today's Fees</h6>
-                    <h2 class="fw-bold" style="color: #28a745;">₹ <span id="todayFees">0</span></h2>
-                </div>
+
+            <div class="royal-stat-card">
+                <i class="fas fa-calendar-day stat-bg-icon"></i>
+                <div class="stat-label">Today's Admissions</div>
+                <div class="stat-value" id="countToday" style="color: var(--gold);">0</div>
             </div>
-            <div class="col-md-3">
-                <div class="stat-card position-relative">
-                    <i class="fas fa-bell stat-icon"></i>
-                    <h6 class="text-uppercase small fw-bold text-muted">Pending Notices</h6>
-                    <h2 class="fw-bold" style="color: #dc3545;">03</h2>
-                </div>
+
+            <div class="royal-stat-card" style="border-bottom-color: #28a745;">
+                <i class="fas fa-shield-alt stat-bg-icon" style="color: #28a745;"></i>
+                <div class="stat-label">System Status</div>
+                <div class="stat-value" style="font-size: 1.5rem; color: #28a745; margin-top: 20px;"> Let's do it..</div>
             </div>
+
         </div>
 
-        <div class="row mt-5">
-            <div class="col-md-8">
-                <div class="stat-card">
-                    <h5 class="fw-bold mb-4"><i class="fas fa-chart-line me-2"></i>Recent Activity</h5>
-                    <div id="activityLog" class="small text-muted">
-                        Fetching latest school updates...
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="stat-card" style="border-left-color: var(--royal);">
-                    <h5 class="fw-bold mb-3">System Health</h5>
-                    <p class="small text-muted"><i class="fas fa-circle text-success me-2"></i> Database Connected</p>
-                    <p class="small text-muted"><i class="fas fa-circle text-success me-2"></i> Auth Server Online</p>
-                    <p class="small text-muted"><i class="fas fa-circle text-success me-2"></i> Cloud Storage Ready</p>
-                </div>
-            </div>
+        <h4 class="dash-section-title">QUICK ACTIONS</h4>
+        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+            <button onclick="window.location.href='add-student.html'" class="royal-btn" style="flex: 1; min-width: 200px;">
+                <i class="fas fa-plus-circle me-2"></i> New Admission
+            </button>
+            <button onclick="window.location.href='staff.html'" class="royal-btn" style="flex: 1; min-width: 200px; background: var(--royal-blue); border: 1px solid var(--gold);">
+                <i class="fas fa-user-tie me-2"></i> Manage Staff
+            </button>
         </div>
 
     </div>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
-<script src="firebase-config.js"></script>
-
-<script src="menu.js"></script>
-
 <script>
-    const auth = firebase.auth();
     const db = firebase.firestore();
+    const auth = firebase.auth();
 
-    // Any-time check for Auth
+    // Auth listener to load data only when logged in
     auth.onAuthStateChanged(async (user) => {
-        if (!user) {
-            window.location.href = "login.html";
+        if (user) {
+            initDashboard(user);
         } else {
-            loadDashboardData(user);
-            
-            // --- Animation Trigger Logic ---
-            // Animation khatam hone se pehle menu trigger karne ke liye 1.5s delay
-            setTimeout(() => {
-                document.getElementById('splash-screen').style.opacity = '0';
-                document.getElementById('splash-screen').style.visibility = 'hidden';
-                document.getElementById('mainDash').classList.add('visible');
-            }, 2000); 
+            // menu.js will handle redirect, but this is a fallback
+            // window.location.href = 'login.html';
         }
     });
 
-    async function loadDashboardData(user) {
+    async function initDashboard(user) {
+        console.log("Initializing Dashboard for:", user.email);
+
         try {
-            // Get User Name from Staff/Students collection
-            const staffSnap = await db.collection('staff').where('loginEmail', '==', user.email).get();
-            if(!staffSnap.empty) document.getElementById('userNameDisplay').innerText = staffSnap.docs[0].data().name;
+            // 1. Fetch User Details (Name & Role) from Staff Collection
+            let userName = "Authorized User";
+            let userRole = "Staff";
+            
+            const staffQuery = await db.collection('staff').where('loginEmail', '==', user.email).get();
+            if (!staffQuery.empty) {
+                const data = staffQuery.docs[0].data();
+                userName = data.name;
+                userRole = data.designation + " (" + data.role + ")";
+            } else {
+                // Check student if not staff (optional)
+                 const studentQuery = await db.collection('students').where('loginEmail', '==', user.email).get();
+                 if(!studentQuery.empty) {
+                     userName = studentQuery.docs[0].data().name;
+                     userRole = "Student";
+                 }
+            }
 
-            // Fetch Live Stats
-            const studentCount = await db.collection('students').get();
-            document.getElementById('totalStudents').innerText = studentCount.size;
+            document.getElementById('welcomeGreeting').innerText = `Welcome back, ${userName}`;
+            document.getElementById('userRoleDisplay').innerText = userRole;
 
-            const staffCount = await db.collection('staff').get();
-            document.getElementById('totalStaff').innerText = staffCount.size;
 
-        } catch (err) {
-            console.error("Data Load Error:", err);
+            // 2. Fetch Live Counts from Firestore
+            // Students Count
+            db.collection('students').onSnapshot(snap => {
+                document.getElementById('countStudents').innerText = snap.size;
+            });
+
+            // Staff Count
+            db.collection('staff').onSnapshot(snap => {
+                document.getElementById('countStaff').innerText = snap.size;
+            });
+
+            // (Optional) Today's Admission Count Logic could go here
+            // For now, it's static 0 as per placeholder.
+
+        } catch (error) {
+            console.error("Dashboard Error:", error);
+            document.getElementById('welcomeGreeting').innerText = "Welcome back";
         }
     }
 </script>
+
+<script src="menu.js"></script>
 
 </body>
 </html>
