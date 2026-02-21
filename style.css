@@ -1,140 +1,147 @@
-/* ==========================================================================
-   MASTER UNIVERSAL FRAMEWORK (V4.0 - PRINT FIX EDITION)
-   Theme: Imperial Burgundy & Antique Champagne
-   Includes: All-in-One Styles + Single Page Report Card Engine
-==========================================================================
+/* --- THE LALIT INTERNATIONAL SCHOOL - MASTER UNIVERSAL FRAMEWORK --- 
+   Theme: Emerald & Silver (Premium Modern)
+   Fixes: Background-less Menu & Space Removal
 */
 
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Poppins:wght@300;400;500;600;700&display=swap');
 
 :root {
-    /* --- COLOR PALETTE --- */
-    --royal-blue: #4a0404;          /* Deep Imperial Burgundy */
-    --royal-blue-light: #630606;
-    --gold: #c5a059;               /* Antique Champagne Gold */
-    --deep-gold: #8e6f3e;
-    --light-gold: #fffbf2;
-    --text-dark: #2c1810;
-    --border-color: #d8c3a5;
-    --shadow-md: 0 10px 30px rgba(74, 4, 4, 0.1);
+    --royal-blue: #064e3b;          /* Deep Emerald Green */
+    --royal-blue-light: #065f46;    /* Medium Emerald */
+    --gold: #94a3b8;               /* Metallic Silver */
+    --deep-gold: #64748b;          /* Dark Steel Silver */
+    --light-gold: #f8fafc;         /* Off-white Silver Tint */
+    --success: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --info: #3b82f6;
+    --paper-white: #ffffff;
+    --text-dark: #0f172a;
+    --text-muted: #475569;
+    --border-color: #cbd5e1;
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+    --shadow-md: 0 10px 30px rgba(0,0,0,0.08);
+    --shadow-lg: 0 15px 40px rgba(0,0,0,0.12);
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* --- BASE RESET --- */
-* { box-sizing: border-box; -webkit-font-smoothing: antialiased; outline: none; }
-body { background: #f4ece2; font-family: 'Poppins', sans-serif; margin: 0; padding: 0; color: var(--text-dark); }
-h1, h2, h3, .brand-font { font-family: 'Cinzel', serif; text-transform: uppercase; }
+* { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
 
-/* --- UNIVERSAL MENU & SIDEBAR --- */
-#menu-trigger-btn { position: fixed; top: 15px; left: 15px; width: 45px; height: 45px; z-index: 20001; cursor: pointer; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; background: transparent; border: none; }
-#menu-trigger-btn span { width: 25px; height: 3px; background: var(--royal-blue); border-radius: 2px; transition: 0.4s; }
-.open-btn span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
-.open-btn span:nth-child(2) { opacity: 0; }
-.open-btn span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
-
-#sidebar-panel { position: fixed; top: 0; left: -300px; width: 280px; height: 100vh; background: var(--royal-blue); z-index: 20000; transition: 0.4s; border-right: 3px solid var(--gold); overflow-y: auto; color: white; }
-#sidebar-panel.open { left: 0; }
-#menu-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 19999; display: none; backdrop-filter: blur(3px); }
-
-.sidebar-header { padding: 30px 20px; text-align: center; background: rgba(0,0,0,0.2); border-bottom: 1px solid rgba(197, 160, 89, 0.2); }
-.menu-logo { width: 65px; height: 65px; border-radius: 50%; border: 2px solid var(--gold); padding: 3px; background: white; object-fit: contain; }
-.nav-item { display: flex; align-items: center; padding: 12px 15px; color: white; text-decoration: none; transition: 0.3s; font-size: 0.9rem; }
-.nav-item i { color: var(--gold); margin-right: 12px; }
-.nav-item:hover, .active-link { background: rgba(197, 160, 89, 0.2); color: var(--gold); }
-.menu-divider { font-size: 10px; text-transform: uppercase; color: var(--gold); opacity: 0.6; padding: 20px 10px 5px; letter-spacing: 1.5px; font-weight: bold; }
-
-/* --- MAIN LAYOUT & UI --- */
-.main-content { padding: 30px 20px 40px; display: flex; flex-direction: column; align-items: center; }
-.royal-card { width: 100%; max-width: 1300px; background: var(--paper-white); background-image: url('https://www.transparenttextures.com/patterns/pinstriped-suit.png'); border: 1px solid var(--border-color); border-radius: 15px; padding: 30px; box-shadow: var(--shadow-md); position: relative; overflow: hidden; }
-.royal-card::after { content: ""; position: absolute; top: 15px; left: 15px; right: 15px; bottom: 15px; border: 1px solid rgba(197, 160, 89, 0.2); pointer-events: none; border-radius: 10px; }
-
-.royal-btn { background: var(--royal-blue); color: var(--gold); border: 1px solid var(--gold); padding: 12px 28px; font-weight: 600; cursor: pointer; transition: var(--transition); text-transform: uppercase; border-radius: 5px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; }
-.royal-btn:hover { background: var(--gold); color: white; transform: translateY(-2px); }
-
-.controls-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; background: var(--light-gold); padding: 25px; border-radius: 12px; border: 1px solid var(--gold); margin-bottom: 25px; }
-input, select { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-bottom: 3px solid var(--gold); border-radius: 6px; background: white; }
-
-/* ==========================================================================
-   REPORT CARD PRINT ENGINE (SINGLE PAGE LOGIC)
-========================================================================== */
-.report-card { 
-    width: 210mm; 
-    height: 297mm; /* Fixed A4 Height */
-    max-height: 297mm;
-    padding: 10mm; 
-    background: white; 
-    margin: 20px auto; 
-    border: 10px double var(--royal-blue);
-    box-sizing: border-box; 
-    display: flex; 
-    flex-direction: column; 
-    justify-content: space-between; /* Distributes space evenly */
-    color: #000;
-    overflow: hidden; /* Prevents spillover */
-    box-shadow: var(--shadow-lg);
+body { 
+    background: #f1f5f9; 
+    font-family: 'Poppins', sans-serif; 
+    margin: 0; padding: 0; 
+    color: var(--text-dark);
+    line-height: 1.6;
 }
 
-/* Header Section (Logo, Name, Photo) */
-.report-header-table { width: 100%; border-bottom: 2px solid var(--royal-blue); margin-bottom: 5px; padding-bottom: 5px; }
-.report-header-table td { vertical-align: middle; }
-.school-logo-print { width: 80px; height: 80px; object-fit: contain; }
-.student-photo-print { width: 80px; height: 90px; border: 2px solid var(--royal-blue); object-fit: cover; }
-.brand-side { text-align: center; }
-.brand-side h1 { font-size: 22px; color: var(--royal-blue); margin: 0; line-height: 1.2; }
-.brand-side p { margin: 2px 0; font-size: 10px; font-weight: 600; color: var(--text-dark); }
-
-/* Titles & Tables */
-.exam-title-bar { background: var(--royal-blue); color: var(--gold); text-align: center; padding: 5px; font-weight: bold; margin: 5px 0; border-radius: 4px; font-size: 14px; text-transform: uppercase; }
-
-.marks-table { width: 100%; border-collapse: collapse; font-size: 11px; }
-.marks-table th, .marks-table td { border: 1px solid #000; padding: 4px 2px; text-align: center; }
-.marks-table th { background: rgba(197, 160, 89, 0.2); color: var(--royal-blue); font-weight: bold; }
-.student-info-table td { text-align: left; padding: 5px; border: none; border-bottom: 1px solid #ddd; font-size: 12px; }
-
-/* Main Content Container - This will stretch/shrink */
-.report-content-body {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    justify-content: flex-start;
-    padding: 10px 0;
+/* --- SPACE FIX: Menu & Content Gap Removal --- */
+#menu-trigger-btn {
+    position: fixed !important; 
+    top: 15px !important; 
+    left: 15px !important; 
+    width: 45px; height: 45px;
+    background: transparent !important; 
+    border: none !important;             
+    z-index: 20001; cursor: pointer; 
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center; gap: 5px; 
+    transition: 0.3s; outline: none;
 }
 
-/* Summary, Co-Scholastic & Remarks */
-.result-summary { display: grid; grid-template-columns: repeat(4, 1fr); border: 2px solid var(--royal-blue); background: var(--light-gold); }
-.res-item { padding: 5px; text-align: center; border-right: 1px solid var(--royal-blue); }
-.res-item:last-child { border-right: none; }
-.res-label { font-size: 9px; font-weight: bold; color: var(--royal-blue); display: block; }
-.res-val { font-size: 14px; font-weight: bold; }
-
-.co-scholastic-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.remarks-box { border: 2px solid var(--royal-blue); padding: 8px; font-size: 12px; min-height: 40px; background: rgba(255, 251, 242, 0.5); }
-
-/* Footer Signatures - Always at bottom */
-.footer-signs { display: flex; justify-content: space-between; margin-top: 5px; padding-top: 5px; text-align: center; border-top: 1px solid #ccc; }
-.sig-box { width: 150px; }
-.sig-img { width: 120px; height: 40px; object-fit: contain; mix-blend-mode: multiply; }
-.sig-text { border-top: 1px solid #000; margin-top: 2px; font-weight: bold; font-size: 11px; color: var(--royal-blue); }
-
-/* --- PRINT SPECIFIC MEDIA QUERY --- */
-@media print { 
-    @page { size: A4; margin: 0mm; }
-    html, body { height: 297mm; width: 210mm; background: white !important; }
-    .no-print, #menu-container, #menu-trigger-btn, .main-content > .admin-container { display: none !important; } 
-    .main-content { margin: 0 !important; padding: 0 !important; height: 297mm; }
-    
-    .report-card { 
-        margin: 0 !important; 
-        border: none !important; /* Remove outer border for actual print */
-        box-shadow: none !important;
-        height: 297mm !important;
-        page-break-after: always;
-        page-break-inside: avoid;
-        padding: 8mm !important; /* Slightly reduce padding for safe margins */
-    }
-    
-    /* Final Safety Net: Scale down slightly if content is still too big */
-    body { transform: scale(0.99); transform-origin: top center; }
+#menu-trigger-btn span { 
+    width: 25px; height: 3px; 
+    background: var(--royal-blue) !important; /* Lines changed to Emerald */
+    border-radius: 2px; transition: 0.4s; 
 }
 
+.main-content { 
+    padding: 30px 20px 40px; 
+    display: flex; flex-direction: column; align-items: center;
+}
+
+/* --- REST OF THE THEME (STRUCTURE UNTOUCHED) --- */
+.school-logo { 
+    width: 120px; height: 120px; object-fit: contain; display: block;
+    margin: 0 auto 15px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1)); 
+    transition: var(--transition); 
+}
+.school-logo:hover { transform: scale(1.05); }
+
+.receipt-logo { width: 80px !important; height: 80px !important; object-fit: contain; margin-bottom: 10px; }
+
+.royal-card { 
+    width: 100%; max-width: 1300px;
+    background: var(--paper-white);
+    background-image: url('https://www.transparenttextures.com/patterns/white-diamond.png');
+    border: 1px solid var(--border-color);
+    border-radius: 15px;
+    padding: clamp(20px, 5%, 50px);
+    box-shadow: var(--shadow-md);
+    position: relative; overflow: hidden;
+}
+
+.royal-card::after {
+    content: ""; position: absolute;
+    top: 15px; left: 15px; right: 15px; bottom: 15px;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    pointer-events: none; border-radius: 10px;
+}
+
+#menu-container { position: fixed; top: 0; width: 100%; z-index: 9999; }
+
+.header { text-align: center; margin-bottom: 40px; border-bottom: 3px double var(--gold); padding-bottom: 25px; }
+h1, .brand-font { font-family: 'Cinzel', serif; color: var(--royal-blue); margin: 0; text-transform: uppercase; }
+h2 { font-family: 'Cinzel', serif; color: var(--royal-blue); text-align: center; margin: 30px 0; position: relative; padding-bottom: 10px; width: 100%; }
+h2::after { content: ""; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 80px; height: 3px; background: var(--gold); }
+
+.royal-btn {
+    background: var(--royal-blue); color: #ffffff;
+    border: 1px solid var(--royal-blue); padding: 12px 28px;
+    font-weight: 600; cursor: pointer; transition: var(--transition);
+    text-transform: uppercase; letter-spacing: 1.5px;
+    border-radius: 5px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    text-decoration: none;
+}
+
+.royal-btn:hover { background: var(--gold); color: white; transform: translateY(-3px); box-shadow: 0 5px 15px rgba(148, 163, 184, 0.4); }
+
+.search-box-wrapper { position: relative; max-width: 600px; margin: 0 auto 30px; width: 100%; }
+.search-input-royal {
+    width: 100%; padding: 15px 25px; padding-right: 60px;
+    border: 2px solid var(--gold); border-radius: 30px;
+    font-size: 16px; outline: none; transition: var(--transition);
+}
+
+.form-section {
+    background: rgba(248, 250, 252, 0.8);
+    border-left: 6px solid var(--royal-blue);
+    padding: 25px; margin-bottom: 30px; border-radius: 8px;
+    box-shadow: var(--shadow-sm);
+}
+
+.input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+.input-group { display: flex; flex-direction: column; gap: 8px; }
+
+input, select, textarea {
+    width: 100%; padding: 14px 16px; border: 1px solid #d1d1d1;
+    border-bottom: 3px solid var(--gold); border-radius: 6px;
+    font-size: 15px; transition: var(--transition); background: white;
+}
+
+.profile-grid-custom { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-top: 30px; width: 100%; }
+.custom-id-card {
+    background: white; border: 1px solid var(--gold); border-radius: 12px;
+    padding: 18px; display: flex; align-items: center; gap: 20px;
+    cursor: pointer; transition: var(--transition); position: relative; overflow: hidden;
+}
+.custom-id-card:hover { transform: scale(1.03) translateY(-5px); box-shadow: var(--shadow-lg); border-color: var(--royal-blue); }
+
+.id-photo { width: 85px; height: 105px; object-fit: cover; border: 2px solid var(--gold); border-radius: 6px; }
+
+/* Mobile Responsive Adjustments */
+@media (max-width: 768px) {
+    .main-content { padding-top: 20px !important; }
+    .royal-card { padding: 20px; }
+    .school-logo { width: 90px; height: 90px; }
+}
