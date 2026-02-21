@@ -1,4 +1,4 @@
-/* THE LALIT INTERNATIONAL SCHOOL - UNIVERSAL SECURE MENU */
+/* THE LALIT INTERNATIONAL SCHOOL - COMPLETE SECURE MENU */
 
 const menuConfig = [
     { title: "Dashboard", icon: "fa-home", link: "index.html", role: "all" },
@@ -26,28 +26,20 @@ const menuConfig = [
     { title: "Manage Users", icon: "fa-user-shield", link: "manage-users.html", role: ["admin"] },
 
     { type: "divider", title: "Security", role: "all" },
-    { title: "Reset Password", icon: "fa-key", link: "reset.html", role: "all" },
+    // Yahan Reset Password fix kar diya hai (link ab '#' hai aur ID de di hai)
+    { title: "Reset Password", icon: "fa-key", link: "#", role: "all", id: "resetPasswordBtn" },
     { title: "Logout", icon: "fa-sign-out-alt", link: "#", role: "all", id: "logoutBtn" }
 ];
-
-// Helper function to check role access
-function hasAccess(item, userRole) {
-    if (item.role === "all") return true;
-    if (Array.isArray(item.role)) return item.role.includes(userRole);
-    return item.role === userRole;
-}
 
 async function initUniversalMenu() {
     const user = firebase.auth().currentUser;
     let userRole = "guest";
 
     if (user) {
-        // Step 1: Check Staff Collection
         const staffDoc = await firebase.firestore().collection('staff').where('loginEmail', '==', user.email).get();
         if (!staffDoc.empty) {
             userRole = staffDoc.docs[0].data().role;
         } else {
-            // Step 2: Check Student Collection
             const studentDoc = await firebase.firestore().collection('students').where('loginEmail', '==', user.email).get();
             if (!studentDoc.empty) {
                 userRole = "student";
@@ -55,31 +47,29 @@ async function initUniversalMenu() {
         }
     }
 
-    // --- SECURITY GUARD: Check if user has permission for CURRENT page ---
+    // Security Check: Current page permissions
     const currentPage = window.location.pathname.split("/").pop() || 'index.html';
     const currentMenuItem = menuConfig.find(m => m.link === currentPage);
+    const hasAccess = (item) => (item.role === "all") || (Array.isArray(item.role) && item.role.includes(userRole)) || (item.role === userRole);
 
-    if (currentMenuItem && !hasAccess(currentMenuItem, userRole)) {
-        alert("⛔ Access Denied! You don't have permission for this page.");
-        window.location.href = "index.html"; // Redirect unauthorized users to dashboard
+    if (currentMenuItem && !hasAccess(currentMenuItem)) {
+        alert("⛔ Access Denied! Wapas Dashboard par bheja ja raha hai.");
+        window.location.href = "index.html";
         return;
     }
 
-    // Render Menu
+    // Sidebar Creation
     const menuWrapper = document.createElement('div');
     menuWrapper.id = 'imperial-menu-wrapper';
 
     let menuItemsHTML = '';
     menuConfig.forEach(item => {
-        if (hasAccess(item, userRole)) {
+        if (hasAccess(item)) {
             if (item.type === "divider") {
                 menuItemsHTML += `<div class="menu-divider">${item.title}</div>`;
             } else {
                 const isActive = currentPage === item.link ? 'active-link' : '';
-                menuItemsHTML += `
-                    <a href="${item.link}" class="nav-item ${isActive}" id="${item.id || ''}">
-                        <i class="fas ${item.icon}"></i> <span>${item.title}</span>
-                    </a>`;
+                menuItemsHTML += `<a href="${item.link}" class="nav-item ${isActive}" id="${item.id || ''}"><i class="fas ${item.icon}"></i> <span>${item.title}</span></a>`;
             }
         }
     });
@@ -91,19 +81,48 @@ async function initUniversalMenu() {
                 <img src="logo.png" class="menu-logo" onerror="this.src='https://via.placeholder.com/60'">
                 <h3>THE LALIT</h3>
                 <p>INTERNATIONAL SCHOOL</p>
-                <div style="font-size:0.6rem; color:#D4AF37; margin-top:5px; text-transform:uppercase;">User: ${user.email.split('@')[0]} | Role: ${userRole}</div>
+                <div style="font-size:0.6rem; color:#D4AF37; margin-top:5px; text-transform:uppercase;">Role: ${userRole}</div>
             </div>
             <nav class="nav-links">${menuItemsHTML}</nav>
         </div>
-        <button id="menu-trigger-btn">
-            <span></span><span></span><span></span>
-        </button>
+        <button id="menu-trigger-btn"><span></span><span></span><span></span></button>
     `;
 
     document.body.prepend(menuWrapper);
-    document.body.style.opacity = "1"; // Show page after security check
+    document.body.style.opacity = "1"; // Security Check ke baad page dikhao
 
-    // CSS Injection (Same as your original)
+    // Menu Toggle Actions
+    const trigger = document.getElementById('menu-trigger-btn');
+    const panel = document.getElementById('sidebar-panel');
+    const overlay = document.getElementById('menu-overlay');
+    const toggle = () => { panel.classList.toggle('open'); trigger.classList.toggle('open-btn'); overlay.style.display = panel.classList.contains('open') ? 'block' : 'none'; };
+    trigger.onclick = toggle; overlay.onclick = toggle;
+
+    // RESET PASSWORD FUNCTION
+    const resetBtn = document.getElementById('resetPasswordBtn');
+    if(resetBtn) {
+        resetBtn.onclick = (e) => {
+            e.preventDefault();
+            if(confirm("Password reset link aapki registered email par bhej dein?")) {
+                firebase.auth().sendPasswordResetEmail(user.email).then(() => {
+                    alert("Success! Check your Email Inbox.");
+                }).catch((error) => { alert("Error: " + error.message); });
+            }
+        };
+    }
+
+    // LOGOUT FUNCTION
+    const logoutBtn = document.getElementById('logoutBtn');
+    if(logoutBtn) {
+        logoutBtn.onclick = (e) => {
+            e.preventDefault();
+            if(confirm("Logout karna chahte hain?")) {
+                firebase.auth().signOut().then(() => { window.location.href = "login.html"; });
+            }
+        };
+    }
+
+    // CSS injection remains same
     const style = document.createElement('style');
     style.textContent = `
         #menu-trigger-btn { position: fixed; top: 15px; left: 15px; width: 45px; height: 45px; background: #002366; border: 1px solid #D4AF37; border-radius: 8px; z-index: 20001; cursor: pointer; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; transition: 0.3s; }
@@ -126,46 +145,16 @@ async function initUniversalMenu() {
         .open-btn span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
     `;
     document.head.appendChild(style);
-
-    const trigger = document.getElementById('menu-trigger-btn');
-    const panel = document.getElementById('sidebar-panel');
-    const overlay = document.getElementById('menu-overlay');
-
-    const toggle = () => {
-        panel.classList.toggle('open');
-        trigger.classList.toggle('open-btn');
-        overlay.style.display = panel.classList.contains('open') ? 'block' : 'none';
-    };
-
-    trigger.onclick = toggle;
-    overlay.onclick = toggle;
-
-    const logoutBtn = document.getElementById('logoutBtn');
-    if(logoutBtn) {
-        logoutBtn.onclick = (e) => {
-            e.preventDefault();
-            if(confirm("Do you want to exit The Lalit School Portal?")) {
-                firebase.auth().signOut().then(() => { window.location.href = "login.html"; });
-            }
-        };
-    }
 }
 
-// Global Security Guard
+// Global Auth Check
 firebase.auth().onAuthStateChanged((user) => {
     const currentPage = window.location.pathname.split("/").pop() || 'index.html';
-
-    if (!user) {
-        // Not logged in
-        if (currentPage !== "login.html") {
-            window.location.href = "login.html";
-        }
-    } else {
-        // Logged in
-        if (currentPage === "login.html") {
-            window.location.href = "index.html";
-        } else {
-            initUniversalMenu();
-        }
+    if (!user && currentPage !== "login.html") {
+        window.location.href = "login.html";
+    } else if (user && currentPage === "login.html") {
+        window.location.href = "index.html";
+    } else if (user) {
+        initUniversalMenu();
     }
 });
