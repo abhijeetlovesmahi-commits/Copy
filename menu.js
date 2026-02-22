@@ -1,4 +1,4 @@
-/* THE LALIT INTERNATIONAL SCHOOL - SECURE MANUAL PASSWORD RESET */
+/* THE LALIT INTERNATIONAL SCHOOL - SECURE UNIVERSAL MENU & DASHBOARD LOGIC */
 
 const menuConfig = [
     { title: "Dashboard", icon: "fa-home", link: "index.html", role: "all" },
@@ -26,8 +26,10 @@ const menuConfig = [
     { title: "Manage Users", icon: "fa-user-shield", link: "manage-users.html", role: ["admin"] },
 
     { type: "divider", title: "Security", role: "all" },
-    { title: "Reset Password", icon: "fa-key", link: "#", role: "all", id: "resetPasswordBtn" },
-    { title: "Logout", icon: "fa-sign-out-alt", link: "#", role: "all", id: "logoutBtn" }
+    // Login button sirf tab dikhega jab user login nahi hoga
+    { title: "Login to Portal", icon: "fa-sign-in-alt", link: "login.html", role: "guest", id: "loginBtn" },
+    { title: "Reset Password", icon: "fa-key", link: "#", role: ["admin", "accountant", "teacher", "student"], id: "resetPasswordBtn" },
+    { title: "Logout", icon: "fa-sign-out-alt", link: "#", role: ["admin", "accountant", "teacher", "student"], id: "logoutBtn" }
 ];
 
 async function initUniversalMenu() {
@@ -35,34 +37,48 @@ async function initUniversalMenu() {
     let userRole = "guest";
 
     if (user) {
-        const staffDoc = await firebase.firestore().collection('staff').where('loginEmail', '==', user.email).get();
-        if (!staffDoc.empty) {
-            userRole = staffDoc.docs[0].data().role;
-        } else {
-            const studentDoc = await firebase.firestore().collection('students').where('loginEmail', '==', user.email).get();
-            if (!studentDoc.empty) {
-                userRole = "student";
+        try {
+            const staffDoc = await firebase.firestore().collection('staff').where('loginEmail', '==', user.email).get();
+            if (!staffDoc.empty) {
+                userRole = staffDoc.docs[0].data().role;
+            } else {
+                const studentDoc = await firebase.firestore().collection('students').where('loginEmail', '==', user.email).get();
+                if (!studentDoc.empty) {
+                    userRole = "student";
+                }
             }
-        }
+        } catch (e) { console.error("Role fetching failed", e); }
     }
 
     const currentPage = window.location.pathname.split("/").pop() || 'index.html';
-    const currentMenuItem = menuConfig.find(m => m.link === currentPage);
-    const hasAccess = (item) => (item.role === "all") || (Array.isArray(item.role) && item.role.includes(userRole)) || (item.role === userRole);
+    const hasAccess = (item) => {
+        if (item.role === "all") return true;
+        if (userRole === "guest" && item.role === "guest") return true;
+        if (Array.isArray(item.role)) return item.role.includes(userRole);
+        return item.role === userRole;
+    };
 
-    if (currentMenuItem && !hasAccess(currentMenuItem)) {
+    // Access Security Check
+    const currentMenuItem = menuConfig.find(m => m.link === currentPage);
+    if (currentMenuItem && !hasAccess(currentMenuItem) && userRole !== "guest") {
         alert("⛔ Access Denied!");
         window.location.href = "index.html";
         return;
     }
 
+    // Purane menu ko remove karein agar pehle se hai (Duplicate prevent karne ke liye)
+    const oldMenu = document.getElementById('imperial-menu-wrapper');
+    if (oldMenu) oldMenu.remove();
+
     const menuWrapper = document.createElement('div');
     menuWrapper.id = 'imperial-menu-wrapper';
     let menuItemsHTML = '';
+    
     menuConfig.forEach(item => {
         if (hasAccess(item)) {
-            if (item.type === "divider") { menuItemsHTML += `<div class="menu-divider">${item.title}</div>`; } 
-            else {
+            if (item.type === "divider") { 
+                menuItemsHTML += `<div class="menu-divider">${item.title}</div>`; 
+            } else {
                 const isActive = currentPage === item.link ? 'active-link' : '';
                 menuItemsHTML += `<a href="${item.link}" class="nav-item ${isActive}" id="${item.id || ''}"><i class="fas ${item.icon}"></i> <span>${item.title}</span></a>`;
             }
@@ -76,46 +92,44 @@ async function initUniversalMenu() {
                 <img src="logo.png" class="menu-logo" onerror="this.src='https://via.placeholder.com/60'">
                 <h3>THE LALIT</h3>
                 <p>INTERNATIONAL SCHOOL</p>
-                <div style="font-size:0.6rem; color:#D4AF37; margin-top:5px; text-transform:uppercase;">Role: ${userRole}</div>
+                <div style="font-size:0.6rem; color:#D4AF37; margin-top:5px; text-transform:uppercase;">Status: ${userRole}</div>
             </div>
             <nav class="nav-links">${menuItemsHTML}</nav>
         </div>
         <button id="menu-trigger-btn"><span></span><span></span><span></span></button>
     `;
+    
     document.body.prepend(menuWrapper);
-    document.body.style.opacity = "1";
 
     const trigger = document.getElementById('menu-trigger-btn');
     const panel = document.getElementById('sidebar-panel');
     const overlay = document.getElementById('menu-overlay');
-    const toggle = () => { panel.classList.toggle('open'); trigger.classList.toggle('open-btn'); overlay.style.display = panel.classList.contains('open') ? 'block' : 'none'; };
-    trigger.onclick = toggle; overlay.onclick = toggle;
+    
+    const toggle = () => { 
+        panel.classList.toggle('open'); 
+        trigger.classList.toggle('open-btn'); 
+        overlay.style.display = panel.classList.contains('open') ? 'block' : 'none'; 
+    };
+    
+    trigger.onclick = toggle; 
+    overlay.onclick = toggle;
 
-    // --- MANUAL PASSWORD RESET (NO EMAIL NEEDED) ---
+    // --- MANUAL PASSWORD RESET ---
     const resetBtn = document.getElementById('resetPasswordBtn');
-    if(resetBtn) {
+    if(resetBtn && user) {
         resetBtn.onclick = async (e) => {
             e.preventDefault();
-            const newPass = prompt("Apna Naya Password likhein (Kam se kam 6 characters):");
+            const newPass = prompt("Apna Naya Password likhein (Min 6 chars):");
             if (newPass && newPass.length >= 6) {
-                const confirmPass = prompt("Password dobara likhein confirm karne ke liye:");
+                const confirmPass = prompt("Confirm Password:");
                 if (newPass === confirmPass) {
                     try {
                         await user.updatePassword(newPass);
-                        alert("✅ Password safaltapoorvak badal gaya hai! Agli baar naye password se login karein.");
+                        alert("✅ Password badal gaya!");
                     } catch (error) {
-                        if (error.code === 'auth/requires-recent-login') {
-                            alert("Security Note: Password badalne ke liye aapko ek baar logout karke dubara login karna hoga.");
-                            firebase.auth().signOut().then(() => { window.location.href = "login.html"; });
-                        } else {
-                            alert("Error: " + error.message);
-                        }
+                        alert("Security: Dubara login karke try karein.");
                     }
-                } else {
-                    alert("❌ Password match nahi huye!");
                 }
-            } else if (newPass) {
-                alert("❌ Password kam se kam 6 aksharon ka hona chahiye.");
             }
         };
     }
@@ -125,38 +139,49 @@ async function initUniversalMenu() {
         logoutBtn.onclick = (e) => {
             e.preventDefault();
             if(confirm("Logout karna chahte hain?")) {
-                firebase.auth().signOut().then(() => { window.location.href = "login.html"; });
+                firebase.auth().signOut().then(() => { window.location.href = "index.html"; });
             }
         };
     }
 
-    const style = document.createElement('style');
-    style.textContent = `
-        #menu-trigger-btn { position: fixed; top: 15px; left: 15px; width: 45px; height: 45px; background: #002366; border: 1px solid #D4AF37; border-radius: 8px; z-index: 20001; cursor: pointer; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; transition: 0.3s; }
-        #menu-trigger-btn span { width: 25px; height: 3px; background: #D4AF37; border-radius: 2px; transition: 0.4s; }
-        #sidebar-panel { position: fixed; top: 0; left: -300px; width: 280px; height: 100vh; background: #002366; z-index: 20000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 5px 0 25px rgba(0,0,0,0.3); overflow-y: auto; color: white; border-right: 3px solid #D4AF37; }
-        #sidebar-panel.open { left: 0; }
-        #menu-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 19999; display: none; backdrop-filter: blur(3px); }
-        .sidebar-header { padding: 30px 20px; text-align: center; background: rgba(0,0,0,0.2); border-bottom: 1px solid rgba(212,175,55,0.2); }
-        .menu-logo { width: 65px; height: 65px; border-radius: 50%; border: 2px solid #D4AF37; padding: 3px; background: white; }
-        .sidebar-header h3 { font-family: 'Cinzel', serif; color: #D4AF37; margin: 10px 0 0; font-size: 1.2rem; }
-        .sidebar-header p { font-size: 0.6rem; letter-spacing: 2px; margin: 0; color: #aaa; }
-        .nav-links { padding: 15px; }
-        .menu-divider { font-size: 10px; text-transform: uppercase; color: #D4AF37; opacity: 0.6; padding: 20px 10px 5px; letter-spacing: 1.5px; font-weight: bold; }
-        .nav-item { display: flex; align-items: center; padding: 12px 15px; color: white; text-decoration: none; margin-bottom: 5px; border-radius: 6px; transition: 0.3s; font-size: 0.9rem; }
-        .nav-item i { width: 25px; color: #D4AF37; font-size: 1.1rem; margin-right: 12px; text-align: center; }
-        .nav-item:hover { background: rgba(212,175,55,0.15); color: #D4AF37; }
-        .active-link { background: rgba(212,175,55,0.2) !important; border-left: 4px solid #D4AF37; color: #D4AF37 !important; font-weight: bold; }
-        .open-btn span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
-        .open-btn span:nth-child(2) { opacity: 0; }
-        .open-btn span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
-    `;
-    document.head.appendChild(style);
+    // CSS Styles (Wahi hain jo aapne diye the)
+    if (!document.getElementById('menu-styles')) {
+        const style = document.createElement('style');
+        style.id = 'menu-styles';
+        style.textContent = `
+            #menu-trigger-btn { position: fixed; top: 15px; left: 15px; width: 45px; height: 45px; background: #002366; border: 1px solid #D4AF37; border-radius: 8px; z-index: 20001; cursor: pointer; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; transition: 0.3s; }
+            #menu-trigger-btn span { width: 25px; height: 3px; background: #D4AF37; border-radius: 2px; transition: 0.4s; }
+            #sidebar-panel { position: fixed; top: 0; left: -300px; width: 280px; height: 100vh; background: #002366; z-index: 20000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 5px 0 25px rgba(0,0,0,0.3); overflow-y: auto; color: white; border-right: 3px solid #D4AF37; }
+            #sidebar-panel.open { left: 0; }
+            #menu-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 19999; display: none; backdrop-filter: blur(3px); }
+            .sidebar-header { padding: 30px 20px; text-align: center; background: rgba(0,0,0,0.2); border-bottom: 1px solid rgba(212,175,55,0.2); }
+            .menu-logo { width: 65px; height: 65px; border-radius: 50%; border: 2px solid #D4AF37; padding: 3px; background: white; }
+            .sidebar-header h3 { font-family: 'Cinzel', serif; color: #D4AF37; margin: 10px 0 0; font-size: 1.2rem; }
+            .sidebar-header p { font-size: 0.6rem; letter-spacing: 2px; margin: 0; color: #aaa; }
+            .nav-links { padding: 15px; }
+            .menu-divider { font-size: 10px; text-transform: uppercase; color: #D4AF37; opacity: 0.6; padding: 20px 10px 5px; letter-spacing: 1.5px; font-weight: bold; }
+            .nav-item { display: flex; align-items: center; padding: 12px 15px; color: white; text-decoration: none; margin-bottom: 5px; border-radius: 6px; transition: 0.3s; font-size: 0.9rem; }
+            .nav-item i { width: 25px; color: #D4AF37; font-size: 1.1rem; margin-right: 12px; text-align: center; }
+            .nav-item:hover { background: rgba(212,175,55,0.15); color: #D4AF37; }
+            .active-link { background: rgba(212,175,55,0.2) !important; border-left: 4px solid #D4AF37; color: #D4AF37 !important; font-weight: bold; }
+            .open-btn span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+            .open-btn span:nth-child(2) { opacity: 0; }
+            .open-btn span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+        `;
+        document.head.appendChild(style);
+    }
 }
 
+// --- FIXED AUTH LISTENER ---
 firebase.auth().onAuthStateChanged((user) => {
+    // Har haal mein menu dikhao (chahe guest ho ya user)
+    initUniversalMenu();
+    
     const currentPage = window.location.pathname.split("/").pop() || 'index.html';
-    if (!user && currentPage !== "login.html") { window.location.href = "login.html"; } 
-    else if (user && currentPage === "login.html") { window.location.href = "index.html"; } 
-    else if (user) { initUniversalMenu(); }
+    
+    // Agar koi private page par bina login ke jane ki koshish kare
+    const privatePages = ["add-student.html", "add-staff.html", "collect-fees.html", "manage-users.html"];
+    if (!user && privatePages.includes(currentPage)) {
+        window.location.href = "login.html";
+    }
 });
