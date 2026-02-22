@@ -3,13 +3,37 @@
 <head>
     <link rel="manifest" href="manifest.json">
 
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js')
-    .then(() => console.log("App ready to install!"))
-    .catch((err) => console.log("Error:", err));
-  }
-</script>
+let deferredPrompt;
+const installBanner = document.getElementById('install-banner');
+const installBtn = document.getElementById('install-btn');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Chrome ko default prompt dikhane se rokein
+    e.preventDefault();
+    deferredPrompt = e;
+    // Humara custom banner dikhayein
+    installBanner.style.display = 'block';
+});
+
+installBtn.addEventListener('click', (e) => {
+    // Banner ko chhupayein
+    installBanner.style.display = 'none';
+    // Browser ka install prompt dikhayein
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+            console.log('User accepted the install prompt');
+        }
+        deferredPrompt = null;
+    });
+});
+
+// Agar app pehle se installed hai toh banner hide rakhein
+window.addEventListener('appinstalled', (evt) => {
+    installBanner.style.display = 'none';
+    console.log('App successfully installed!');
+});
+    
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -72,6 +96,11 @@
 </head>
 <body>
 
+    <div id="install-banner" style="display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #001f3f; color: gold; padding: 15px 25px; border: 2px solid gold; border-radius: 50px; z-index: 1000; box-shadow: 0 10px 20px rgba(0,0,0,0.5); font-family: serif; text-align: center;">
+    <p style="margin: 0 0 10px 0; font-weight: bold;">Experience Royal Luxury as an App!</p>
+    <button id="install-btn" style="background: gold; color: #001f3f; border: none; padding: 8px 20px; border-radius: 20px; font-weight: bold; cursor: pointer;">Install Now</button>
+    </div>
+    
     <main class="main-content">
         <div class="royal-card">
             
