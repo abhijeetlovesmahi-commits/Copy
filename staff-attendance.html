@@ -18,31 +18,21 @@
             margin-top: 20px;
         }
         .staff-card {
-            background: white;
-            border-radius: 12px;
-            padding: 15px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            border-left: 5px solid var(--gold);
+            background: white; border-radius: 12px; padding: 15px;
+            display: flex; align-items: center; gap: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-left: 5px solid var(--gold);
         }
-        .staff-img {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid #eee;
-        }
+        .staff-img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid #eee; }
         .info-area { flex: 1; }
         .btn-group { display: flex; gap: 8px; margin-top: 10px; }
-        .time-tag {
-            font-size: 0.75rem;
-            color: #666;
-            margin-top: 5px;
-            display: block;
-        }
-        .status-present { color: green; font-weight: bold; }
+        .time-tag { font-size: 0.75rem; color: #666; margin-top: 5px; display: block; }
+        
+        /* Payroll Table Styling */
+        .payroll-section { margin-top: 50px; padding-top: 30px; border-top: 2px double var(--gold); }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
+        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
+        th { background-color: var(--royal-blue); color: white; }
+        .salary-badge { font-weight: bold; color: #2e7d32; }
     </style>
 </head>
 <body>
@@ -51,99 +41,125 @@
 
 <div class="main-content">
     <div class="royal-card">
-        <div class="header">
-            <h2 style="color:var(--royal-blue);">DAILY ATTENDANCE LOG</h2>
+        <div class="header" style="text-align:center;">
+            <h2 style="color:var(--royal-blue); margin-bottom:5px;">STAFF ATTENDANCE</h2>
             <p id="currentDateDisplay" style="font-weight: bold; color: var(--gold);"></p>
         </div>
 
         <div class="attendance-grid" id="attendanceList">
-            <p>Fetching staff list...</p>
+            <p style="text-align:center; grid-column:1/-1;">Loading staff records...</p>
+        </div>
+
+        <div class="payroll-section">
+            <h2 style="color:var(--royal-blue); text-align:center;">MONTHLY PAYROLL REPORT</h2>
+            <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 20px;">
+                <input type="month" id="payrollMonth" class="royal-input" style="max-width:250px;">
+                <button class="royal-btn" onclick="generatePayroll()">GENERATE SALARY</button>
+            </div>
+
+            <table id="payrollTable">
+                <thead>
+                    <tr>
+                        <th>Staff Name</th>
+                        <th>Basic Salary</th>
+                        <th>Days Present</th>
+                        <th>Absent Days</th>
+                        <th>Net Salary</th>
+                    </tr>
+                </thead>
+                <tbody id="payrollBody">
+                    <tr><td colspan="5" style="text-align:center;">Select month and click generate</td></tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
 
 <script>
 const db = firebase.firestore();
-const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
+const today = new Date().toISOString().split('T')[0];
 document.getElementById('currentDateDisplay').innerText = "Date: " + new Date().toDateString();
+document.getElementById('payrollMonth').value = today.substring(0, 7);
 
 async function loadAttendanceSheet() {
-    const attendanceList = document.getElementById('attendanceList');
-    
+    const list = document.getElementById('attendanceList');
     try {
-        // 1. Get all staff
         const staffSnap = await db.collection('staff').get();
-        // 2. Get today's attendance records
         const attSnap = await db.collection('attendance').where('date', '==', today).get();
         
         let attendanceData = {};
         attSnap.forEach(doc => { attendanceData[doc.data().staffID] = doc.data(); });
 
-        attendanceList.innerHTML = "";
-        
+        list.innerHTML = "";
         staffSnap.forEach(doc => {
             const staff = doc.data();
             const record = attendanceData[staff.staffID] || null;
 
             const card = document.createElement('div');
             card.className = 'staff-card';
-            
             card.innerHTML = `
                 <img src="${staff.photo || 'https://via.placeholder.com/100'}" class="staff-img">
                 <div class="info-area">
-                    <strong style="font-size:1.1rem;">${staff.name}</strong>
-                    <div style="font-size:0.8rem; color:#777;">ID: ${staff.staffID} | ${staff.designation}</div>
-                    
-                    <span class="time-tag">
-                        In: ${record?.arrival || '--:--'} | Out: ${record?.departure || '--:--'}
-                    </span>
-
+                    <strong>${staff.name}</strong>
+                    <div style="font-size:0.75rem;">ID: ${staff.staffID}</div>
+                    <span class="time-tag">Arrival: ${record?.arrival || '--:--'} | Exit: ${record?.departure || '--:--'}</span>
                     <div class="btn-group">
-                        <button class="royal-btn btn-sm" 
-                            onclick="markArrival('${staff.staffID}', '${staff.name}')"
-                            ${record?.arrival ? 'disabled style="opacity:0.5"' : ''}>
-                            ARRIVAL
-                        </button>
-                        <button class="royal-btn btn-sm btn-danger" 
-                            onclick="markDeparture('${staff.staffID}')"
-                            ${!record?.arrival || record?.departure ? 'disabled style="opacity:0.5"' : ''}>
-                            DEPARTURE
-                        </button>
+                        <button class="royal-btn btn-sm" onclick="markArrival('${staff.staffID}', '${staff.name}')" ${record?.arrival ? 'disabled style="opacity:0.5"' : ''}>ARRIVAL</button>
+                        <button class="royal-btn btn-sm btn-danger" onclick="markDeparture('${staff.staffID}')" ${!record?.arrival || record?.departure ? 'disabled style="opacity:0.5"' : ''}>DEPARTURE</button>
                     </div>
-                </div>
-            `;
-            attendanceList.appendChild(card);
+                </div>`;
+            list.appendChild(card);
         });
-    } catch (error) {
-        console.error(error);
-        attendanceList.innerHTML = "Error loading data.";
-    }
+    } catch (e) { list.innerHTML = "Error: " + e.message; }
 }
 
 async function markArrival(id, name) {
     const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const docId = `${id}_${today}`;
-    
-    await db.collection('attendance').doc(docId).set({
-        staffID: Number(id),
-        name: name,
-        date: today,
-        arrival: time,
-        departure: "",
-        month: today.substring(0, 7), // YYYY-MM for payroll
-        timestamp: Date.now()
+    await db.collection('attendance').doc(`${id}_${today}`).set({
+        staffID: Number(id), name, date: today, arrival: time, departure: "", month: today.substring(0, 7), timestamp: Date.now()
     });
     loadAttendanceSheet();
 }
 
 async function markDeparture(id) {
     const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const docId = `${id}_${today}`;
-    
-    await db.collection('attendance').doc(docId).update({
-        departure: time
-    });
+    await db.collection('attendance').doc(`${id}_${today}`).update({ departure: time });
     loadAttendanceSheet();
+}
+
+// SALARY LOGIC MERGED HERE
+async function generatePayroll() {
+    const targetMonth = document.getElementById('payrollMonth').value;
+    const tbody = document.getElementById('payrollBody');
+    tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Calculating...</td></tr>";
+
+    const staffSnap = await db.collection('staff').get();
+    const attSnap = await db.collection('attendance').where('month', '==', targetMonth).get();
+
+    let records = [];
+    attSnap.forEach(doc => records.push(doc.data()));
+
+    tbody.innerHTML = "";
+    staffSnap.forEach(doc => {
+        const staff = doc.data();
+        const basicSalary = staff.salary || 30000; // Agar staff data me salary nahi hai to 30000 default
+        const presents = records.filter(r => r.staffID == staff.staffID).length;
+        
+        // Logic: 30 days month assumption
+        const daysInMonth = 30;
+        const absentDays = daysInMonth - presents;
+        const dailyDeduction = basicSalary / daysInMonth;
+        const netSalary = basicSalary - (absentDays * dailyDeduction);
+
+        const row = `<tr>
+            <td>${staff.name}</td>
+            <td>₹${basicSalary}</td>
+            <td style="color:green; font-weight:bold;">${presents}</td>
+            <td style="color:red;">${absentDays}</td>
+            <td class="salary-badge">₹${Math.round(netSalary)}</td>
+        </tr>`;
+        tbody.innerHTML += row;
+    });
 }
 
 loadAttendanceSheet();
