@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to The Lalit International School</title>
+    <title>The Lalit International School | Royal Luxury</title>
     
     <link rel="stylesheet" href="style.css">
     
@@ -12,89 +12,103 @@
 </head>
 <body>
 
-    <header>
-        <div class="logo-area">
-            <img src="logo.png" alt="School Logo" id="main-logo">
-            <h1 id="brand-name"></h1> </div>
-        <nav id="menu-container"></nav> </header>
+    <button id="menu-trigger-btn">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
 
-    <section class="news-ticker">
-        <div class="ticker-label">Latest News:</div>
-        <marquee id="news-marquee" behavior="scroll" direction="left">
-            Loading latest announcements...
-        </marquee>
-    </section>
+    <nav id="menu-container"></nav>
 
-    <section id="about-section" class="section-container">
-        <div class="content-box">
-            <h2>About Our School</h2>
-            <p id="about-content">Loading about us details...</p>
-        </div>
-    </section>
+    <main class="main-content">
+        <div class="royal-card">
+            
+            <header class="header">
+                <img src="logo.png" alt="School Logo" class="school-logo">
+                <h1 id="brand-name" class="brand-font">The Lalit International School</h1>
+            </header>
 
-    <section id="messages" class="flex-container">
-        <div class="msg-card">
-            <h3>Director's Message</h3>
-            <img id="director-img" src="placeholder-user.jpg" alt="Director">
-            <p id="director-msg">Loading message...</p>
-        </div>
-        <div class="msg-card">
-            <h3>Principal's Message</h3>
-            <img id="principal-img" src="placeholder-user.jpg" alt="Principal">
-            <p id="principal-msg">Loading message...</p>
-        </div>
-    </section>
-
-    <section id="portals" class="section-container">
-        <div class="portal-grid">
-            <div class="portal-box">
-                <h3>Student Portal</h3>
-                <p id="portal-notice">Check results, attendance and fees here.</p>
-                <a href="#" id="portal-btn" class="btn">Login to Portal</a>
-            </div>
-            <div class="portal-box">
-                <h3>Current Vacancies</h3>
-                <p id="vacancy-list">Loading job openings...</p>
-                <button class="btn">Apply Now</button>
-            </div>
-        </div>
-    </section>
-
-    <section id="infrastructure" class="section-container">
-        <h2 style="text-align:center;">Our Infrastructure</h2>
-        <div id="infra-gallery" class="gallery-grid">
-            </div>
-    </section>
-
-    <section id="contact-section" class="section-container flex-container">
-        <div class="contact-info">
-            <h2>Contact Us</h2>
-            <p><strong>Address:</strong> <span id="display-address">Loading...</span></p>
-            <p><strong>Phone:</strong> <span id="display-phone">Loading...</span></p>
-            <p><strong>Email:</strong> <span id="display-email">Loading...</span></p>
-        </div>
-        <div class="map-area">
-            <div id="map-container">
-                <p>Loading map...</p>
-            </div>
-        </div>
-    </section>
-
-    <footer>
-        <div class="footer-content">
-            <p id="footer-copy">&copy; 2026 The Lalit International School. All Rights Reserved.</p>
-            <div id="social-icons">
+            <div class="form-section" style="margin-top: -20px; border-left-color: var(--royal-blue);">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <span style="font-weight: bold; color: var(--royal-blue); white-space: nowrap;">LATEST NEWS:</span>
+                    <marquee id="news-marquee" behavior="scroll" direction="left">
+                        Loading latest announcements...
+                    </marquee>
                 </div>
-        </div>
-    </footer>
+            </div>
+
+            <section id="about-section">
+                <h2>About Our School</h2>
+                <div style="text-align: center; max-width: 900px; margin: 0 auto;">
+                    <p id="about-content">Loading about us details...</p>
+                </div>
+            </section>
+
+            <div class="profile-grid-custom">
+                <div class="custom-id-card">
+                    <img id="director-img" src="placeholder-user.jpg" alt="Director" class="id-photo">
+                    <div>
+                        <h3 style="color: var(--royal-blue); margin-top: 0;">Director's Message</h3>
+                        <p id="director-msg" style="font-size: 0.9rem; margin-bottom: 0;">Loading message...</p>
+                    </div>
+                </div>
+                <div class="custom-id-card">
+                    <img id="principal-img" src="placeholder-user.jpg" alt="Principal" class="id-photo">
+                    <div>
+                        <h3 style="color: var(--royal-blue); margin-top: 0;">Principal's Message</h3>
+                        <p id="principal-msg" style="font-size: 0.9rem; margin-bottom: 0;">Loading message...</p>
+                    </div>
+                </div>
+            </div>
+
+            <hr style="border: none; border-top: 1px solid var(--border-color); margin: 50px 0;">
+
+            <div class="input-grid">
+                <div class="form-section">
+                    <h3 style="color: var(--royal-blue);">Student Portal</h3>
+                    <p id="portal-notice">Check results, attendance and fees here.</p>
+                    <a href="login.html" class="royal-btn">Login to Portal</a>
+                </div>
+                <div class="form-section">
+                    <h3 style="color: var(--royal-blue);">Current Vacancies</h3>
+                    <p id="vacancy-list">Loading job openings...</p>
+                    <button class="royal-btn">Apply Now</button>
+                </div>
+            </div>
+
+            <section id="infrastructure">
+                <h2>Our Infrastructure</h2>
+                <div id="infra-gallery" class="profile-grid-custom">
+                    </div>
+            </section>
+
+            <section id="contact-section" class="form-section" style="margin-top: 50px;">
+                <h2 style="margin-top: 0;">Contact Us</h2>
+                <div class="input-grid">
+                    <div class="contact-info">
+                        <p><strong>Address:</strong> <br><span id="display-address">Loading...</span></p>
+                        <p><strong>Phone:</strong> <br><span id="display-phone">Loading...</span></p>
+                        <p><strong>Email:</strong> <br><span id="display-email">Loading...</span></p>
+                    </div>
+                    <div class="map-area" style="min-height: 200px; background: #eee; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                        <div id="map-container">
+                            <p>Map Loading...</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <footer style="text-align: center; padding-top: 30px; border-top: 1px solid var(--gold); margin-top: 40px;">
+                <p id="footer-copy">&copy; 2026 The Lalit International School. All Rights Reserved.</p>
+            </footer>
+
+        </div> </main>
 
     <script src="brand.js"></script>
     <script src="menu.js"></script>
     <script src="firebase-config.js"></script>
     
     <script>
-        // Home page par data dikhane ke liye fetch function
-        // Yeh logic aapke firebase-config.js mein hona chahiye
         window.onload = function() {
             if (typeof fetchWebsiteData === 'function') {
                 fetchWebsiteData();
