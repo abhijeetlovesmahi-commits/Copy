@@ -3,91 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Website Manager | Admin Panel</title>
+    <title>Website Manager | The Lalit International</title>
     
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+
+    <style>
+        /* Is page ke liye thoda extra touch up */
+        .manager-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            width: 100%;
+        }
+        h3 { 
+            color: var(--royal-blue); 
+            border-bottom: 1px solid var(--gold); 
+            padding-bottom: 10px; 
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+        textarea { height: 100px; resize: vertical; }
+        .status-msg {
+            position: fixed; bottom: 20px; right: 20px;
+            padding: 15px 25px; border-radius: 8px;
+            color: white; display: none; z-index: 10000;
+        }
+    </style>
 </head>
 <body>
 
-    <header>
-        <div class="logo-area">
-            <img src="logo.png" alt="Logo" id="main-logo">
-            <span id="brand-name"></span>
+    <main class="main-content">
+        <div class="royal-card">
+            <header class="header">
+                <img src="logo.png" alt="Logo" class="school-logo">
+                <h1 class="brand-font">Website Content Manager</h1>
+                <p style="color: var(--gold); font-size: 0.8rem;">ADMIN PANEL - UPDATE LIVE WEBSITE</p>
+            </header>
+
+            <div class="manager-grid">
+                <div class="form-section">
+                    <h3><i class="fas fa-info-circle"></i> About Us</h3>
+                    <textarea id="aboutText" placeholder="School ke baare mein likhein..."></textarea>
+                    <button class="royal-btn" style="width:100%" onclick="handleMasterUpload('content', 'aboutText', '', '', 'aboutUs')">Update About Us</button>
+                </div>
+
+                <div class="form-section">
+                    <h3><i class="fas fa-user-tie"></i> Director's Message</h3>
+                    <textarea id="directorMsg" placeholder="Director ka sandesh..."></textarea>
+                    <input type="file" id="directorImg" accept="image/*" style="margin-bottom: 10px;">
+                    <button class="royal-btn" style="width:100%" onclick="handleMasterUpload('messages', 'directorMsg', '', 'directorImg', 'director')">Update Director</button>
+                </div>
+
+                <div class="form-section">
+                    <h3><i class="fas fa-user-graduate"></i> Principal's Message</h3>
+                    <textarea id="principalMsg" placeholder="Principal ka sandesh..."></textarea>
+                    <input type="file" id="principalImg" accept="image/*" style="margin-bottom: 10px;">
+                    <button class="royal-btn" style="width:100%" onclick="handleMasterUpload('messages', 'principalMsg', '', 'principalImg', 'principal')">Update Principal</button>
+                </div>
+
+                <div class="form-section">
+                    <h3><i class="fas fa-map-marked-alt"></i> Contact & Map</h3>
+                    <input type="text" id="contactPhone" placeholder="Phone Number" style="margin-bottom: 10px;">
+                    <input type="email" id="contactEmail" placeholder="Email Address" style="margin-bottom: 10px;">
+                    <textarea id="schoolAddress" placeholder="Full Address..."></textarea>
+                    <button class="royal-btn" style="width:100%" onclick="updateContact()">Update Contact Info</button>
+                </div>
+            </div>
+
+            <div id="masterStatus" class="status-msg"></div>
         </div>
-        <nav id="menu-container"></nav>
-    </header>
-
-    <main class="admin-container">
-        <h2>Website Content Management</h2>
-
-        <div class="upload-card">
-            <h3>About Us</h3>
-            <textarea id="aboutText" placeholder="School ke baare mein likhein..."></textarea>
-            <button onclick="handleMasterUpload('content', 'aboutText', '', '')">Update About Us</button>
-        </div>
-
-        <div class="upload-card">
-            <h3>Director's Message</h3>
-            <textarea id="directorMsg" placeholder="Director ka sandesh..."></textarea>
-            <input type="file" id="directorImg" accept="image/*">
-            <button onclick="handleMasterUpload('messages', 'directorMsg', '', 'directorImg')">Update Director Message</button>
-        </div>
-
-        <div class="upload-card">
-            <h3>Principal's Message</h3>
-            <textarea id="principalMsg" placeholder="Principal ka sandesh..."></textarea>
-            <input type="file" id="principalImg" accept="image/*">
-            <button onclick="handleMasterUpload('messages', 'principalMsg', '', 'principalImg')">Update Principal Message</button>
-        </div>
-
-        <div class="upload-card">
-            <h3>News & Announcements</h3>
-            <input type="text" id="newsTitle" placeholder="News Headline">
-            <textarea id="newsDetail" placeholder="News ki puri jankari..."></textarea>
-            <input type="file" id="newsImg" accept="image/*">
-            <button onclick="handleMasterUpload('news', 'newsTitle', 'newsDetail', 'newsImg')">Publish News</button>
-        </div>
-
-        <div class="upload-card">
-            <h3>Vacancies (Jobs)</h3>
-            <textarea id="vacancyInfo" placeholder="Job requirements aur posts..."></textarea>
-            <button onclick="handleMasterUpload('content', 'vacancyInfo', '', '')">Update Vacancies</button>
-        </div>
-
-        <div class="upload-card">
-            <h3>Student Portal Info</h3>
-            <input type="text" id="portalLink" placeholder="External Portal Link (Optional)">
-            <textarea id="portalNotice" placeholder="Students ke liye koi zaroori notice..."></textarea>
-            <button onclick="handleMasterUpload('portal', 'portalLink', 'portalNotice', '')">Update Student Portal</button>
-        </div>
-
-        <div class="upload-card">
-            <h3>Contact Us & Map</h3>
-            <input type="text" id="contactPhone" placeholder="Phone Number">
-            <input type="email" id="contactEmail" placeholder="Email Address">
-            <textarea id="schoolAddress" placeholder="School ka pura pata..."></textarea>
-            <input type="text" id="mapLink" placeholder="Google Map Embed Link (Iframe URL)">
-            <button onclick="handleMasterUpload('contact', 'contactPhone', 'mapLink', '')">Update Contact & Map</button>
-        </div>
-
-        <div class="upload-card">
-            <h3>Footer Details</h3>
-            <input type="text" id="footerCopyright" placeholder="Copyright Text (e.g. © 2026 TLIS)">
-            <input type="text" id="socialLinks" placeholder="Social Media Links (FB, Insta etc.)">
-            <button onclick="handleMasterUpload('content', 'footerCopyright', 'socialLinks', '')">Update Footer</button>
-        </div>
-
-        <div id="masterStatus"></div>
     </main>
 
+    <script src="firebase-config.js"></script>
     <script src="brand.js"></script>
     <script src="menu.js"></script>
-    <script src="firebase-config.js"></script>
 
+    <script>
+        // --- MASTER UPLOAD LOGIC ---
+        async function handleMasterUpload(collection, textId, secondaryId, fileId, docName) {
+            const btn = event.target;
+            const originalText = btn.innerText;
+            const textContent = document.getElementById(textId).value;
+            const fileInput = fileId ? document.getElementById(fileId) : null;
+            
+            if(!textContent && (!fileInput || !fileInput.files[0])) {
+                showStatus("Kuch to likho ya file select karo!", "#e74c3c");
+                return;
+            }
+
+            btn.innerText = "Uploading...";
+            btn.disabled = true;
+
+            try {
+                let updateData = {
+                    lastUpdated: new Date().getTime(),
+                    text: textContent
+                };
+
+                // Agar image bhi hai
+                if (fileInput && fileInput.files[0]) {
+                    const file = fileInput.files[0];
+                    const storageRef = firebase.storage().ref(`website/${docName}_${file.name}`);
+                    await storageRef.put(file);
+                    const url = await storageRef.getDownloadURL();
+                    updateData.imageUrl = url;
+                }
+
+                await firebase.firestore().collection(collection).doc(docName).set(updateData, { merge: true });
+                showStatus("✅ Successfully Updated!", "#27ae60");
+                
+            } catch (error) {
+                console.error(error);
+                showStatus("❌ Error: " + error.message, "#e74c3c");
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        async function updateContact() {
+            const phone = document.getElementById('contactPhone').value;
+            const email = document.getElementById('contactEmail').value;
+            const addr = document.getElementById('schoolAddress').value;
+
+            try {
+                await firebase.firestore().collection('content').doc('contactInfo').set({
+                    phone, email, address: addr, lastUpdated: new Date()
+                }, {merge: true});
+                showStatus("✅ Contact Updated!", "#27ae60");
+            } catch (e) { showStatus("Error updating contact", "#e74c3c"); }
+        }
+
+        function showStatus(msg, color) {
+            const s = document.getElementById('masterStatus');
+            s.innerText = msg;
+            s.style.backgroundColor = color;
+            s.style.display = 'block';
+            setTimeout(() => { s.style.display = 'none'; }, 3000);
+        }
+    </script>
 </body>
 </html>
-
