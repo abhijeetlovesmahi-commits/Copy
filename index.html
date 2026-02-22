@@ -17,7 +17,13 @@
     <script src="menu.js"></script>
 
     <style>
-        /* Dashboard specific extra styling */
+        /* Dashboard & Role logic */
+        .role-section { display: none; width: 100%; }
+        
+        /* Sidebar Menu Fix (Agar menu.js use kar rahe hain) */
+        #menu-container.active { left: 0 !important; }
+        
+        /* Banner & Stats */
         .welcome-banner {
             background: linear-gradient(135deg, var(--royal-blue) 0%, #001a4d 100%);
             color: white; padding: 30px; border-radius: 15px;
@@ -26,20 +32,18 @@
         .stat-card {
             background: white; padding: 20px; border-radius: 12px;
             box-shadow: var(--shadow-sm); border-left: 5px solid var(--royal-blue);
-            transition: 0.3s; text-align: center; height: 100%; border: 1px solid #eee;
+            transition: 0.3s; text-align: center; border: 1px solid #eee;
         }
-        .stat-card i { font-size: 1.8rem; color: var(--gold); margin-bottom: 10px; }
         .stat-val { font-size: 1.5rem; font-weight: 700; color: var(--royal-blue); }
-        .stat-label { font-size: 0.75rem; text-transform: uppercase; color: #777; }
         
-        /* Visibility Classes */
-        .role-section { display: none; width: 100%; }
-        #public-view { display: block; } /* Pehle public view dikhega */
+        /* Initial State: Public View Visible */
+        #public-view { display: block; }
+        #dashboard-view { display: none; }
     </style>
 </head>
 <body>
 
-    <button id="menu-trigger-btn">
+    <button id="menu-trigger-btn" onclick="toggleSidebar()">
         <span></span><span></span><span></span>
     </button>
 
@@ -53,23 +57,23 @@
                 <h1 id="brand-name" class="brand-font">The Lalit International School</h1>
             </header>
 
-            <div id="dashboard-view" class="role-section">
+            <div id="dashboard-view">
                 <div class="welcome-banner">
-                    <h2 id="welcomeText" style="color: white; font-family: 'Poppins';">Namaste!</h2>
-                    <span id="roleBadge" class="royal-btn" style="padding: 5px 15px; font-size: 12px; pointer-events: none;">Verifying...</span>
-                    <button onclick="firebase.auth().signOut()" class="royal-btn" style="background: var(--danger); border: none; font-size: 10px; margin-left: 10px;">Logout</button>
+                    <h2 id="welcomeText" style="color: white;">Namaste!</h2>
+                    <span id="roleBadge" class="royal-btn" style="padding: 5px 15px; font-size: 12px; pointer-events: none;">Role</span>
+                    <button onclick="firebase.auth().signOut()" class="royal-btn" style="background: #c0392b; border: none; font-size: 10px; margin-left: 10px;">Logout</button>
                 </div>
 
                 <div id="adminView" class="role-section">
                     <div class="input-grid">
                         <div class="stat-card">
-                            <i class="fas fa-vault"></i>
-                            <div class="stat-label">Today's Collection</div>
+                            <i class="fas fa-vault" style="color: var(--gold); font-size: 1.5rem;"></i>
+                            <div style="font-size: 10px; color: #777;">TODAY'S COLLECTION</div>
                             <div class="stat-val" id="todayCollection">₹0</div>
                         </div>
                         <div class="stat-card">
-                            <i class="fas fa-users"></i>
-                            <div class="stat-label">Total Students</div>
+                            <i class="fas fa-users" style="color: var(--gold); font-size: 1.5rem;"></i>
+                            <div style="font-size: 10px; color: #777;">TOTAL STUDENTS</div>
                             <div class="stat-val" id="totalStudents">0</div>
                         </div>
                     </div>
@@ -77,8 +81,8 @@
 
                 <div id="teacherView" class="role-section">
                     <div class="input-grid">
-                        <div class="stat-card"><i class="fas fa-book-open"></i><div class="stat-label">Homework Status</div><div class="stat-val">Updated</div></div>
-                        <div class="stat-card"><i class="fas fa-user-clock"></i><div class="stat-label">Attendance</div><div class="stat-val">Marked</div></div>
+                        <div class="stat-card"><i class="fas fa-book-open"></i><div>Homework</div><div class="stat-val">Updated</div></div>
+                        <div class="stat-card"><i class="fas fa-user-clock"></i><div>Attendance</div><div class="stat-val">Marked</div></div>
                     </div>
                 </div>
 
@@ -86,10 +90,9 @@
                     <div class="input-grid">
                         <div class="stat-card">
                             <i class="fas fa-receipt"></i>
-                            <div class="stat-label">My Pending Fees</div>
-                            <div class="stat-val" style="color: var(--danger);" id="myDue">₹0</div>
+                            <div>Pending Fees</div>
+                            <div class="stat-val" style="color: #c0392b;" id="myDue">₹0</div>
                         </div>
-                        <div class="stat-card"><i class="fas fa-pencil-alt"></i><div class="stat-label">Home Work</div><div class="stat-val">Check Assignment</div></div>
                     </div>
                 </div>
             </div>
@@ -118,13 +121,8 @@
                 <div class="input-grid" style="margin-top: 40px;">
                     <div class="form-section">
                         <h3>Student Portal</h3>
-                        <p>Access your results & fees.</p>
+                        <p>Access results & fees.</p>
                         <a href="login.html" class="royal-btn">Login to Portal</a>
-                    </div>
-                    <div class="form-section">
-                        <h3>Vacancies</h3>
-                        <p id="vacancy-list">No openings.</p>
-                        <button class="royal-btn">Apply Now</button>
                     </div>
                 </div>
             </div>
@@ -136,44 +134,51 @@
     </main>
 
     <script>
-        // --- LOGIC MERGE ---
+        // MENU TOGGLE FUNCTION
+        function toggleSidebar() {
+            const menu = document.getElementById('menu-container');
+            // Agar aapke menu.js mein logic hai toh use 'active' class toggler chahiye
+            menu.classList.toggle('active');
+        }
 
-        // Auth Listener: Check Login Status
+        // AUTH LISTENER
         firebase.auth().onAuthStateChanged(async (user) => {
             const publicView = document.getElementById('public-view');
             const dashboardView = document.getElementById('dashboard-view');
 
             if (user) {
-                // User Logged In Hai
+                // LOGIN HAI: Dashboard dikhao, Public chhupao
                 publicView.style.display = 'none';
                 dashboardView.style.display = 'block';
                 
-                let role = "student"; // Default
-                
-                // 1. Check if Staff
-                const staffDoc = await firebase.firestore().collection('staff').where('loginEmail', '==', user.email).get();
-                if(!staffDoc.empty) {
-                    role = staffDoc.docs[0].data().role;
-                }
+                // Role Detection
+                let role = "student";
+                try {
+                    const staffDoc = await firebase.firestore().collection('staff').where('loginEmail', '==', user.email).get();
+                    if(!staffDoc.empty) {
+                        role = staffDoc.docs[0].data().role;
+                    }
+                } catch(e) { console.log("Role error:", e); }
                 
                 loadDashboardData(user, role);
             } else {
-                // User Logout Hai
+                // LOGIN NAHI HAI: Public dikhao, Dashboard chhupao
                 publicView.style.display = 'block';
                 dashboardView.style.display = 'none';
+                
+                // Home page ka data load karo
                 if(typeof fetchWebsiteData === 'function') fetchWebsiteData();
             }
         });
 
         async function loadDashboardData(user, role) {
             document.getElementById('welcomeText').innerText = "Namaste, " + user.email.split('@')[0].toUpperCase();
-            document.getElementById('roleBadge').innerText = "Role: " + role.toUpperCase();
+            document.getElementById('roleBadge').innerText = role.toUpperCase();
 
-            // All views hide karein pehle
-            document.getElementById('adminView').style.display = 'none';
-            document.getElementById('teacherView').style.display = 'none';
-            document.getElementById('studentView').style.display = 'none';
+            // Hide all sub-views
+            document.querySelectorAll('.role-section').forEach(sec => sec.style.display = 'none');
 
+            // Show relevant role view
             if(role === 'admin' || role === 'accountant') {
                 document.getElementById('adminView').style.display = 'block';
                 fetchAdminStats();
@@ -188,7 +193,7 @@
         async function fetchAdminStats() {
             const stuSnap = await firebase.firestore().collection('students').get();
             document.getElementById('totalStudents').innerText = stuSnap.size;
-            document.getElementById('todayCollection').innerText = "₹45,200"; // Dynamic logic add karein
+            document.getElementById('todayCollection').innerText = "₹45,200"; 
         }
 
         async function fetchStudentStats(email) {
