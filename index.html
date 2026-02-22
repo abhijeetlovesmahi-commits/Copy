@@ -17,13 +17,10 @@
     <script src="menu.js"></script>
 
     <style>
-        /* Dashboard & Role logic */
         .role-section { display: none; width: 100%; }
-        
-        /* Sidebar Menu Fix (Agar menu.js use kar rahe hain) */
-        #menu-container.active { left: 0 !important; }
-        
-        /* Banner & Stats */
+        #dashboard-view { display: none; }
+        #public-view { display: block; }
+
         .welcome-banner {
             background: linear-gradient(135deg, var(--royal-blue) 0%, #001a4d 100%);
             color: white; padding: 30px; border-radius: 15px;
@@ -32,22 +29,12 @@
         .stat-card {
             background: white; padding: 20px; border-radius: 12px;
             box-shadow: var(--shadow-sm); border-left: 5px solid var(--royal-blue);
-            transition: 0.3s; text-align: center; border: 1px solid #eee;
+            text-align: center; border: 1px solid #eee;
         }
         .stat-val { font-size: 1.5rem; font-weight: 700; color: var(--royal-blue); }
-        
-        /* Initial State: Public View Visible */
-        #public-view { display: block; }
-        #dashboard-view { display: none; }
     </style>
 </head>
 <body>
-
-    <button id="menu-trigger-btn" onclick="toggleSidebar()">
-        <span></span><span></span><span></span>
-    </button>
-
-    <nav id="menu-container"></nav>
 
     <main class="main-content">
         <div class="royal-card">
@@ -59,9 +46,8 @@
 
             <div id="dashboard-view">
                 <div class="welcome-banner">
-                    <h2 id="welcomeText" style="color: white;">Namaste!</h2>
+                    <h2 id="welcomeText" style="color: white; font-family: 'Poppins';">Welcome!</h2>
                     <span id="roleBadge" class="royal-btn" style="padding: 5px 15px; font-size: 12px; pointer-events: none;">Role</span>
-                    <button onclick="firebase.auth().signOut()" class="royal-btn" style="background: #c0392b; border: none; font-size: 10px; margin-left: 10px;">Logout</button>
                 </div>
 
                 <div id="adminView" class="role-section">
@@ -89,8 +75,8 @@
                 <div id="studentView" class="role-section">
                     <div class="input-grid">
                         <div class="stat-card">
-                            <i class="fas fa-receipt"></i>
-                            <div>Pending Fees</div>
+                            <i class="fas fa-receipt" style="color: var(--gold);"></i>
+                            <div>My Pending Fees</div>
                             <div class="stat-val" style="color: #c0392b;" id="myDue">₹0</div>
                         </div>
                     </div>
@@ -102,7 +88,7 @@
                     <marquee id="news-marquee">Loading latest announcements...</marquee>
                 </div>
 
-                <section id="about-section">
+                <section>
                     <h2>About Our School</h2>
                     <p id="about-content" style="text-align: center;">Loading school details...</p>
                 </section>
@@ -117,68 +103,46 @@
                         <div><h3>Principal's Message</h3><p id="principal-msg">Loading...</p></div>
                     </div>
                 </div>
-
-                <div class="input-grid" style="margin-top: 40px;">
-                    <div class="form-section">
-                        <h3>Student Portal</h3>
-                        <p>Access results & fees.</p>
-                        <a href="login.html" class="royal-btn">Login to Portal</a>
-                    </div>
-                </div>
             </div>
 
             <footer style="text-align: center; padding-top: 30px; border-top: 1px solid var(--gold); margin-top: 40px;">
-                <p>&copy; 2026 The Lalit International School.</p>
+                <p>&copy; 2026 The Lalit International School. All Rights Reserved.</p>
             </footer>
         </div>
     </main>
 
     <script>
-        // MENU TOGGLE FUNCTION
-        function toggleSidebar() {
-            const menu = document.getElementById('menu-container');
-            // Agar aapke menu.js mein logic hai toh use 'active' class toggler chahiye
-            menu.classList.toggle('active');
-        }
-
-        // AUTH LISTENER
+        // DASHBOARD LOGIC
         firebase.auth().onAuthStateChanged(async (user) => {
             const publicView = document.getElementById('public-view');
             const dashboardView = document.getElementById('dashboard-view');
 
             if (user) {
-                // LOGIN HAI: Dashboard dikhao, Public chhupao
                 publicView.style.display = 'none';
                 dashboardView.style.display = 'block';
                 
-                // Role Detection
                 let role = "student";
                 try {
                     const staffDoc = await firebase.firestore().collection('staff').where('loginEmail', '==', user.email).get();
                     if(!staffDoc.empty) {
                         role = staffDoc.docs[0].data().role;
                     }
-                } catch(e) { console.log("Role error:", e); }
+                } catch(e) { console.error(e); }
                 
                 loadDashboardData(user, role);
             } else {
-                // LOGIN NAHI HAI: Public dikhao, Dashboard chhupao
                 publicView.style.display = 'block';
                 dashboardView.style.display = 'none';
-                
-                // Home page ka data load karo
                 if(typeof fetchWebsiteData === 'function') fetchWebsiteData();
             }
         });
 
         async function loadDashboardData(user, role) {
             document.getElementById('welcomeText').innerText = "Namaste, " + user.email.split('@')[0].toUpperCase();
-            document.getElementById('roleBadge').innerText = role.toUpperCase();
+            document.getElementById('roleBadge').innerText = "Access: " + role.toUpperCase();
 
-            // Hide all sub-views
             document.querySelectorAll('.role-section').forEach(sec => sec.style.display = 'none');
 
-            // Show relevant role view
             if(role === 'admin' || role === 'accountant') {
                 document.getElementById('adminView').style.display = 'block';
                 fetchAdminStats();
@@ -193,7 +157,6 @@
         async function fetchAdminStats() {
             const stuSnap = await firebase.firestore().collection('students').get();
             document.getElementById('totalStudents').innerText = stuSnap.size;
-            document.getElementById('todayCollection').innerText = "₹45,200"; 
         }
 
         async function fetchStudentStats(email) {
