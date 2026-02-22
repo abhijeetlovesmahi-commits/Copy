@@ -9,9 +9,13 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <style>
-        .manager-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; }
-        .preview-img { width: 100px; height: 120px; object-fit: cover; display: none; margin: 10px 0; border: 2px solid var(--gold); border-radius: 5px; }
-        .pdf-note { font-size: 11px; color: #c0392b; margin-top: 5px; }
+        .manager-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+        .gallery-upload-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px; }
+        .upload-box { background: rgba(255,255,255,0.1); padding: 10px; border: 1px dashed var(--gold); border-radius: 8px; }
+        .upload-box input[type="text"] { font-size: 10px; margin-bottom: 5px; background: #fff; color: #000; }
+        .upload-box input[type="file"] { font-size: 10px; color: var(--gold); }
+        .status-text { font-size: 9px; display: block; margin-top: 2px; }
+        .preview-mini { width: 40px; height: 40px; object-fit: cover; border-radius: 4px; float: right; display: none; border: 1px solid var(--gold); }
     </style>
 </head>
 <body>
@@ -20,59 +24,54 @@
         <div class="royal-card">
             <header class="header">
                 <h1 class="brand-font">Master Website Manager</h1>
-                <p style="color:var(--gold)">CBSE Compliance & Live Content Control</p>
+                <p style="color:var(--gold)">Live Content & Image Server Control</p>
             </header>
 
             <div class="manager-grid">
                 
                 <div class="form-section">
-                    <h3><i class="fas fa-bullhorn"></i> News Ticker & Updates</h3>
-                    <textarea id="newsTicker" placeholder="Marquee mein chalne wali news likhein..."></textarea>
-                    <button class="royal-btn" style="width:100%" onclick="saveSimpleData('content', 'newsData', 'newsTicker')">Update Ticker</button>
+                    <h3><i class="fas fa-bullhorn"></i> News Ticker</h3>
+                    <textarea id="newsTicker" placeholder="Marquee news likhein..."></textarea>
+                    <button class="royal-btn" style="width:100%" onclick="saveSimpleData('content', 'newsData', 'newsTicker')">Update News</button>
                 </div>
 
                 <div class="form-section">
-                    <h3><i class="fas fa-user-tie"></i> Director's Message</h3>
-                    <textarea id="dirMsg" placeholder="Director message..."></textarea>
-                    <input type="file" accept="image/*" onchange="compressAndPreview(this, 'dirPrev')">
-                    <input type="text" id="dirUrl" placeholder="Ya HD Image URL yahan dalein">
-                    <img id="dirPrev" class="preview-img">
-                    <button class="royal-btn" style="width:100%" onclick="saveComplexData('messages', 'director', 'dirMsg', 'dirUrl', 'dirPrev')">Update Director</button>
+                    <h3><i class="fas fa-user-tie"></i> Director Message</h3>
+                    <textarea id="dirMsg" placeholder="Message..."></textarea>
+                    <div class="upload-box">
+                        <img id="prev_dir" class="preview-mini">
+                        <input type="text" id="dirUrl" placeholder="Image URL">
+                        <input type="file" onchange="autoUpload(this, 'st_dir', 'dirUrl', 'prev_dir')">
+                        <span id="st_dir" class="status-text"></span>
+                    </div>
+                    <button class="royal-btn" style="width:100%; margin-top:10px;" onclick="saveComplexData('messages', 'director', 'dirMsg', 'dirUrl')">Save Director</button>
                 </div>
 
                 <div class="form-section">
-                    <h3><i class="fas fa-user-graduate"></i> Principal's Message</h3>
-                    <textarea id="priMsg" placeholder="Principal message..."></textarea>
-                    <input type="file" accept="image/*" onchange="compressAndPreview(this, 'priPrev')">
-                    <input type="text" id="priUrl" placeholder="Ya HD Image URL yahan dalein">
-                    <img id="priPrev" class="preview-img">
-                    <button class="royal-btn" style="width:100%" onclick="saveComplexData('messages', 'principal', 'priMsg', 'priUrl', 'priPrev')">Update Principal</button>
+                    <h3><i class="fas fa-user-graduate"></i> Principal Message</h3>
+                    <textarea id="priMsg" placeholder="Message..."></textarea>
+                    <div class="upload-box">
+                        <img id="prev_pri" class="preview-mini">
+                        <input type="text" id="priUrl" placeholder="Image URL">
+                        <input type="file" onchange="autoUpload(this, 'st_pri', 'priUrl', 'prev_pri')">
+                        <span id="st_pri" class="status-text"></span>
+                    </div>
+                    <button class="royal-btn" style="width:100%; margin-top:10px;" onclick="saveComplexData('messages', 'principal', 'priMsg', 'priUrl')">Save Principal</button>
                 </div>
 
-                <div class="form-section">
-                    <h3><i class="fas fa-images"></i> School Gallery (Latest Events)</h3>
-                    <p style="font-size:12px;">Charo box mein Photos ke URL dalein:</p>
-                    <input type="text" id="g1" placeholder="Photo URL 1" style="margin-bottom:5px;">
-                    <input type="text" id="g2" placeholder="Photo URL 2" style="margin-bottom:5px;">
-                    <input type="text" id="g3" placeholder="Photo URL 3" style="margin-bottom:5px;">
-                    <input type="text" id="g4" placeholder="Photo URL 4">
-                    <button class="royal-btn" style="width:100%; margin-top:10px;" onclick="saveGallery()">Update Gallery</button>
+                <div class="form-section" style="grid-column: span 1;">
+                    <h3><i class="fas fa-images"></i> School Gallery (12 Photos)</h3>
+                    <div class="gallery-upload-grid" id="galleryInputs">
+                        </div>
+                    <button class="royal-btn" style="width:100%; margin-top:15px;" onclick="saveGallery()">Update All 12 Photos</button>
                 </div>
 
                 <div class="form-section">
                     <h3><i class="fas fa-map-marker-alt"></i> Contact & Google Map</h3>
                     <input type="text" id="schoolPhone" placeholder="Phone Number">
                     <textarea id="schoolAddr" placeholder="Full Address..."></textarea>
-                    <input type="text" id="mapEmbed" placeholder="Google Map Iframe Link (src only)">
+                    <input type="text" id="mapEmbed" placeholder="Paste Iframe or Map Link here">
                     <button class="royal-btn" style="width:100%" onclick="saveContact()">Update Contact & Map</button>
-                </div>
-
-                <div class="form-section">
-                    <h3><i class="fas fa-file-pdf"></i> Vacancies & Mandatory PDF</h3>
-                    <textarea id="vacText" placeholder="Current job openings likhein..."></textarea>
-                    <input type="text" id="disclosurePdf" placeholder="Public Disclosure PDF Link (URL)">
-                    <p class="pdf-note">*PDF file ko Google Drive par upload karke 'Anyone with link' karke link yahan dalein.</p>
-                    <button class="royal-btn" style="width:100%" onclick="saveCBSEData()">Update PDF & Vacancy</button>
                 </div>
 
             </div>
@@ -80,88 +79,89 @@
     </main>
 
     <script src="firebase-config.js"></script>
-    <script src="menu.js"></script>
-
     <script>
-        // --- 1. COMPRESSION LOGIC ---
-        function compressAndPreview(input, previewId) {
-            const preview = document.getElementById(previewId);
-            const file = input.files[0];
-            if (!file) return;
+        const IMGBB_API_KEY = '84054e1c5e021a85ff2e90390a9c43c9';
 
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = new Image();
-                img.src = e.target.result;
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    const scale = 400 / img.width;
-                    canvas.width = 400;
-                    canvas.height = img.height * scale;
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    preview.src = canvas.toDataURL('image/jpeg', 0.7);
-                    preview.style.display = 'block';
-                }
-            }
-            reader.readAsDataURL(file);
+        // 12 Gallery Boxes banana
+        const galleryGrid = document.getElementById('galleryInputs');
+        for(let i=1; i<=12; i++) {
+            galleryGrid.innerHTML += `
+                <div class="upload-box">
+                    <img id="prev_g${i}" class="preview-mini">
+                    <input type="text" id="g${i}" placeholder="Photo ${i} URL">
+                    <input type="file" onchange="autoUpload(this, 'st_g${i}', 'g${i}', 'prev_g${i}')">
+                    <span id="st_g${i}" class="status-text"></span>
+                </div>
+            `;
         }
 
-        // --- 2. SAVE FUNCTIONS ---
-        
+        // AUTO UPLOAD LOGIC
+        async function autoUpload(fileInput, statusId, urlInputId, previewId) {
+            const file = fileInput.files[0];
+            const status = document.getElementById(statusId);
+            const urlInput = document.getElementById(urlInputId);
+            const preview = document.getElementById(previewId);
+
+            if(!file) return;
+            if(file.size > 10 * 1024 * 1024) { alert("File is too big! Max 10MB"); return; }
+
+            status.innerText = "⏳ Uploading...";
+            status.style.color = "gold";
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            try {
+                const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+                    method: 'POST', body: formData
+                });
+                const data = await response.json();
+                if(data.success) {
+                    urlInput.value = data.data.url;
+                    status.innerText = "✅ Done!";
+                    status.style.color = "#2ecc71";
+                    preview.src = data.data.url;
+                    preview.style.display = "block";
+                } else { status.innerText = "❌ Failed"; }
+            } catch(e) { status.innerText = "❌ Error"; }
+        }
+
+        // SAVE FUNCTIONS
         async function saveSimpleData(col, doc, id) {
             const val = document.getElementById(id).value;
             await firebase.firestore().collection(col).doc(doc).set({ text: val, lastUpdated: new Date() }, { merge: true });
             alert("Updated!");
         }
 
-        async function saveComplexData(col, doc, msgId, urlId, prevId) {
+        async function saveComplexData(col, doc, msgId, urlId) {
             const msg = document.getElementById(msgId).value;
             const url = document.getElementById(urlId).value;
-            const previewImg = document.getElementById(prevId).src;
-            
-            // Fix: URL priority handling
-            let finalPhoto = (url && url.trim() !== "") ? url : (previewImg.startsWith('data:image') ? previewImg : "");
-
-            await firebase.firestore().collection(col).doc(doc).set({
-                text: msg,
-                imageUrl: finalPhoto,
-                lastUpdated: new Date()
-            }, { merge: true });
+            await firebase.firestore().collection(col).doc(doc).set({ text: msg, imageUrl: url, lastUpdated: new Date() }, { merge: true });
             alert("Success!");
         }
 
         async function saveGallery() {
-            const images = [
-                document.getElementById('g1').value,
-                document.getElementById('g2').value,
-                document.getElementById('g3').value,
-                document.getElementById('g4').value
-            ];
+            let images = [];
+            for(let i=1; i<=12; i++) {
+                let val = document.getElementById(`g${i}`).value;
+                if(val) images.push(val);
+            }
             await firebase.firestore().collection('content').doc('gallery').set({ images: images });
             alert("Gallery Updated!");
         }
 
         async function saveContact() {
+            let map = document.getElementById('mapEmbed').value;
+            if(map.includes('<iframe')) {
+                const match = map.match(/src="([^"]+)"/);
+                map = match ? match[1] : map;
+            }
             const phone = document.getElementById('schoolPhone').value;
             const addr = document.getElementById('schoolAddr').value;
-            const map = document.getElementById('mapEmbed').value;
             await firebase.firestore().collection('content').doc('contactInfo').set({
-                phone: phone,
-                address: addr,
-                mapUrl: map
+                phone: phone, address: addr, mapUrl: map
             }, { merge: true });
-            alert("Contact Updated!");
-        }
-
-        async function saveCBSEData() {
-            const vac = document.getElementById('vacText').value;
-            const pdf = document.getElementById('disclosurePdf').value;
-            await firebase.firestore().collection('content').doc('cbse').set({
-                vacancy: vac,
-                disclosureUrl: pdf
-            }, { merge: true });
-            alert("CBSE Data Updated!");
+            alert("Contact & Map Updated!");
         }
     </script>
 </body>
