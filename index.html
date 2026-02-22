@@ -21,31 +21,28 @@
         #dashboard-view { display: none; }
         #public-view { display: block; }
         
-        /* Message Card & Photo Bada karne ke liye */
-        .id-photo-large { 
-            width: 150px !important; /* Size badha diya gaya hai */
-            height: 180px !important; 
-            object-fit: cover; 
-            border: 3px solid var(--gold); 
-            border-radius: 10px;
-            flex-shrink: 0;
-        }
-        .custom-id-card-large {
+        /* Message Card: Image Top, Text Bottom */
+        .message-card-new {
             background: white; border: 1px solid var(--gold); border-radius: 15px;
-            padding: 25px; display: flex; align-items: flex-start; gap: 25px;
-            margin-bottom: 20px; transition: 0.3s;
+            overflow: hidden; margin-bottom: 30px; box-shadow: var(--shadow-md);
         }
+        .message-img-full {
+            width: 100%; height: 350px; object-fit: cover;
+            border-bottom: 3px solid var(--gold);
+        }
+        .message-body { padding: 25px; text-align: center; }
+        .message-body h3 { font-family: 'Cinzel', serif; color: var(--royal-blue); margin-bottom: 15px; }
+        .message-text { line-height: 1.8; color: #444; font-size: 1.05rem; }
 
-        .welcome-banner {
-            background: linear-gradient(135deg, var(--royal-blue) 0%, #001a4d 100%);
-            color: white; padding: 30px; border-radius: 15px; text-align: center;
-        }
-        .cbse-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-top: 20px; }
-        .cbse-item { 
-            background: #fff; border: 1px solid var(--gold); padding: 15px; 
-            border-radius: 8px; text-align: center; font-size: 13px; font-weight: 600;
-            color: var(--royal-blue); text-decoration: none;
-        }
+        /* Gallery Grid */
+        .gallery-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0; }
+        .gallery-item { width: 100%; height: 200px; object-fit: cover; border-radius: 8px; border: 2px solid var(--gold); }
+
+        /* Map Fix */
+        #map-frame { width: 100%; height: 300px; border-radius: 10px; border: 2px solid var(--gold); margin-top: 15px; }
+        
+        .btn-cbse { text-decoration: none; display: block; padding: 15px; background: #fff; border: 1px solid var(--gold); border-radius: 8px; color: var(--royal-blue); font-weight: 600; text-align: center; transition: 0.3s; }
+        .btn-cbse:hover { background: var(--gold); color: white; }
     </style>
 </head>
 <body>
@@ -56,17 +53,11 @@
             <header class="header" id="brand-header-container"></header>
 
             <div id="dashboard-view">
-                <div class="welcome-banner">
-                    <h2 id="welcomeText" style="color: white;">Welcome!</h2>
-                    <span id="roleBadge" class="royal-btn" style="padding: 5px 15px; font-size: 12px; pointer-events: none;">Role</span>
-                </div>
-                <div style="text-align:center; margin: 15px 0;">
-                    <button onclick="showPublicView()" class="royal-btn" style="background: var(--gold); color: #000;"><i class="fas fa-globe"></i> View Website</button>
-                    <button onclick="firebase.auth().signOut()" class="royal-btn" style="background: #c0392b; margin-left:10px;"><i class="fas fa-sign-out-alt"></i> Logout</button>
-                </div>
-                <div id="adminView" class="role-section">
-                    <div class="input-grid">
-                        <div class="stat-card"><i class="fas fa-users"></i><div>Students</div><div class="stat-val" id="totalStudents">0</div></div>
+                <div class="welcome-banner" style="background: linear-gradient(135deg, var(--royal-blue), #001a4d); color: white; padding: 30px; border-radius: 15px; text-align: center; margin-bottom: 20px;">
+                    <h2 id="welcomeText">Welcome!</h2>
+                    <div style="margin-top:15px;">
+                        <button onclick="showPublicView()" class="royal-btn" style="background: var(--gold); color: #000;"><i class="fas fa-globe"></i> Visit Website</button>
+                        <button onclick="firebase.auth().signOut()" class="royal-btn" style="background: #c0392b; margin-left: 10px;"><i class="fas fa-sign-out-alt"></i> Logout</button>
                     </div>
                 </div>
             </div>
@@ -76,56 +67,72 @@
                     <button onclick="showDashboardView()" class="royal-btn"><i class="fas fa-arrow-left"></i> Back to Dashboard</button>
                 </div>
 
-                <div class="form-section"><marquee id="news-marquee">Loading school updates...</marquee></div>
+                <div class="form-section">
+                    <marquee id="news-marquee" style="font-weight: 600; color: var(--royal-blue);">Loading Updates...</marquee>
+                </div>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    <a id="pdf-link" href="#" target="_blank" class="royal-btn" style="background: #c0392b; width: 100%;">
+                        <i class="fas fa-file-pdf"></i> MANDATORY PUBLIC DISCLOSURE (APPENDIX-IX)
+                    </a>
+                </div>
 
                 <section>
-                    <h2 id="brand-name" style="font-size: 1.2rem;">School Name</h2>
-                    <p id="about-content" style="text-align: center;">Loading about details...</p>
-                    
-                    <div class="cbse-grid">
-                        <a href="disclosure.html" class="cbse-item" style="border: 2px solid #c0392b;">Public Disclosure</a>
-                        <a href="academics.html" class="cbse-item">Academics</a>
-                        <a href="infrastructure.html" class="cbse-item">Infrastructure</a>
-                        <a href="admissions.html" class="cbse-item">Admissions</a>
+                    <h2 class="brand-font" style="text-align: center;">Academic Excellence</h2>
+                    <p id="about-content" style="text-align: center; margin-bottom: 30px;">Loading...</p>
+                    <div class="cbse-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+                        <a href="academics.html" class="btn-cbse">Academics</a>
+                        <a href="infrastructure.html" class="btn-cbse">Infrastructure</a>
+                        <a href="admissions.html" class="btn-cbse">Admissions</a>
+                        <a href="vacancies.html" class="btn-cbse">Vacancies</a>
                     </div>
                 </section>
 
-                <div style="margin-top: 40px;">
-                    <div class="custom-id-card-large">
-                        <img id="director-img" src="placeholder-user.jpg" class="id-photo-large">
-                        <div>
-                            <h3 style="color: var(--royal-blue); margin-top: 0; font-family: 'Cinzel';">Director's Message</h3>
-                            <p id="director-msg" style="font-size: 1rem; line-height: 1.8;">Loading...</p>
+                <div style="margin-top: 50px;">
+                    <div class="message-card-new">
+                        <img id="director-img" src="placeholder.jpg" class="message-img-full">
+                        <div class="message-body">
+                            <h3>Director's Message</h3>
+                            <p id="director-msg" class="message-text">Loading...</p>
                         </div>
                     </div>
 
-                    <div class="custom-id-card-large">
-                        <img id="principal-img" src="placeholder-user.jpg" class="id-photo-large">
-                        <div>
-                            <h3 style="color: var(--royal-blue); margin-top: 0; font-family: 'Cinzel';">Principal's Message</h3>
-                            <p id="principal-msg" style="font-size: 1rem; line-height: 1.8;">Loading...</p>
+                    <div class="message-card-new">
+                        <img id="principal-img" src="placeholder.jpg" class="message-img-full">
+                        <div class="message-body">
+                            <h3>Principal's Message</h3>
+                            <p id="principal-msg" class="message-text">Loading...</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="input-grid" style="margin-top: 40px;">
-                    <div class="form-section">
-                        <h3>Contact Us</h3>
-                        <p><strong>Address:</strong> <span id="display-address">Loading...</span></p>
-                        <p><strong>Phone:</strong> <span id="display-phone">Loading...</span></p>
-                        <p id="aff-no" style="font-size: 0.7rem; color: #777;">Loading Affiliation...</p>
+                <section style="margin-top: 40px;">
+                    <h2 class="brand-font" style="text-align: center;">School Gallery</h2>
+                    <div id="gallery-grid" class="gallery-container"></div>
+                </section>
+
+                <section style="margin-top: 40px;" class="form-section">
+                    <h2 class="brand-font">Contact & Location</h2>
+                    <div class="input-grid">
+                        <div>
+                            <p><strong>Phone:</strong> <span id="display-phone">...</span></p>
+                            <p><strong>Address:</strong> <br> <span id="display-address">...</span></p>
+                        </div>
+                        <div id="map-container">
+                            <iframe id="map-frame" src="" allowfullscreen="" loading="lazy"></iframe>
+                        </div>
                     </div>
-                </div>
+                </section>
+
             </div>
 
-            <footer style="text-align: center; padding-top: 30px; border-top: 1px solid var(--gold); margin-top: 40px; font-size: 12px;">
+            <footer style="text-align: center; padding: 30px; border-top: 1px solid var(--gold); margin-top: 40px;">
                 <p>&copy; 2026 <span id="brand-name"></span>. All Rights Reserved.</p>
             </footer>
         </div>
     </main>
 
     <script>
-        // Copy original switchers and firebase fetch logic here
         function showPublicView() {
             document.getElementById('dashboard-view').style.display = 'none';
             document.getElementById('public-view').style.display = 'block';
@@ -140,55 +147,59 @@
 
         async function fetchWebsiteData() {
             const db = firebase.firestore();
-            db.collection('content').doc('aboutUs').get().then(doc => { if (doc.exists) document.getElementById('about-content').innerText = doc.data().text; });
-            db.collection('messages').doc('director').get().then(doc => { 
-                if (doc.exists) {
+            
+            // 1. Ticker
+            db.collection('content').doc('newsData').get().then(doc => {
+                if(doc.exists) document.getElementById('news-marquee').innerText = doc.data().text;
+            });
+
+            // 2. Messages
+            db.collection('messages').doc('director').get().then(doc => {
+                if(doc.exists) {
                     document.getElementById('director-msg').innerText = doc.data().text;
-                    if(doc.data().imageUrl) document.getElementById('director-img').src = doc.data().imageUrl;
+                    document.getElementById('director-img').src = doc.data().imageUrl || 'placeholder.jpg';
                 }
             });
-            db.collection('messages').doc('principal').get().then(doc => { 
-                if (doc.exists) {
+            db.collection('messages').doc('principal').get().then(doc => {
+                if(doc.exists) {
                     document.getElementById('principal-msg').innerText = doc.data().text;
-                    if(doc.data().imageUrl) document.getElementById('principal-img').src = doc.data().imageUrl;
+                    document.getElementById('principal-img').src = doc.data().imageUrl || 'placeholder.jpg';
                 }
             });
-            db.collection('content').doc('contactInfo').get().then(doc => { 
-                if (doc.exists) {
-                    document.getElementById('display-address').innerText = doc.data().address || "";
-                    document.getElementById('display-phone').innerText = doc.data().phone || "";
+
+            // 3. Gallery
+            db.collection('content').doc('gallery').get().then(doc => {
+                if(doc.exists) {
+                    const grid = document.getElementById('gallery-grid');
+                    grid.innerHTML = '';
+                    doc.data().images.forEach(url => {
+                        if(url) grid.innerHTML += `<img src="${url}" class="gallery-item">`;
+                    });
                 }
+            });
+
+            // 4. Contact & Map
+            db.collection('content').doc('contactInfo').get().then(doc => {
+                if(doc.exists) {
+                    document.getElementById('display-phone').innerText = doc.data().phone;
+                    document.getElementById('display-address').innerText = doc.data().address;
+                    document.getElementById('map-frame').src = doc.data().mapUrl;
+                }
+            });
+
+            // 5. PDF & About
+            db.collection('content').doc('cbse').get().then(doc => {
+                if(doc.exists) document.getElementById('pdf-link').href = doc.data().disclosureUrl;
+            });
+            db.collection('content').doc('aboutUs').get().then(doc => {
+                if(doc.exists) document.getElementById('about-content').innerText = doc.data().text;
             });
         }
 
-        firebase.auth().onAuthStateChanged(async (user) => {
-            if (user) {
-                showDashboardView();
-                let role = "student";
-                try {
-                    const staffDoc = await firebase.firestore().collection('staff').where('loginEmail', '==', user.email).get();
-                    if(!staffDoc.empty) role = staffDoc.docs[0].data().role;
-                } catch(e) {}
-                loadDashboardData(user, role);
-            } else {
-                document.getElementById('dashboard-view').style.display = 'none';
-                document.getElementById('public-view').style.display = 'block';
-                fetchWebsiteData();
-            }
+        firebase.auth().onAuthStateChanged(user => {
+            if(user) { showDashboardView(); } 
+            else { showPublicView(); document.getElementById('back-to-dash-container').style.display = 'none'; }
         });
-
-        async function loadDashboardData(user, role) {
-            document.getElementById('welcomeText').innerText = "Namaste, " + user.email.split('@')[0].toUpperCase();
-            document.getElementById('roleBadge').innerText = "Access: " + role.toUpperCase();
-            document.querySelectorAll('.role-section').forEach(sec => sec.style.display = 'none');
-            if(role === 'admin' || role === 'accountant') {
-                document.getElementById('adminView').style.display = 'block';
-                const stuSnap = await firebase.firestore().collection('students').get();
-                document.getElementById('totalStudents').innerText = stuSnap.size;
-            } else if (role === 'student') {
-                document.getElementById('studentView').style.display = 'block';
-            }
-        }
     </script>
 </body>
 </html>
