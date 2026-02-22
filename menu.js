@@ -6,7 +6,7 @@ const menuConfig = [
     { type: "divider", title: "Admission & Staff", role: ["admin", "accountant"] },
     { title: "Student Admission", icon: "fa-user-plus", link: "add-student.html", role: ["admin", "accountant"] },
     { title: "Staff Enrollment", icon: "fa-user-tie", link: "add-staff.html", role: ["admin"] },
-    { title: "View Students", icon: "fa-users-viewfinder", link: "view-students.html", role: ["admin", "accountant", "teacher"] },
+    { title: "Website Manager", icon: "fa-pen-nib", link: "view-students.html", role: ["admin", "accountant", "teacher"] },
 
     { type: "divider", title: "Academic & Exams", role: "all" },
     { title: "Student Attendance", icon: "fa-calendar-check", link: "attendance.html", role: ["admin", "teacher"] },
