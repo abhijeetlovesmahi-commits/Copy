@@ -32,6 +32,9 @@
             text-align: center; border: 1px solid #eee;
         }
         .stat-val { font-size: 1.5rem; font-weight: 700; color: var(--royal-blue); }
+        
+        /* Smooth Loading effect */
+        img { transition: opacity 0.5s ease-in-out; }
     </style>
 </head>
 <body>
@@ -65,13 +68,6 @@
                     </div>
                 </div>
 
-                <div id="teacherView" class="role-section">
-                    <div class="input-grid">
-                        <div class="stat-card"><i class="fas fa-book-open"></i><div>Homework</div><div class="stat-val">Updated</div></div>
-                        <div class="stat-card"><i class="fas fa-user-clock"></i><div>Attendance</div><div class="stat-val">Marked</div></div>
-                    </div>
-                </div>
-
                 <div id="studentView" class="role-section">
                     <div class="input-grid">
                         <div class="stat-card">
@@ -85,12 +81,12 @@
 
             <div id="public-view">
                 <div class="form-section">
-                    <marquee id="news-marquee" behavior="scroll" direction="left">Loading latest announcements from school...</marquee>
+                    <marquee id="news-marquee" behavior="scroll" direction="left">Welcome to The Lalit International School - Quality Education for Future Leaders.</marquee>
                 </div>
 
                 <section>
                     <h2>About Our School</h2>
-                    <p id="about-content" style="text-align: center;">Loading school details...</p>
+                    <p id="about-content" style="text-align: center; min-height: 50px;">Loading school details...</p>
                 </section>
 
                 <div class="profile-grid-custom">
@@ -98,70 +94,69 @@
                         <img id="director-img" src="placeholder-user.jpg" class="id-photo" alt="Director">
                         <div>
                             <h3 style="color: var(--royal-blue); margin-top: 0;">Director's Message</h3>
-                            <p id="director-msg" style="font-size: 0.9rem;">Loading...</p>
+                            <p id="director-msg" style="font-size: 0.9rem;">Loading message...</p>
                         </div>
                     </div>
                     <div class="custom-id-card">
                         <img id="principal-img" src="placeholder-user.jpg" class="id-photo" alt="Principal">
                         <div>
                             <h3 style="color: var(--royal-blue); margin-top: 0;">Principal's Message</h3>
-                            <p id="principal-msg" style="font-size: 0.9rem;">Loading...</p>
+                            <p id="principal-msg" style="font-size: 0.9rem;">Loading message...</p>
                         </div>
                     </div>
                 </div>
 
                 <div class="input-grid" style="margin-top: 40px;">
                     <div class="form-section">
-                        <h3>Student Portal</h3>
-                        <p>Login to check your fees, attendance and results.</p>
-                        <a href="login.html" class="royal-btn">Go to Portal</a>
-                    </div>
-                    <div class="form-section">
                         <h3>Contact Info</h3>
-                        <p><strong>Address:</strong> <span id="display-address">Loading...</span></p>
-                        <p><strong>Phone:</strong> <span id="display-phone">Loading...</span></p>
+                        <p><strong>Address:</strong> <span id="display-address">Update from Admin</span></p>
+                        <p><strong>Phone:</strong> <span id="display-phone">Update from Admin</span></p>
                     </div>
                 </div>
             </div>
 
             <footer style="text-align: center; padding-top: 30px; border-top: 1px solid var(--gold); margin-top: 40px;">
-                <p>&copy; 2026 The Lalit International School. All Rights Reserved.</p>
+                <p>&copy; 2026 The Lalit International School.</p>
             </footer>
         </div>
     </main>
 
     <script>
-        // --- DATA FETCH LOGIC (WEBSITE LIVE UPDATE) ---
+        // --- DATA FETCH LOGIC (Bina Storage Bucket ke kaam karega) ---
         async function fetchWebsiteData() {
             const db = firebase.firestore();
             try {
-                // About Us
-                const aboutDoc = await db.collection('content').doc('aboutUs').get();
-                if (aboutDoc.exists) document.getElementById('about-content').innerText = aboutDoc.data().text;
+                // About Us Fetch
+                db.collection('content').doc('aboutUs').get().then(doc => {
+                    if (doc.exists) document.getElementById('about-content').innerText = doc.data().text;
+                });
 
-                // Director
-                const dirDoc = await db.collection('messages').doc('director').get();
-                if (dirDoc.exists) {
-                    const data = dirDoc.data();
-                    document.getElementById('director-msg').innerText = data.text;
-                    if(data.imageUrl) document.getElementById('director-img').src = data.imageUrl;
-                }
+                // Director Fetch
+                db.collection('messages').doc('director').get().then(doc => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        document.getElementById('director-msg').innerText = data.text;
+                        if(data.imageUrl) document.getElementById('director-img').src = data.imageUrl;
+                    }
+                });
 
-                // Principal
-                const priDoc = await db.collection('messages').doc('principal').get();
-                if (priDoc.exists) {
-                    const data = priDoc.data();
-                    document.getElementById('principal-msg').innerText = data.text;
-                    if(data.imageUrl) document.getElementById('principal-img').src = data.imageUrl;
-                }
+                // Principal Fetch
+                db.collection('messages').doc('principal').get().then(doc => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        document.getElementById('principal-msg').innerText = data.text;
+                        if(data.imageUrl) document.getElementById('principal-img').src = data.imageUrl;
+                    }
+                });
 
-                // Contact
-                const contactDoc = await db.collection('content').doc('contactInfo').get();
-                if (contactDoc.exists) {
-                    const c = contactDoc.data();
-                    if(document.getElementById('display-address')) document.getElementById('display-address').innerText = c.address;
-                    if(document.getElementById('display-phone')) document.getElementById('display-phone').innerText = c.phone;
-                }
+                // Contact Info
+                db.collection('content').doc('contactInfo').get().then(doc => {
+                    if (doc.exists) {
+                        const c = doc.data();
+                        if(document.getElementById('display-address')) document.getElementById('display-address').innerText = c.address || "";
+                        if(document.getElementById('display-phone')) document.getElementById('display-phone').innerText = c.phone || "";
+                    }
+                });
             } catch (error) { console.log("Fetch error:", error); }
         }
 
@@ -171,8 +166,8 @@
             const dashboardView = document.getElementById('dashboard-view');
 
             if (user) {
-                publicView.style.display = 'none';
-                dashboardView.style.display = 'block';
+                if(publicView) publicView.style.display = 'none';
+                if(dashboardView) dashboardView.style.display = 'block';
                 
                 let role = "student";
                 try {
@@ -182,15 +177,18 @@
                 
                 loadDashboardData(user, role);
             } else {
-                publicView.style.display = 'block';
-                dashboardView.style.display = 'none';
-                fetchWebsiteData(); // Login nahi hai to website ka data load karo
+                if(publicView) publicView.style.display = 'block';
+                if(dashboardView) dashboardView.style.display = 'none';
+                fetchWebsiteData(); // Public view load hone par data kheencho
             }
         });
 
         async function loadDashboardData(user, role) {
-            document.getElementById('welcomeText').innerText = "Namaste, " + user.email.split('@')[0].toUpperCase();
-            document.getElementById('roleBadge').innerText = "Access: " + role.toUpperCase();
+            const welcome = document.getElementById('welcomeText');
+            const badge = document.getElementById('roleBadge');
+            if(welcome) welcome.innerText = "Namaste, " + user.email.split('@')[0].toUpperCase();
+            if(badge) badge.innerText = "Access: " + role.toUpperCase();
+            
             document.querySelectorAll('.role-section').forEach(sec => sec.style.display = 'none');
 
             if(role === 'admin' || role === 'accountant') {
