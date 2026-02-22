@@ -1,1 +1,93 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Website Manager | Admin Panel</title>
+    
+    <link rel="stylesheet" href="style.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+</head>
+<body>
+
+    <header>
+        <div class="logo-area">
+            <img src="logo.png" alt="Logo" id="main-logo">
+            <span id="brand-name"></span>
+        </div>
+        <nav id="menu-container"></nav>
+    </header>
+
+    <main class="admin-container">
+        <h2>Website Content Management</h2>
+
+        <div class="upload-card">
+            <h3>About Us</h3>
+            <textarea id="aboutText" placeholder="School ke baare mein likhein..."></textarea>
+            <button onclick="handleMasterUpload('content', 'aboutText', '', '')">Update About Us</button>
+        </div>
+
+        <div class="upload-card">
+            <h3>Director's Message</h3>
+            <textarea id="directorMsg" placeholder="Director ka sandesh..."></textarea>
+            <input type="file" id="directorImg" accept="image/*">
+            <button onclick="handleMasterUpload('messages', 'directorMsg', '', 'directorImg')">Update Director Message</button>
+        </div>
+
+        <div class="upload-card">
+            <h3>Principal's Message</h3>
+            <textarea id="principalMsg" placeholder="Principal ka sandesh..."></textarea>
+            <input type="file" id="principalImg" accept="image/*">
+            <button onclick="handleMasterUpload('messages', 'principalMsg', '', 'principalImg')">Update Principal Message</button>
+        </div>
+
+        <div class="upload-card">
+            <h3>News & Announcements</h3>
+            <input type="text" id="newsTitle" placeholder="News Headline">
+            <textarea id="newsDetail" placeholder="News ki puri jankari..."></textarea>
+            <input type="file" id="newsImg" accept="image/*">
+            <button onclick="handleMasterUpload('news', 'newsTitle', 'newsDetail', 'newsImg')">Publish News</button>
+        </div>
+
+        <div class="upload-card">
+            <h3>Vacancies (Jobs)</h3>
+            <textarea id="vacancyInfo" placeholder="Job requirements aur posts..."></textarea>
+            <button onclick="handleMasterUpload('content', 'vacancyInfo', '', '')">Update Vacancies</button>
+        </div>
+
+        <div class="upload-card">
+            <h3>Student Portal Info</h3>
+            <input type="text" id="portalLink" placeholder="External Portal Link (Optional)">
+            <textarea id="portalNotice" placeholder="Students ke liye koi zaroori notice..."></textarea>
+            <button onclick="handleMasterUpload('portal', 'portalLink', 'portalNotice', '')">Update Student Portal</button>
+        </div>
+
+        <div class="upload-card">
+            <h3>Contact Us & Map</h3>
+            <input type="text" id="contactPhone" placeholder="Phone Number">
+            <input type="email" id="contactEmail" placeholder="Email Address">
+            <textarea id="schoolAddress" placeholder="School ka pura pata..."></textarea>
+            <input type="text" id="mapLink" placeholder="Google Map Embed Link (Iframe URL)">
+            <button onclick="handleMasterUpload('contact', 'contactPhone', 'mapLink', '')">Update Contact & Map</button>
+        </div>
+
+        <div class="upload-card">
+            <h3>Footer Details</h3>
+            <input type="text" id="footerCopyright" placeholder="Copyright Text (e.g. © 2026 TLIS)">
+            <input type="text" id="socialLinks" placeholder="Social Media Links (FB, Insta etc.)">
+            <button onclick="handleMasterUpload('content', 'footerCopyright', 'socialLinks', '')">Update Footer</button>
+        </div>
+
+        <div id="masterStatus"></div>
+    </main>
+
+    <script src="brand.js"></script>
+    <script src="menu.js"></script>
+    <script src="firebase-config.js"></script>
+
+</body>
+</html>
 
