@@ -4,147 +4,107 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Website Manager | The Lalit International</title>
-    
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
-
-    <style>
-        /* Is page ke liye thoda extra touch up */
-        .manager-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 20px;
-            width: 100%;
-        }
-        h3 { 
-            color: var(--royal-blue); 
-            border-bottom: 1px solid var(--gold); 
-            padding-bottom: 10px; 
-            margin-bottom: 15px;
-            font-size: 1.1rem;
-        }
-        textarea { height: 100px; resize: vertical; }
-        .status-msg {
-            position: fixed; bottom: 20px; right: 20px;
-            padding: 15px 25px; border-radius: 8px;
-            color: white; display: none; z-index: 10000;
-        }
-    </style>
 </head>
 <body>
 
     <main class="main-content">
         <div class="royal-card">
             <header class="header">
-                <img src="logo.png" alt="Logo" class="school-logo">
-                <h1 class="brand-font">Website Content Manager</h1>
-                <p style="color: var(--gold); font-size: 0.8rem;">ADMIN PANEL - UPDATE LIVE WEBSITE</p>
+                <h1 class="brand-font">Website Manager</h1>
+                <p style="color:var(--gold)">Bina Storage Bucket wala Advanced System</p>
             </header>
 
-            <div class="manager-grid">
+            <div class="input-grid">
                 <div class="form-section">
-                    <h3><i class="fas fa-info-circle"></i> About Us</h3>
-                    <textarea id="aboutText" placeholder="School ke baare mein likhein..."></textarea>
-                    <button class="royal-btn" style="width:100%" onclick="handleMasterUpload('content', 'aboutText', '', '', 'aboutUs')">Update About Us</button>
+                    <h3>Director's Message</h3>
+                    <textarea id="directorMsg" placeholder="Sandesh likhein..."></textarea>
+                    <label>Photo Upload (Auto Compress):</label>
+                    <input type="file" id="directorFile" accept="image/*" onchange="previewAndCompress(this, 'dirPreview')">
+                    <p style="text-align:center; font-size:10px;">-- YA --</p>
+                    <input type="text" id="directorUrl" placeholder="Direct HD Photo URL (Optional)">
+                    <img id="dirPreview" style="width:100px; display:none; margin:10px auto; border:2px solid var(--gold); border-radius:5px;">
+                    <button class="royal-btn" style="width:100%" onclick="saveToFirestore('messages', 'director', 'directorMsg', 'directorUrl', 'dirPreview')">Update Director</button>
                 </div>
 
                 <div class="form-section">
-                    <h3><i class="fas fa-user-tie"></i> Director's Message</h3>
-                    <textarea id="directorMsg" placeholder="Director ka sandesh..."></textarea>
-                    <input type="file" id="directorImg" accept="image/*" style="margin-bottom: 10px;">
-                    <button class="royal-btn" style="width:100%" onclick="handleMasterUpload('messages', 'directorMsg', '', 'directorImg', 'director')">Update Director</button>
-                </div>
-
-                <div class="form-section">
-                    <h3><i class="fas fa-user-graduate"></i> Principal's Message</h3>
-                    <textarea id="principalMsg" placeholder="Principal ka sandesh..."></textarea>
-                    <input type="file" id="principalImg" accept="image/*" style="margin-bottom: 10px;">
-                    <button class="royal-btn" style="width:100%" onclick="handleMasterUpload('messages', 'principalMsg', '', 'principalImg', 'principal')">Update Principal</button>
-                </div>
-
-                <div class="form-section">
-                    <h3><i class="fas fa-map-marked-alt"></i> Contact & Map</h3>
-                    <input type="text" id="contactPhone" placeholder="Phone Number" style="margin-bottom: 10px;">
-                    <input type="email" id="contactEmail" placeholder="Email Address" style="margin-bottom: 10px;">
-                    <textarea id="schoolAddress" placeholder="Full Address..."></textarea>
-                    <button class="royal-btn" style="width:100%" onclick="updateContact()">Update Contact Info</button>
+                    <h3>Principal's Message</h3>
+                    <textarea id="principalMsg" placeholder="Sandesh likhein..."></textarea>
+                    <label>Photo Upload (Auto Compress):</label>
+                    <input type="file" id="principalFile" accept="image/*" onchange="previewAndCompress(this, 'priPreview')">
+                    <p style="text-align:center; font-size:10px;">-- YA --</p>
+                    <input type="text" id="principalUrl" placeholder="Direct HD Photo URL (Optional)">
+                    <img id="priPreview" style="width:100px; display:none; margin:10px auto; border:2px solid var(--gold); border-radius:5px;">
+                    <button class="royal-btn" style="width:100%" onclick="saveToFirestore('messages', 'principal', 'principalMsg', 'principalUrl', 'priPreview')">Update Principal</button>
                 </div>
             </div>
-
-            <div id="masterStatus" class="status-msg"></div>
         </div>
     </main>
 
     <script src="firebase-config.js"></script>
-    <script src="brand.js"></script>
     <script src="menu.js"></script>
 
     <script>
-        // --- MASTER UPLOAD LOGIC ---
-        async function handleMasterUpload(collection, textId, secondaryId, fileId, docName) {
-            const btn = event.target;
-            const originalText = btn.innerText;
-            const textContent = document.getElementById(textId).value;
-            const fileInput = fileId ? document.getElementById(fileId) : null;
-            
-            if(!textContent && (!fileInput || !fileInput.files[0])) {
-                showStatus("Kuch to likho ya file select karo!", "#e74c3c");
-                return;
-            }
+        // --- 1. COMPRESSION LOGIC (Canvas ka use karke) ---
+        function previewAndCompress(input, previewId) {
+            const preview = document.getElementById(previewId);
+            const file = input.files[0];
+            if (!file) return;
 
-            btn.innerText = "Uploading...";
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Max width 400px rakhte hain taaki quality bhi rahe aur size bhi kam ho
+                    const scale = 400 / img.width;
+                    canvas.width = 400;
+                    canvas.height = img.height * scale;
+
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    
+                    // Photo ko Base64 format mein compress karke nikalna (Quality 0.7)
+                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                    preview.src = compressedBase64;
+                    preview.style.display = 'block';
+                }
+            }
+            reader.readAsDataURL(file);
+        }
+
+        // --- 2. SAVE LOGIC ---
+        async function saveToFirestore(col, doc, msgId, urlId, previewId) {
+            const msg = document.getElementById(msgId).value;
+            const url = document.getElementById(urlId).value;
+            const previewImg = document.getElementById(previewId).src;
+            const btn = event.target;
+
+            btn.innerText = "Saving...";
             btn.disabled = true;
 
+            // Priority: Pehle HD URL check hoga, agar nahi hai to Compressed Photo
+            let finalPhoto = url ? url : (previewImg.startsWith('data:image') ? previewImg : "");
+
             try {
-                let updateData = {
-                    lastUpdated: new Date().getTime(),
-                    text: textContent
-                };
-
-                // Agar image bhi hai
-                if (fileInput && fileInput.files[0]) {
-                    const file = fileInput.files[0];
-                    const storageRef = firebase.storage().ref(`website/${docName}_${file.name}`);
-                    await storageRef.put(file);
-                    const url = await storageRef.getDownloadURL();
-                    updateData.imageUrl = url;
-                }
-
-                await firebase.firestore().collection(collection).doc(docName).set(updateData, { merge: true });
-                showStatus("✅ Successfully Updated!", "#27ae60");
-                
+                await firebase.firestore().collection(col).doc(doc).set({
+                    text: msg,
+                    imageUrl: finalPhoto,
+                    lastUpdated: new Date().getTime()
+                }, { merge: true });
+                alert("✅ Website Updated Successfully!");
             } catch (error) {
                 console.error(error);
-                showStatus("❌ Error: " + error.message, "#e74c3c");
+                alert("❌ Error: " + error.message);
             } finally {
-                btn.innerText = originalText;
+                btn.innerText = "Update Now";
                 btn.disabled = false;
             }
-        }
-
-        async function updateContact() {
-            const phone = document.getElementById('contactPhone').value;
-            const email = document.getElementById('contactEmail').value;
-            const addr = document.getElementById('schoolAddress').value;
-
-            try {
-                await firebase.firestore().collection('content').doc('contactInfo').set({
-                    phone, email, address: addr, lastUpdated: new Date()
-                }, {merge: true});
-                showStatus("✅ Contact Updated!", "#27ae60");
-            } catch (e) { showStatus("Error updating contact", "#e74c3c"); }
-        }
-
-        function showStatus(msg, color) {
-            const s = document.getElementById('masterStatus');
-            s.innerText = msg;
-            s.style.backgroundColor = color;
-            s.style.display = 'block';
-            setTimeout(() => { s.style.display = 'none'; }, 3000);
         }
     </script>
 </body>
