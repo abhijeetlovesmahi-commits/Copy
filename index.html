@@ -20,29 +20,32 @@
         .role-section { display: none; width: 100%; }
         #dashboard-view { display: none; }
         #public-view { display: block; }
+        
+        /* Message Card & Photo Bada karne ke liye */
+        .id-photo-large { 
+            width: 150px !important; /* Size badha diya gaya hai */
+            height: 180px !important; 
+            object-fit: cover; 
+            border: 3px solid var(--gold); 
+            border-radius: 10px;
+            flex-shrink: 0;
+        }
+        .custom-id-card-large {
+            background: white; border: 1px solid var(--gold); border-radius: 15px;
+            padding: 25px; display: flex; align-items: flex-start; gap: 25px;
+            margin-bottom: 20px; transition: 0.3s;
+        }
+
         .welcome-banner {
             background: linear-gradient(135deg, var(--royal-blue) 0%, #001a4d 100%);
-            color: white; padding: 30px; border-radius: 15px;
-            border-bottom: 5px solid var(--gold); margin-bottom: 20px; text-align: center;
+            color: white; padding: 30px; border-radius: 15px; text-align: center;
         }
-        .stat-card {
-            background: white; padding: 20px; border-radius: 12px;
-            box-shadow: var(--shadow-sm); border-left: 5px solid var(--royal-blue);
-            text-align: center; border: 1px solid #eee;
-        }
-        .stat-val { font-size: 1.5rem; font-weight: 700; color: var(--royal-blue); }
-        .view-toggle-btns { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
-        
-        /* CBSE Norms Grid */
         .cbse-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-top: 20px; }
         .cbse-item { 
             background: #fff; border: 1px solid var(--gold); padding: 15px; 
             border-radius: 8px; text-align: center; font-size: 13px; font-weight: 600;
-            color: var(--royal-blue); text-transform: uppercase; cursor: pointer;
-            transition: 0.3s; text-decoration: none; display: block;
+            color: var(--royal-blue); text-decoration: none;
         }
-        .cbse-item:hover { background: var(--light-gold); transform: translateY(-3px); box-shadow: var(--shadow-md); }
-        .mandatory-disclosure { border: 2px solid #c0392b; padding: 15px; margin: 20px 0; border-radius: 10px; text-align: center; background: #fff5f5; }
     </style>
 </head>
 <body>
@@ -50,29 +53,21 @@
     <main class="main-content">
         <div class="royal-card">
             
-            <header class="header">
-                <img src="" alt="School Logo" class="school-logo">
-                <h1 id="brand-name" class="brand-font">Loading...</h1>
-                <p id="aff-no" style="font-size: 12px; color: var(--royal-blue); margin-top: 5px; letter-spacing: 1px;">Loading Affiliation...</p>
-            </header>
+            <header class="header" id="brand-header-container"></header>
 
             <div id="dashboard-view">
                 <div class="welcome-banner">
                     <h2 id="welcomeText" style="color: white;">Welcome!</h2>
                     <span id="roleBadge" class="royal-btn" style="padding: 5px 15px; font-size: 12px; pointer-events: none;">Role</span>
                 </div>
-                <div class="view-toggle-btns">
+                <div style="text-align:center; margin: 15px 0;">
                     <button onclick="showPublicView()" class="royal-btn" style="background: var(--gold); color: #000;"><i class="fas fa-globe"></i> View Website</button>
-                    <button onclick="firebase.auth().signOut()" class="royal-btn" style="background: #c0392b;"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                    <button onclick="firebase.auth().signOut()" class="royal-btn" style="background: #c0392b; margin-left:10px;"><i class="fas fa-sign-out-alt"></i> Logout</button>
                 </div>
                 <div id="adminView" class="role-section">
                     <div class="input-grid">
-                        <div class="stat-card"><i class="fas fa-vault"></i><div>Collection</div><div class="stat-val">₹45,200</div></div>
                         <div class="stat-card"><i class="fas fa-users"></i><div>Students</div><div class="stat-val" id="totalStudents">0</div></div>
                     </div>
-                </div>
-                <div id="studentView" class="role-section">
-                    <div class="input-grid"><div class="stat-card"><i class="fas fa-receipt"></i><div>Pending Fees</div><div class="stat-val" id="myDue">₹0</div></div></div>
                 </div>
             </div>
 
@@ -81,57 +76,56 @@
                     <button onclick="showDashboardView()" class="royal-btn"><i class="fas fa-arrow-left"></i> Back to Dashboard</button>
                 </div>
 
-                <div class="mandatory-disclosure">
-                    <a href="disclosure.html" style="text-decoration: none; color: #c0392b; font-weight: 800; font-size: 1.1rem;">
-                        <i class="fas fa-file-shield"></i> MANDATORY PUBLIC DISCLOSURE (APPENDIX-IX)
-                    </a>
-                </div>
-
-                <div class="form-section">
-                    <marquee id="news-marquee">Loading latest announcements from school...</marquee>
-                </div>
+                <div class="form-section"><marquee id="news-marquee">Loading school updates...</marquee></div>
 
                 <section>
-                    <h2>About Our School</h2>
-                    <p id="about-content" style="text-align: center; min-height: 40px;">Loading...</p>
+                    <h2 id="brand-name" style="font-size: 1.2rem;">School Name</h2>
+                    <p id="about-content" style="text-align: center;">Loading about details...</p>
                     
                     <div class="cbse-grid">
-                        <a href="academics.html" class="cbse-item"><i class="fas fa-book"></i><br>Academics & NCERT</a>
-                        <a href="management.html" class="cbse-item"><i class="fas fa-users-cog"></i><br>Management (SMC)</a>
-                        <a href="infrastructure.html" class="cbse-item"><i class="fas fa-school"></i><br>Infrastructure</a>
-                        <a href="admissions.html" class="cbse-item"><i class="fas fa-user-graduate"></i><br>Admissions</a>
-                        <a href="tc-verification.html" class="cbse-item"><i class="fas fa-id-card-alt"></i><br>TC Verification</a>
+                        <a href="disclosure.html" class="cbse-item" style="border: 2px solid #c0392b;">Public Disclosure</a>
+                        <a href="academics.html" class="cbse-item">Academics</a>
+                        <a href="infrastructure.html" class="cbse-item">Infrastructure</a>
+                        <a href="admissions.html" class="cbse-item">Admissions</a>
                     </div>
                 </section>
 
-                <div class="profile-grid-custom" style="margin-top: 30px;">
-                    <div class="custom-id-card">
-                        <img id="director-img" src="placeholder-user.jpg" class="id-photo">
-                        <div><h3>Director's Message</h3><p id="director-msg" style="font-size: 13px;">Loading...</p></div>
+                <div style="margin-top: 40px;">
+                    <div class="custom-id-card-large">
+                        <img id="director-img" src="placeholder-user.jpg" class="id-photo-large">
+                        <div>
+                            <h3 style="color: var(--royal-blue); margin-top: 0; font-family: 'Cinzel';">Director's Message</h3>
+                            <p id="director-msg" style="font-size: 1rem; line-height: 1.8;">Loading...</p>
+                        </div>
                     </div>
-                    <div class="custom-id-card">
-                        <img id="principal-img" src="placeholder-user.jpg" class="id-photo">
-                        <div><h3>Principal's Message</h3><p id="principal-msg" style="font-size: 13px;">Loading...</p></div>
+
+                    <div class="custom-id-card-large">
+                        <img id="principal-img" src="placeholder-user.jpg" class="id-photo-large">
+                        <div>
+                            <h3 style="color: var(--royal-blue); margin-top: 0; font-family: 'Cinzel';">Principal's Message</h3>
+                            <p id="principal-msg" style="font-size: 1rem; line-height: 1.8;">Loading...</p>
+                        </div>
                     </div>
                 </div>
 
                 <div class="input-grid" style="margin-top: 40px;">
                     <div class="form-section">
-                        <h3>School Contact</h3>
+                        <h3>Contact Us</h3>
                         <p><strong>Address:</strong> <span id="display-address">Loading...</span></p>
                         <p><strong>Phone:</strong> <span id="display-phone">Loading...</span></p>
+                        <p id="aff-no" style="font-size: 0.7rem; color: #777;">Loading Affiliation...</p>
                     </div>
                 </div>
             </div>
 
             <footer style="text-align: center; padding-top: 30px; border-top: 1px solid var(--gold); margin-top: 40px; font-size: 12px;">
-                <p>&copy; 2026 <span id="brand-name">School Name</span>. All Rights Reserved.</p>
+                <p>&copy; 2026 <span id="brand-name"></span>. All Rights Reserved.</p>
             </footer>
         </div>
     </main>
 
     <script>
-        // Copy original switchers and firebase fetch logic here (same as previous)
+        // Copy original switchers and firebase fetch logic here
         function showPublicView() {
             document.getElementById('dashboard-view').style.display = 'none';
             document.getElementById('public-view').style.display = 'block';
@@ -146,27 +140,25 @@
 
         async function fetchWebsiteData() {
             const db = firebase.firestore();
-            try {
-                db.collection('content').doc('aboutUs').get().then(doc => { if (doc.exists) document.getElementById('about-content').innerText = doc.data().text; });
-                db.collection('messages').doc('director').get().then(doc => { 
-                    if (doc.exists) {
-                        document.getElementById('director-msg').innerText = doc.data().text;
-                        if(doc.data().imageUrl) document.getElementById('director-img').src = doc.data().imageUrl;
-                    }
-                });
-                db.collection('messages').doc('principal').get().then(doc => { 
-                    if (doc.exists) {
-                        document.getElementById('principal-msg').innerText = doc.data().text;
-                        if(doc.data().imageUrl) document.getElementById('principal-img').src = doc.data().imageUrl;
-                    }
-                });
-                db.collection('content').doc('contactInfo').get().then(doc => { 
-                    if (doc.exists) {
-                        document.getElementById('display-address').innerText = doc.data().address || "";
-                        document.getElementById('display-phone').innerText = doc.data().phone || "";
-                    }
-                });
-            } catch (error) { console.log(error); }
+            db.collection('content').doc('aboutUs').get().then(doc => { if (doc.exists) document.getElementById('about-content').innerText = doc.data().text; });
+            db.collection('messages').doc('director').get().then(doc => { 
+                if (doc.exists) {
+                    document.getElementById('director-msg').innerText = doc.data().text;
+                    if(doc.data().imageUrl) document.getElementById('director-img').src = doc.data().imageUrl;
+                }
+            });
+            db.collection('messages').doc('principal').get().then(doc => { 
+                if (doc.exists) {
+                    document.getElementById('principal-msg').innerText = doc.data().text;
+                    if(doc.data().imageUrl) document.getElementById('principal-img').src = doc.data().imageUrl;
+                }
+            });
+            db.collection('content').doc('contactInfo').get().then(doc => { 
+                if (doc.exists) {
+                    document.getElementById('display-address').innerText = doc.data().address || "";
+                    document.getElementById('display-phone').innerText = doc.data().phone || "";
+                }
+            });
         }
 
         firebase.auth().onAuthStateChanged(async (user) => {
@@ -176,7 +168,7 @@
                 try {
                     const staffDoc = await firebase.firestore().collection('staff').where('loginEmail', '==', user.email).get();
                     if(!staffDoc.empty) role = staffDoc.docs[0].data().role;
-                } catch(e) { console.error(e); }
+                } catch(e) {}
                 loadDashboardData(user, role);
             } else {
                 document.getElementById('dashboard-view').style.display = 'none';
@@ -195,8 +187,6 @@
                 document.getElementById('totalStudents').innerText = stuSnap.size;
             } else if (role === 'student') {
                 document.getElementById('studentView').style.display = 'block';
-                const stuDoc = await firebase.firestore().collection('students').where('loginEmail', '==', user.email).get();
-                if(!stuDoc.empty) document.getElementById('myDue').innerText = "₹" + (stuDoc.docs[0].data().pendingFee || 0);
             }
         }
     </script>
