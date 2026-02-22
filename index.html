@@ -3,19 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Lalit International School | Royal Luxury</title>
+    <title>The Lalit International School | Portal</title>
     
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
+    
+    <script src="firebase-config.js"></script>
+    <script src="brand.js"></script>
+    <script src="menu.js"></script>
+
+    <style>
+        /* Dashboard specific extra styling */
+        .welcome-banner {
+            background: linear-gradient(135deg, var(--royal-blue) 0%, #001a4d 100%);
+            color: white; padding: 30px; border-radius: 15px;
+            border-bottom: 5px solid var(--gold); margin-bottom: 30px; text-align: center;
+        }
+        .stat-card {
+            background: white; padding: 20px; border-radius: 12px;
+            box-shadow: var(--shadow-sm); border-left: 5px solid var(--royal-blue);
+            transition: 0.3s; text-align: center; height: 100%; border: 1px solid #eee;
+        }
+        .stat-card i { font-size: 1.8rem; color: var(--gold); margin-bottom: 10px; }
+        .stat-val { font-size: 1.5rem; font-weight: 700; color: var(--royal-blue); }
+        .stat-label { font-size: 0.75rem; text-transform: uppercase; color: #777; }
+        
+        /* Visibility Classes */
+        .role-section { display: none; width: 100%; }
+        #public-view { display: block; } /* Pehle public view dikhega */
+    </style>
 </head>
 <body>
 
     <button id="menu-trigger-btn">
-        <span></span>
-        <span></span>
-        <span></span>
+        <span></span><span></span><span></span>
     </button>
 
     <nav id="menu-container"></nav>
@@ -28,93 +53,151 @@
                 <h1 id="brand-name" class="brand-font">The Lalit International School</h1>
             </header>
 
-            <div class="form-section" style="margin-top: -20px; border-left-color: var(--royal-blue);">
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <span style="font-weight: bold; color: var(--royal-blue); white-space: nowrap;">LATEST NEWS:</span>
-                    <marquee id="news-marquee" behavior="scroll" direction="left">
-                        Loading latest announcements...
-                    </marquee>
+            <div id="dashboard-view" class="role-section">
+                <div class="welcome-banner">
+                    <h2 id="welcomeText" style="color: white; font-family: 'Poppins';">Namaste!</h2>
+                    <span id="roleBadge" class="royal-btn" style="padding: 5px 15px; font-size: 12px; pointer-events: none;">Verifying...</span>
+                    <button onclick="firebase.auth().signOut()" class="royal-btn" style="background: var(--danger); border: none; font-size: 10px; margin-left: 10px;">Logout</button>
                 </div>
-            </div>
 
-            <section id="about-section">
-                <h2>About Our School</h2>
-                <div style="text-align: center; max-width: 900px; margin: 0 auto;">
-                    <p id="about-content">Loading about us details...</p>
-                </div>
-            </section>
-
-            <div class="profile-grid-custom">
-                <div class="custom-id-card">
-                    <img id="director-img" src="placeholder-user.jpg" alt="Director" class="id-photo">
-                    <div>
-                        <h3 style="color: var(--royal-blue); margin-top: 0;">Director's Message</h3>
-                        <p id="director-msg" style="font-size: 0.9rem; margin-bottom: 0;">Loading message...</p>
-                    </div>
-                </div>
-                <div class="custom-id-card">
-                    <img id="principal-img" src="placeholder-user.jpg" alt="Principal" class="id-photo">
-                    <div>
-                        <h3 style="color: var(--royal-blue); margin-top: 0;">Principal's Message</h3>
-                        <p id="principal-msg" style="font-size: 0.9rem; margin-bottom: 0;">Loading message...</p>
-                    </div>
-                </div>
-            </div>
-
-            <hr style="border: none; border-top: 1px solid var(--border-color); margin: 50px 0;">
-
-            <div class="input-grid">
-                <div class="form-section">
-                    <h3 style="color: var(--royal-blue);">Student Portal</h3>
-                    <p id="portal-notice">Check results, attendance and fees here.</p>
-                    <a href="login.html" class="royal-btn">Login to Portal</a>
-                </div>
-                <div class="form-section">
-                    <h3 style="color: var(--royal-blue);">Current Vacancies</h3>
-                    <p id="vacancy-list">Loading job openings...</p>
-                    <button class="royal-btn">Apply Now</button>
-                </div>
-            </div>
-
-            <section id="infrastructure">
-                <h2>Our Infrastructure</h2>
-                <div id="infra-gallery" class="profile-grid-custom">
-                    </div>
-            </section>
-
-            <section id="contact-section" class="form-section" style="margin-top: 50px;">
-                <h2 style="margin-top: 0;">Contact Us</h2>
-                <div class="input-grid">
-                    <div class="contact-info">
-                        <p><strong>Address:</strong> <br><span id="display-address">Loading...</span></p>
-                        <p><strong>Phone:</strong> <br><span id="display-phone">Loading...</span></p>
-                        <p><strong>Email:</strong> <br><span id="display-email">Loading...</span></p>
-                    </div>
-                    <div class="map-area" style="min-height: 200px; background: #eee; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                        <div id="map-container">
-                            <p>Map Loading...</p>
+                <div id="adminView" class="role-section">
+                    <div class="input-grid">
+                        <div class="stat-card">
+                            <i class="fas fa-vault"></i>
+                            <div class="stat-label">Today's Collection</div>
+                            <div class="stat-val" id="todayCollection">₹0</div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-users"></i>
+                            <div class="stat-label">Total Students</div>
+                            <div class="stat-val" id="totalStudents">0</div>
                         </div>
                     </div>
                 </div>
-            </section>
+
+                <div id="teacherView" class="role-section">
+                    <div class="input-grid">
+                        <div class="stat-card"><i class="fas fa-book-open"></i><div class="stat-label">Homework Status</div><div class="stat-val">Updated</div></div>
+                        <div class="stat-card"><i class="fas fa-user-clock"></i><div class="stat-label">Attendance</div><div class="stat-val">Marked</div></div>
+                    </div>
+                </div>
+
+                <div id="studentView" class="role-section">
+                    <div class="input-grid">
+                        <div class="stat-card">
+                            <i class="fas fa-receipt"></i>
+                            <div class="stat-label">My Pending Fees</div>
+                            <div class="stat-val" style="color: var(--danger);" id="myDue">₹0</div>
+                        </div>
+                        <div class="stat-card"><i class="fas fa-pencil-alt"></i><div class="stat-label">Home Work</div><div class="stat-val">Check Assignment</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="public-view">
+                <div class="form-section">
+                    <marquee id="news-marquee">Loading latest announcements...</marquee>
+                </div>
+
+                <section id="about-section">
+                    <h2>About Our School</h2>
+                    <p id="about-content" style="text-align: center;">Loading school details...</p>
+                </section>
+
+                <div class="profile-grid-custom">
+                    <div class="custom-id-card">
+                        <img id="director-img" src="placeholder-user.jpg" class="id-photo">
+                        <div><h3>Director's Message</h3><p id="director-msg">Loading...</p></div>
+                    </div>
+                    <div class="custom-id-card">
+                        <img id="principal-img" src="placeholder-user.jpg" class="id-photo">
+                        <div><h3>Principal's Message</h3><p id="principal-msg">Loading...</p></div>
+                    </div>
+                </div>
+
+                <div class="input-grid" style="margin-top: 40px;">
+                    <div class="form-section">
+                        <h3>Student Portal</h3>
+                        <p>Access your results & fees.</p>
+                        <a href="login.html" class="royal-btn">Login to Portal</a>
+                    </div>
+                    <div class="form-section">
+                        <h3>Vacancies</h3>
+                        <p id="vacancy-list">No openings.</p>
+                        <button class="royal-btn">Apply Now</button>
+                    </div>
+                </div>
+            </div>
 
             <footer style="text-align: center; padding-top: 30px; border-top: 1px solid var(--gold); margin-top: 40px;">
-                <p id="footer-copy">&copy; 2026 The Lalit International School. All Rights Reserved.</p>
+                <p>&copy; 2026 The Lalit International School.</p>
             </footer>
+        </div>
+    </main>
 
-        </div> </main>
-
-    <script src="brand.js"></script>
-    <script src="menu.js"></script>
-    <script src="firebase-config.js"></script>
-    
     <script>
-        window.onload = function() {
-            if (typeof fetchWebsiteData === 'function') {
-                fetchWebsiteData();
-            }
-        };
-    </script>
+        // --- LOGIC MERGE ---
 
+        // Auth Listener: Check Login Status
+        firebase.auth().onAuthStateChanged(async (user) => {
+            const publicView = document.getElementById('public-view');
+            const dashboardView = document.getElementById('dashboard-view');
+
+            if (user) {
+                // User Logged In Hai
+                publicView.style.display = 'none';
+                dashboardView.style.display = 'block';
+                
+                let role = "student"; // Default
+                
+                // 1. Check if Staff
+                const staffDoc = await firebase.firestore().collection('staff').where('loginEmail', '==', user.email).get();
+                if(!staffDoc.empty) {
+                    role = staffDoc.docs[0].data().role;
+                }
+                
+                loadDashboardData(user, role);
+            } else {
+                // User Logout Hai
+                publicView.style.display = 'block';
+                dashboardView.style.display = 'none';
+                if(typeof fetchWebsiteData === 'function') fetchWebsiteData();
+            }
+        });
+
+        async function loadDashboardData(user, role) {
+            document.getElementById('welcomeText').innerText = "Namaste, " + user.email.split('@')[0].toUpperCase();
+            document.getElementById('roleBadge').innerText = "Role: " + role.toUpperCase();
+
+            // All views hide karein pehle
+            document.getElementById('adminView').style.display = 'none';
+            document.getElementById('teacherView').style.display = 'none';
+            document.getElementById('studentView').style.display = 'none';
+
+            if(role === 'admin' || role === 'accountant') {
+                document.getElementById('adminView').style.display = 'block';
+                fetchAdminStats();
+            } else if (role === 'teacher') {
+                document.getElementById('teacherView').style.display = 'block';
+            } else if (role === 'student') {
+                document.getElementById('studentView').style.display = 'block';
+                fetchStudentStats(user.email);
+            }
+        }
+
+        async function fetchAdminStats() {
+            const stuSnap = await firebase.firestore().collection('students').get();
+            document.getElementById('totalStudents').innerText = stuSnap.size;
+            document.getElementById('todayCollection').innerText = "₹45,200"; // Dynamic logic add karein
+        }
+
+        async function fetchStudentStats(email) {
+            const stuDoc = await firebase.firestore().collection('students').where('loginEmail', '==', email).get();
+            if(!stuDoc.empty) {
+                const s = stuDoc.docs[0].data();
+                document.getElementById('myDue').innerText = "₹" + (s.pendingFee || 0);
+            }
+        }
+    </script>
 </body>
 </html>
