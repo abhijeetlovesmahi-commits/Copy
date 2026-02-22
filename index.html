@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Lalit International School | Official Portal</title>
+    <title>Loading...</title>
     
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -12,15 +12,14 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
     
-    <script src="firebase-config.js"></script>
     <script src="brand.js"></script>
+    <script src="firebase-config.js"></script>
     <script src="menu.js"></script>
 
     <style>
         .role-section { display: none; width: 100%; }
         #dashboard-view { display: none; }
         #public-view { display: block; }
-
         .welcome-banner {
             background: linear-gradient(135deg, var(--royal-blue) 0%, #001a4d 100%);
             color: white; padding: 30px; border-radius: 15px;
@@ -32,9 +31,18 @@
             text-align: center; border: 1px solid #eee;
         }
         .stat-val { font-size: 1.5rem; font-weight: 700; color: var(--royal-blue); }
-        
-        /* Floating Toggle Button logic */
         .view-toggle-btns { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
+        
+        /* CBSE Norms Grid */
+        .cbse-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-top: 20px; }
+        .cbse-item { 
+            background: #fff; border: 1px solid var(--gold); padding: 15px; 
+            border-radius: 8px; text-align: center; font-size: 13px; font-weight: 600;
+            color: var(--royal-blue); text-transform: uppercase; cursor: pointer;
+            transition: 0.3s; text-decoration: none; display: block;
+        }
+        .cbse-item:hover { background: var(--light-gold); transform: translateY(-3px); box-shadow: var(--shadow-md); }
+        .mandatory-disclosure { border: 2px solid #c0392b; padding: 15px; margin: 20px 0; border-radius: 10px; text-align: center; background: #fff5f5; }
     </style>
 </head>
 <body>
@@ -43,8 +51,9 @@
         <div class="royal-card">
             
             <header class="header">
-                <img src="logo.png" alt="School Logo" class="school-logo">
-                <h1 id="brand-name" class="brand-font">The Lalit International School</h1>
+                <img src="" alt="School Logo" class="school-logo">
+                <h1 id="brand-name" class="brand-font">Loading...</h1>
+                <p id="aff-no" style="font-size: 12px; color: var(--royal-blue); margin-top: 5px; letter-spacing: 1px;">Loading Affiliation...</p>
             </header>
 
             <div id="dashboard-view">
@@ -52,100 +61,89 @@
                     <h2 id="welcomeText" style="color: white;">Welcome!</h2>
                     <span id="roleBadge" class="royal-btn" style="padding: 5px 15px; font-size: 12px; pointer-events: none;">Role</span>
                 </div>
-
                 <div class="view-toggle-btns">
-                    <button onclick="showPublicView()" class="royal-btn" style="background: var(--gold); color: #000;">
-                        <i class="fas fa-globe"></i> View Website
-                    </button>
-                    <button onclick="firebase.auth().signOut()" class="royal-btn" style="background: #c0392b;">
-                        <i class="fas fa-sign-out-alt"></i> Logout
-                    </button>
+                    <button onclick="showPublicView()" class="royal-btn" style="background: var(--gold); color: #000;"><i class="fas fa-globe"></i> View Website</button>
+                    <button onclick="firebase.auth().signOut()" class="royal-btn" style="background: #c0392b;"><i class="fas fa-sign-out-alt"></i> Logout</button>
                 </div>
-
                 <div id="adminView" class="role-section">
                     <div class="input-grid">
-                        <div class="stat-card">
-                            <i class="fas fa-vault" style="color: var(--gold); font-size: 1.5rem;"></i>
-                            <div style="font-size: 10px; color: #777;">COLLECTION</div>
-                            <div class="stat-val">₹45,200</div>
-                        </div>
-                        <div class="stat-card">
-                            <i class="fas fa-users" style="color: var(--gold); font-size: 1.5rem;"></i>
-                            <div style="font-size: 10px; color: #777;">STUDENTS</div>
-                            <div class="stat-val" id="totalStudents">0</div>
-                        </div>
+                        <div class="stat-card"><i class="fas fa-vault"></i><div>Collection</div><div class="stat-val">₹45,200</div></div>
+                        <div class="stat-card"><i class="fas fa-users"></i><div>Students</div><div class="stat-val" id="totalStudents">0</div></div>
                     </div>
                 </div>
-
                 <div id="studentView" class="role-section">
-                    <div class="input-grid">
-                        <div class="stat-card">
-                            <i class="fas fa-receipt"></i>
-                            <div>Pending Fees</div>
-                            <div class="stat-val" style="color: #c0392b;" id="myDue">₹0</div>
-                        </div>
-                    </div>
+                    <div class="input-grid"><div class="stat-card"><i class="fas fa-receipt"></i><div>Pending Fees</div><div class="stat-val" id="myDue">₹0</div></div></div>
                 </div>
             </div>
 
             <div id="public-view">
                 <div id="back-to-dash-container" style="display:none; text-align:center; margin-bottom: 20px;">
-                    <button onclick="showDashboardView()" class="royal-btn">
-                        <i class="fas fa-arrow-left"></i> Back to Dashboard
-                    </button>
+                    <button onclick="showDashboardView()" class="royal-btn"><i class="fas fa-arrow-left"></i> Back to Dashboard</button>
+                </div>
+
+                <div class="mandatory-disclosure">
+                    <a href="disclosure.html" style="text-decoration: none; color: #c0392b; font-weight: 800; font-size: 1.1rem;">
+                        <i class="fas fa-file-shield"></i> MANDATORY PUBLIC DISCLOSURE (APPENDIX-IX)
+                    </a>
                 </div>
 
                 <div class="form-section">
-                    <marquee id="news-marquee">Welcome to The Lalit International School...</marquee>
+                    <marquee id="news-marquee">Loading latest announcements from school...</marquee>
                 </div>
 
                 <section>
                     <h2>About Our School</h2>
-                    <p id="about-content" style="text-align: center;">Loading school details...</p>
+                    <p id="about-content" style="text-align: center; min-height: 40px;">Loading...</p>
+                    
+                    <div class="cbse-grid">
+                        <a href="academics.html" class="cbse-item"><i class="fas fa-book"></i><br>Academics & NCERT</a>
+                        <a href="management.html" class="cbse-item"><i class="fas fa-users-cog"></i><br>Management (SMC)</a>
+                        <a href="infrastructure.html" class="cbse-item"><i class="fas fa-school"></i><br>Infrastructure</a>
+                        <a href="admissions.html" class="cbse-item"><i class="fas fa-user-graduate"></i><br>Admissions</a>
+                        <a href="tc-verification.html" class="cbse-item"><i class="fas fa-id-card-alt"></i><br>TC Verification</a>
+                    </div>
                 </section>
 
-                <div class="profile-grid-custom">
+                <div class="profile-grid-custom" style="margin-top: 30px;">
                     <div class="custom-id-card">
                         <img id="director-img" src="placeholder-user.jpg" class="id-photo">
-                        <div><h3>Director's Message</h3><p id="director-msg">Loading...</p></div>
+                        <div><h3>Director's Message</h3><p id="director-msg" style="font-size: 13px;">Loading...</p></div>
                     </div>
                     <div class="custom-id-card">
                         <img id="principal-img" src="placeholder-user.jpg" class="id-photo">
-                        <div><h3>Principal's Message</h3><p id="principal-msg">Loading...</p></div>
+                        <div><h3>Principal's Message</h3><p id="principal-msg" style="font-size: 13px;">Loading...</p></div>
                     </div>
                 </div>
 
-                <div class="input-grid" style="margin-top: 20px;">
+                <div class="input-grid" style="margin-top: 40px;">
                     <div class="form-section">
-                        <h3>Contact Info</h3>
+                        <h3>School Contact</h3>
                         <p><strong>Address:</strong> <span id="display-address">Loading...</span></p>
                         <p><strong>Phone:</strong> <span id="display-phone">Loading...</span></p>
                     </div>
                 </div>
             </div>
 
-            <footer style="text-align: center; padding-top: 30px; border-top: 1px solid var(--gold); margin-top: 40px;">
-                <p>&copy; 2026 The Lalit International School.</p>
+            <footer style="text-align: center; padding-top: 30px; border-top: 1px solid var(--gold); margin-top: 40px; font-size: 12px;">
+                <p>&copy; 2026 <span id="brand-name">School Name</span>. All Rights Reserved.</p>
             </footer>
         </div>
     </main>
 
     <script>
-        // VIEW SWITCHING FUNCTIONS
+        // Copy original switchers and firebase fetch logic here (same as previous)
         function showPublicView() {
             document.getElementById('dashboard-view').style.display = 'none';
             document.getElementById('public-view').style.display = 'block';
             document.getElementById('back-to-dash-container').style.display = 'block';
             fetchWebsiteData();
         }
-
         function showDashboardView() {
             document.getElementById('dashboard-view').style.display = 'block';
             document.getElementById('public-view').style.display = 'none';
             document.getElementById('back-to-dash-container').style.display = 'none';
         }
 
-        // FETCH DATA
         async function fetchWebsiteData() {
             const db = firebase.firestore();
             try {
@@ -171,22 +169,18 @@
             } catch (error) { console.log(error); }
         }
 
-        // AUTH & DASHBOARD LOGIC
         firebase.auth().onAuthStateChanged(async (user) => {
             if (user) {
-                showDashboardView(); // Login hai to dashboard dikhao
-                
+                showDashboardView();
                 let role = "student";
                 try {
                     const staffDoc = await firebase.firestore().collection('staff').where('loginEmail', '==', user.email).get();
                     if(!staffDoc.empty) role = staffDoc.docs[0].data().role;
                 } catch(e) { console.error(e); }
-                
                 loadDashboardData(user, role);
             } else {
                 document.getElementById('dashboard-view').style.display = 'none';
                 document.getElementById('public-view').style.display = 'block';
-                document.getElementById('back-to-dash-container').style.display = 'none';
                 fetchWebsiteData();
             }
         });
@@ -195,7 +189,6 @@
             document.getElementById('welcomeText').innerText = "Namaste, " + user.email.split('@')[0].toUpperCase();
             document.getElementById('roleBadge').innerText = "Access: " + role.toUpperCase();
             document.querySelectorAll('.role-section').forEach(sec => sec.style.display = 'none');
-
             if(role === 'admin' || role === 'accountant') {
                 document.getElementById('adminView').style.display = 'block';
                 const stuSnap = await firebase.firestore().collection('students').get();
