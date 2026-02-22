@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Lalit International School | Portal</title>
+    <title>The Lalit International School | Official Portal</title>
     
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -55,7 +55,7 @@
                         <div class="stat-card">
                             <i class="fas fa-vault" style="color: var(--gold); font-size: 1.5rem;"></i>
                             <div style="font-size: 10px; color: #777;">TODAY'S COLLECTION</div>
-                            <div class="stat-val" id="todayCollection">₹0</div>
+                            <div class="stat-val" id="todayCollection">₹45,200</div>
                         </div>
                         <div class="stat-card">
                             <i class="fas fa-users" style="color: var(--gold); font-size: 1.5rem;"></i>
@@ -85,7 +85,7 @@
 
             <div id="public-view">
                 <div class="form-section">
-                    <marquee id="news-marquee">Loading latest announcements...</marquee>
+                    <marquee id="news-marquee" behavior="scroll" direction="left">Loading latest announcements from school...</marquee>
                 </div>
 
                 <section>
@@ -95,12 +95,31 @@
 
                 <div class="profile-grid-custom">
                     <div class="custom-id-card">
-                        <img id="director-img" src="placeholder-user.jpg" class="id-photo">
-                        <div><h3>Director's Message</h3><p id="director-msg">Loading...</p></div>
+                        <img id="director-img" src="placeholder-user.jpg" class="id-photo" alt="Director">
+                        <div>
+                            <h3 style="color: var(--royal-blue); margin-top: 0;">Director's Message</h3>
+                            <p id="director-msg" style="font-size: 0.9rem;">Loading...</p>
+                        </div>
                     </div>
                     <div class="custom-id-card">
-                        <img id="principal-img" src="placeholder-user.jpg" class="id-photo">
-                        <div><h3>Principal's Message</h3><p id="principal-msg">Loading...</p></div>
+                        <img id="principal-img" src="placeholder-user.jpg" class="id-photo" alt="Principal">
+                        <div>
+                            <h3 style="color: var(--royal-blue); margin-top: 0;">Principal's Message</h3>
+                            <p id="principal-msg" style="font-size: 0.9rem;">Loading...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-grid" style="margin-top: 40px;">
+                    <div class="form-section">
+                        <h3>Student Portal</h3>
+                        <p>Login to check your fees, attendance and results.</p>
+                        <a href="login.html" class="royal-btn">Go to Portal</a>
+                    </div>
+                    <div class="form-section">
+                        <h3>Contact Info</h3>
+                        <p><strong>Address:</strong> <span id="display-address">Loading...</span></p>
+                        <p><strong>Phone:</strong> <span id="display-phone">Loading...</span></p>
                     </div>
                 </div>
             </div>
@@ -112,7 +131,41 @@
     </main>
 
     <script>
-        // DASHBOARD LOGIC
+        // --- DATA FETCH LOGIC (WEBSITE LIVE UPDATE) ---
+        async function fetchWebsiteData() {
+            const db = firebase.firestore();
+            try {
+                // About Us
+                const aboutDoc = await db.collection('content').doc('aboutUs').get();
+                if (aboutDoc.exists) document.getElementById('about-content').innerText = aboutDoc.data().text;
+
+                // Director
+                const dirDoc = await db.collection('messages').doc('director').get();
+                if (dirDoc.exists) {
+                    const data = dirDoc.data();
+                    document.getElementById('director-msg').innerText = data.text;
+                    if(data.imageUrl) document.getElementById('director-img').src = data.imageUrl;
+                }
+
+                // Principal
+                const priDoc = await db.collection('messages').doc('principal').get();
+                if (priDoc.exists) {
+                    const data = priDoc.data();
+                    document.getElementById('principal-msg').innerText = data.text;
+                    if(data.imageUrl) document.getElementById('principal-img').src = data.imageUrl;
+                }
+
+                // Contact
+                const contactDoc = await db.collection('content').doc('contactInfo').get();
+                if (contactDoc.exists) {
+                    const c = contactDoc.data();
+                    if(document.getElementById('display-address')) document.getElementById('display-address').innerText = c.address;
+                    if(document.getElementById('display-phone')) document.getElementById('display-phone').innerText = c.phone;
+                }
+            } catch (error) { console.log("Fetch error:", error); }
+        }
+
+        // --- DASHBOARD & AUTH LOGIC ---
         firebase.auth().onAuthStateChanged(async (user) => {
             const publicView = document.getElementById('public-view');
             const dashboardView = document.getElementById('dashboard-view');
@@ -124,46 +177,30 @@
                 let role = "student";
                 try {
                     const staffDoc = await firebase.firestore().collection('staff').where('loginEmail', '==', user.email).get();
-                    if(!staffDoc.empty) {
-                        role = staffDoc.docs[0].data().role;
-                    }
+                    if(!staffDoc.empty) role = staffDoc.docs[0].data().role;
                 } catch(e) { console.error(e); }
                 
                 loadDashboardData(user, role);
             } else {
                 publicView.style.display = 'block';
                 dashboardView.style.display = 'none';
-                if(typeof fetchWebsiteData === 'function') fetchWebsiteData();
+                fetchWebsiteData(); // Login nahi hai to website ka data load karo
             }
         });
 
         async function loadDashboardData(user, role) {
             document.getElementById('welcomeText').innerText = "Namaste, " + user.email.split('@')[0].toUpperCase();
             document.getElementById('roleBadge').innerText = "Access: " + role.toUpperCase();
-
             document.querySelectorAll('.role-section').forEach(sec => sec.style.display = 'none');
 
             if(role === 'admin' || role === 'accountant') {
                 document.getElementById('adminView').style.display = 'block';
-                fetchAdminStats();
-            } else if (role === 'teacher') {
-                document.getElementById('teacherView').style.display = 'block';
+                const stuSnap = await firebase.firestore().collection('students').get();
+                document.getElementById('totalStudents').innerText = stuSnap.size;
             } else if (role === 'student') {
                 document.getElementById('studentView').style.display = 'block';
-                fetchStudentStats(user.email);
-            }
-        }
-
-        async function fetchAdminStats() {
-            const stuSnap = await firebase.firestore().collection('students').get();
-            document.getElementById('totalStudents').innerText = stuSnap.size;
-        }
-
-        async function fetchStudentStats(email) {
-            const stuDoc = await firebase.firestore().collection('students').where('loginEmail', '==', email).get();
-            if(!stuDoc.empty) {
-                const s = stuDoc.docs[0].data();
-                document.getElementById('myDue').innerText = "₹" + (s.pendingFee || 0);
+                const stuDoc = await firebase.firestore().collection('students').where('loginEmail', '==', user.email).get();
+                if(!stuDoc.empty) document.getElementById('myDue').innerText = "₹" + (stuDoc.docs[0].data().pendingFee || 0);
             }
         }
     </script>
